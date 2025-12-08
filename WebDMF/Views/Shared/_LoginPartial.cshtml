@@ -1,0 +1,34 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        @* Gom nhóm Email và Logout vào một thẻ li với d-flex để đảm bảo luôn nằm cùng hàng *@
+        <li class="nav-item d-flex align-items-center gap-2">
+
+            <a id="manage" class="nav-link text-dark border border-success rounded-pill px-3 py-1 d-flex align-items-center bg-white shadow-sm"
+               asp-area="Identity"
+               asp-page="/Account/Manage/Index"
+               title="Manage">
+                <i class="bi bi-person-circle text-success fs-5 me-2"></i>
+                <span class="fw-semibold">@UserManager.GetUserName(User)</span>
+            </a>
+
+            <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button id="logout" type="submit" class="btn btn-outline-danger rounded-pill py-1 px-3 fw-bold border-0">
+                    Logout <i class="bi bi-box-arrow-right ms-1"></i>
+                </button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item d-flex align-items-center">
+            <a class="nav-link text-dark pe-2 fw-semibold" id="login" asp-area="Identity" asp-page="/Account/Login">Đăng nhập</a>
+            <span class="text-muted opacity-50">|</span>
+            <a class="nav-link text-dark ps-2 fw-semibold" id="register" asp-area="Identity" asp-page="/Account/Register">Đăng ký</a>
+        </li>
+    }
+</ul>

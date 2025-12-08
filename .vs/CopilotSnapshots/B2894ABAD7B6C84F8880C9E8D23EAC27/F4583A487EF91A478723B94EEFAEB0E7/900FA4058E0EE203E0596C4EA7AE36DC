@@ -1,0 +1,20 @@
+﻿{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=WebDMF;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+  "Smtp": {
+    "Host": "smtp.example.com",
+    "Port": 587,
+    "EnableSsl": true,
+    "Username": "smtp-user@example.com",
+    "Password": "smtp-password",
+    "From": "no-reply@example.com"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}

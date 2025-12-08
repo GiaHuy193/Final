@@ -1,0 +1,179 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DocNest Document Management</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebDocumentManagement_FileSharing.styles.css" asp-append-version="true" />
+
+    <style>
+        /* Basic page reset */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f8;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+
+        /* Header */
+        .app-header {
+            background-color: #fff;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 1030;
+        }
+        .brand {
+            color: #1a73e8;
+            font-size: 22px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        /* Layout */
+        .main-wrapper {
+            display: flex;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* Sidebar for md+ screens */
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+            flex-shrink: 0;
+            padding-top: 18px;
+        }
+        .sidebar .nav-link {
+            color: #3c4043;
+            padding: 12px 20px;
+            border-radius: 8px;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #eef3ff;
+            color: #1a73e8;
+        }
+        .sidebar .nav-link.active {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        /* Content */
+        .content-area {
+            flex-grow: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* Make offcanvas body match sidebar look */
+        .offcanvas-body .nav-link {
+            color: #3c4043;
+        }
+
+        /* Footer hidden by design */
+        .footer {
+            display: none;
+        }
+
+        @media (max-width: 767.98px) {
+            .app-header {
+                padding: 0.5rem;
+            }
+            .brand {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header d-flex align-items-center">
+        <button class="btn btn-link d-md-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Mở menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <a class="brand me-3" asp-area="" asp-controller="Home" asp-action="Index">DocNest</a>
+
+        <form class="d-none d-md-flex ms-2 me-auto" asp-controller="Document" asp-action="Search" method="get" role="search">
+            <div class="input-group" style="min-width:380px; max-width:600px;">
+                <input type="search" name="q" class="form-control rounded-pill" placeholder="Tìm kiếm tài liệu..." aria-label="Tìm kiếm tài liệu">
+                <button class="btn btn-outline-secondary rounded-pill ms-2" type="submit">Tìm</button>
+            </div>
+        </form>
+
+        <div class="ms-auto d-flex align-items-center">
+            <form class="d-md-none me-2" asp-controller="Document" asp-action="Search" method="get" role="search">
+                <div class="input-group">
+                    <input type="search" name="q" class="form-control" placeholder="Tìm kiếm..." aria-label="Tìm kiếm">
+                </div>
+            </form>
+
+            <partial name="_LoginPartial" />
+        </div>
+    </header>
+
+    <div class="main-wrapper">
+        <!-- Sidebar for md and larger -->
+        <aside class="sidebar d-none d-md-block">
+            <div class="px-3 pb-3">
+                <button class="btn btn-primary w-100 rounded-pill">
+                    + Tải lên / Tạo mới
+                </button>
+            </div>
+
+            <nav class="nav flex-column px-2" aria-label="Sidebar">
+                <a class="nav-link @(currentController == "Document" && (currentAction == "MyFiles" || currentAction == null) ? "active" : "")" asp-area="" asp-controller="Document" asp-action="MyFiles">⭐️ Tài liệu của tôi</a>
+                <a class="nav-link @(currentController == "Document" && currentAction == "SharedWithMe" ? "active" : "")" asp-area="" asp-controller="Document" asp-action="SharedWithMe">📂 Chia sẻ với tôi</a>
+                <a class="nav-link @(currentController == "Document" && currentAction == "Courses" ? "active" : "")" asp-area="" asp-controller="Document" asp-action="Courses">📚 Học phần (Studocu)</a>
+                <a class="nav-link @(currentController == "Document" && currentAction == "Recent" ? "active" : "")" asp-area="" asp-controller="Document" asp-action="Recent">⏰ Gần đây</a>
+                <a class="nav-link @(currentController == "Document" && currentAction == "Trash" ? "active" : "")" asp-area="" asp-controller="Document" asp-action="Trash">🗑️ Thùng rác</a>
+            </nav>
+        </aside>
+
+        <!-- Offcanvas sidebar for small screens -->
+        <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">DocNest</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div class="mb-3">
+                    <button class="btn btn-primary w-100 rounded-pill">
+                        + Tải lên / Tạo mới
+                    </button>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link @(currentController == "Document" && (currentAction == "MyFiles" || currentAction == null) ? "active" : "")" asp-area="" asp-controller="Document" asp-action="MyFiles">⭐️ Tài liệu của tôi</a>
+                    <a class="nav-link @(currentController == "Document" && currentAction == "SharedWithMe" ? "active" : "")" asp-area="" asp-controller="Document" asp-action="SharedWithMe">📂 Chia sẻ với tôi</a>
+                    <a class="nav-link @(currentController == "Document" && currentAction == "Courses" ? "active" : "")" asp-area="" asp-controller="Document" asp-action="Courses">📚 Học phần (Studocu)</a>
+                    <a class="nav-link @(currentController == "Document" && currentAction == "Recent" ? "active" : "")" asp-area="" asp-controller="Document" asp-action="Recent">⏰ Gần đây</a>
+                    <a class="nav-link @(currentController == "Document" && currentAction == "Trash" ? "active" : "")" asp-area="" asp-controller="Document" asp-action="Trash">🗑️ Thùng rác</a>
+                </nav>
+            </div>
+        </div>
+
+        <main role="main" class="content-area">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - DocNest
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

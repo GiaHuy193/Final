@@ -1,0 +1,3 @@
+﻿@using WebDocumentManagement_FileSharing
+@using WebDocumentManagement_FileSharing.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
