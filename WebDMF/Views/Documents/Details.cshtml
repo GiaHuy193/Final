@@ -1,48 +1,139 @@
-﻿@model WebDocumentManagement_FileSharing.Models.Document
+﻿@using System.IO
+@model WebDocumentManagement_FileSharing.Models.Document
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Chi tiết tài liệu";
 }
 
-<h1>Details</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-<div>
-    <h4>Document</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FilePath)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FilePath)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Size)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Size)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category)
-        </dd>
-    </dl>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold"><i class="bi bi-info-circle text-primary"></i> Chi tiết tài liệu</h3>
+        <a asp-action="Index" asp-route-folderId="@Model.FolderId" class="btn btn-outline-secondary btn-sm">Quay lại</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 p-3">
+                <div class="text-center mb-3">
+                    @* Icon dựa trên định dạng file *@
+                    <i class="bi bi-file-earmark-@(Model.Extension == "pdf" ? "pdf" : "text") text-primary" style="font-size: 4rem;"></i>
+                    <h4 class="mt-2 text-truncate">@Model.FileName</h4>
+                </div>
+                <hr />
+                <dl class="row small">
+                    <dt class="col-sm-4 text-muted">Tiêu đề:</dt>
+                    <dd class="col-sm-8 fw-bold">@Model.Title</dd>
+
+                    <dt class="col-sm-4 text-muted">Định dạng:</dt>
+                    <dd class="col-sm-8 text-uppercase">@Model.Extension</dd>
+
+                    <dt class="col-sm-4 text-muted">Dung lượng:</dt>
+                    <dd class="col-sm-8">@(Math.Round(Model.FileSize / 1024.0, 2)) KB</dd>
+
+                    <dt class="col-sm-4 text-muted">Ngày tải:</dt>
+                    <dd class="col-sm-8">@Model.UploadedDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                    <dt class="col-sm-4 text-muted">Chủ sở hữu:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-light text-primary border">
+                            @(ViewBag.OwnerName ?? "Người dùng hệ thống")
+                        </span>
+                    </dd>
+                </dl>
+                <div class="d-grid gap-2 mt-3">
+                    @* Nút xem trực tuyến nhúng iframe Google *@
+                    <a asp-action="Open" asp-route-id="@Model.Id" target="_blank" class="btn btn-outline-info">
+                        <i class="bi bi-eye me-1"></i> Xem trực tuyến
+                    </a>
+                    @* Nút tải bản mới nhất thông qua Action Download của bạn *@
+                    <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="bi bi-download me-1"></i> Tải bản mới nhất
+                    </a>
+                    <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#uploadVersionModal">
+                        <i class="bi bi-cloud-arrow-up me-1"></i> Cập nhật bản mới
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                    <span>Lịch sử phiên bản trên Cloud</span>
+                    <span class="badge bg-primary rounded-pill">@(Model.Versions?.Count ?? 0) bản</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">v</th>
+                                    <th>Ghi chú</th>
+                                    <th>Ngày tạo</th>
+                                    <th class="text-end pe-3">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Versions != null && Model.Versions.Any())
+                                {
+                                    foreach (var v in Model.Versions.OrderByDescending(x => x.VersionNumber))
+                                    {
+                                        <tr>
+                                            <td class="ps-3"><span class="badge bg-secondary">v@v.VersionNumber</span></td>
+                                            <td class="small text-wrap" style="max-width: 200px;">@v.ChangeNote</td>
+                                            <td class="small text-muted">@v.CreatedDate.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-end pe-3">
+                                                @* MỞ TRỰC TIẾP TRÊN GOOGLE DRIVE *@
+                                                <a href="https://drive.google.com/file/d/@v.FilePath/view" target="_blank" class="text-info me-2" title="Xem trên Drive">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted small">Chưa có lịch sử phiên bản</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+@* Modal tải lên bản cập nhật *@
+<div class="modal fade" id="uploadVersionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog shadow-lg">
+        <form asp-action="UploadNewVersion" method="post" enctype="multipart/form-data" class="modal-content border-0">
+            <input type="hidden" name="documentId" value="@Model.Id" />
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-cloud-upload me-2"></i>Tải lên bản v@((Model.Versions?.Count ?? 0) + 1)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info small">
+                    <i class="bi bi-info-circle me-1"></i> Bản cũ vẫn sẽ được lưu trữ trong lịch sử phiên bản.
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Chọn tệp cập nhật</label>
+                    <input type="file" name="fileUpload" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Ghi chú thay đổi</label>
+                    <textarea name="changeNote" class="form-control" rows="3" placeholder="Ví dụ: Đã sửa nội dung chương 2, cập nhật số liệu mới..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-success px-4">Đẩy lên Google Drive</button>
+            </div>
+        </form>
+    </div>
 </div>

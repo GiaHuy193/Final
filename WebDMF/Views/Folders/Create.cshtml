@@ -1,0 +1,31 @@
+﻿@model WebDocumentManagement_FileSharing.Models.Folder
+
+@{
+    ViewData["Title"] = "Tạo thư mục";
+}
+
+<h1>Tạo thư mục</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Tên thư mục</label>
+                <input asp-for="Name" class="form-control" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div>
+                <button type="submit" class="btn btn-primary">Tạo</button>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-secondary ms-2">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

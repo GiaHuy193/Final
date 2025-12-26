@@ -1,212 +1,586 @@
-﻿@* Logic Razor Page giữ nguyên *@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+
 @{
- // Lấy đường dẫn trang hiện tại (ví dụ: "/Identity/Account/Login")
- // Sử dụng null-conditional và cast an toàn để tránh dereference của đối tượng có thể null
- var pageValue = ViewContext?.RouteData?.Values?["page"];
- var currentPage = (pageValue as string) ?? pageValue?.ToString() ?? string.Empty;
+    // Logic Razor Page giữ nguyên
+    var pageValue = ViewContext?.RouteData?.Values?["page"];
+    var currentPage = (pageValue as string) ?? pageValue?.ToString() ?? string.Empty;
 
- // Kiểm tra area nếu có
- var areaValue = ViewContext?.RouteData?.Values?["area"] as string ?? string.Empty;
+    // Kiểm tra area nếu có
+    var areaValue = ViewContext?.RouteData?.Values?["area"] as string ?? string.Empty;
 
- // Xác định trang xác thực: Bất kỳ trang nào trong khu vực Identity (Login/Register/...)
- var hideSidebar = !string.IsNullOrEmpty(areaValue) && string.Equals(areaValue, "Identity", StringComparison.OrdinalIgnoreCase)
- || (!string.IsNullOrEmpty(currentPage) && currentPage.StartsWith("/Identity/Account", StringComparison.OrdinalIgnoreCase));
+    // Kiểm tra trạng thái xác thực người dùng
+    var isAuthenticated = SignInManager.IsSignedIn(User); // Sử dụng SignInManager để kiểm tra chính xác hơn
 
- // Kiểm tra trạng thái xác thực người dùng
- var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+    // Xác định trang xác thực: Bất kỳ trang nào trong khu vực Identity (Login/Register/...)
+    var hideSidebar = !string.IsNullOrEmpty(areaValue) && string.Equals(areaValue, "Identity", StringComparison.OrdinalIgnoreCase)
+    || (!string.IsNullOrEmpty(currentPage) && currentPage.StartsWith("/Identity/Account", StringComparison.OrdinalIgnoreCase));
 
- // Cho phép ghi đè hiển thị sidebar từ ViewData (ví dụ: ở Index.cshtml đặt ViewData["ForceShowSidebar"] = true)
- var forceShowSidebar = (ViewData["ForceShowSidebar"] as bool?) == true;
+    // Cho phép ghi đè hiển thị sidebar từ ViewData (ví dụ: ở Index.cshtml đặt ViewData["ForceShowSidebar"] = true)
+    var forceShowSidebar = (ViewData["ForceShowSidebar"] as bool?) == true;
 
- // Tính toán hiển thị sidebar: hiển thị khi không phải trang Identity và (đã đăng nhập hoặc được ghi đè)
- var showSidebar = !hideSidebar && (isAuthenticated || forceShowSidebar);
+    // Tính toán hiển thị sidebar: hiển thị khi không phải trang Identity và (đã đăng nhập hoặc được ghi đè)
+    var showSidebar = !hideSidebar && (isAuthenticated || forceShowSidebar);
 
- // Thiết lập lớp CSS cho thẻ <main>
- var mainContentClass = showSidebar ? "content-area" : "content-area content-full-width";
+    // Thiết lập lớp CSS cho thẻ <main>
+    var mainContentClass = showSidebar ? "content-area" : "content-area content-full-width";
+
+    // XÁC ĐỊNH URL CHO LOGO KHI CHƯA ĐĂNG NHẬP
+    // Nếu CHƯA đăng nhập: Logo trỏ về gốc tuyệt đối (href="/") để thoát khỏi khu vực Identity/Register.
+    var logoRedirectUrl = isAuthenticated ? Url.Action("Index", "Home") : "/";
+
+    // Determine folderId from query string for upload-folder forms (layout-level)
+    int layoutFolderId = 0;
+    int.TryParse(Context.Request.Query["folderId"], out layoutFolderId);
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="utf-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>@((ViewData["Title"] as string) ?? "") - DocNest Document Management</title>
- <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
- <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
- <link rel="stylesheet" href="~/WebDocumentManagement_FileSharing.styles.css" asp-append-version="true" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@((ViewData["Title"] as string) ?? "") - DocNest Document Management</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebDocumentManagement_FileSharing.styles.css" asp-append-version="true" />
 
- <style>
- /* Tông màu xanh lá chủ đạo: #00897B */
- /* Màu nền: #f4f6f8 */
- /* Màu nền hoạt động/hover sidebar: #E0F2F1 */
+    <style>
+        /* ---------------------------------------------------------------------- */
+        /* BIẾN CSS (CSS Variables) - Cho phép chuyển đổi dễ dàng */
+        /* ---------------------------------------------------------------------- */
+        :root {
+            /* Màu chủ đạo/Nhấn */
+            --primary-color: #1DA1F2;
+            --primary-hover-color: #188DD9;
+            /* Light Mode */
+            --bg-body: #F7F9F9; /* Nền chính */
+            --bg-header: #FFFFFF;
+            --bg-sidebar: #FFFFFF;
+            --bg-hover: #F0F4F7;
+            --bg-active: #EAF5FD;
+            --text-color: #14171A; /* Chữ tối */
+            --text-secondary: #5B7083; /* Chữ xám */
+            --border-color: #E1E8ED;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --input-bg: #FFFFFF;
+            --input-border: #CCD6DD;
+        }
 
- body {
- margin:0;
- padding:0;
- background-color: #f4f6f8; /* Nền ứng dụng */
- }
+        /* DARK MODE (Midnight Blue - Giống Twitter) */
+        body.dark-mode {
+            --primary-color: #1DA1F2;
+            --primary-hover-color: #49A9EC;
+            --bg-body: #15202B; /* Nền Midnight Blue chính */
+            --bg-header: #15202B;
+            --bg-sidebar: #15202B;
+            --bg-hover: #1C2B3A;
+            --bg-active: #1D415F;
+            --text-color: #F7F9F9;
+            --text-secondary: #8899A6;
+            --border-color: #38444D;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --input-bg: #22303C;
+            --input-border: #38444D;
+        }
 
- .app-header {
- background-color: #fff;
- height:64px;
- display: flex;
- align-items: center;
- padding:016px;
- box-shadow:02px6px rgba(0,0,0,0.06);
- z-index:1030;
- }
+        /* ---------------------------------------------------------------------- */
+        /* ÁP DỤNG BIẾN */
+        /* ---------------------------------------------------------------------- */
 
- .brand {
- /* Màu logo/thương hiệu */
- color: #00897B; /* Xanh lá chủ đạo */
- font-weight:700;
- font-size:1.25rem;
- text-decoration: none;
- }
+        /* Màu nền chính và chữ mặc định */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-body);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
 
- /* Nút Tải lên */
- .btn-primary {
- background-color: #00897B; /* Xanh lá chủ đạo */
- border-color: #00897B;
- }
+        /* HEADER */
+        .app-header {
+            background-color: var(--bg-header);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 6px var(--shadow-color);
+            z-index: 1030;
+        }
 
- .btn-primary:hover {
- background-color: #00695C; /* Xanh lá đậm hơn khi hover */
- border-color: #00695C;
- }
+        .brand {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.25rem;
+            text-decoration: none;
+        }
 
- /* Nút tìm kiếm */
- .btn-outline-secondary {
- color: #00897B;
- border-color: #00897B;
- }
+        /* NÚT (BUTTONS) */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #fff;
+        }
 
- .btn-outline-secondary:hover {
- background-color: #00897B;
- color: #fff;
- }
+            .btn-primary:hover {
+                background-color: var(--primary-hover-color);
+                border-color: var(--primary-hover-color);
+                color: #fff;
+            }
+
+        .btn-outline-secondary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+            .btn-outline-secondary:hover {
+                background-color: var(--primary-color);
+                color: #fff;
+            }
+
+        /* MAIN LAYOUT */
+        .main-wrapper {
+            display: flex;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* SIDEBAR (Desktop) */
+        .sidebar {
+            width: 250px;
+            background: var(--bg-sidebar);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+            padding-top: 18px;
+            border-right: 1px solid var(--border-color);
+        }
+
+            .sidebar .nav-link {
+                color: var(--text-secondary);
+                padding: 10px 18px;
+                border-radius: 8px;
+            }
+
+                .sidebar .nav-link:hover {
+                    background: var(--bg-hover);
+                    color: var(--text-color);
+                }
+
+                .sidebar .nav-link.active {
+                    background: var(--bg-active);
+                    color: var(--primary-color);
+                    font-weight: 600;
+                }
+
+        /* CONTENT AREA */
+        .content-area {
+            flex-grow: 1;
+            padding: 24px;
+            overflow-y: auto;
+            color: var(--text-color);
+        }
+
+            .content-area.content-full-width {
+                flex-grow: 1;
+                width: 100%;
+                padding-left: 24px !important;
+                padding-right: 24px !important;
+            }
+
+        /* CÁC THÀNH PHẦN KHÁC (FORMS, DROPDOWNS, CARDS, TABLES) */
+        .form-control {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text-color);
+        }
+
+            .form-control::placeholder {
+                color: var(--text-secondary);
+                opacity: 1;
+            }
+
+        /* Dropdown Menu (Chung cho Profile/Tải lên) */
+        .dropdown-menu {
+            background-color: var(--bg-header);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+        }
+
+            .dropdown-item:hover {
+                background-color: var(--bg-hover);
+                color: var(--primary-color);
+            }
+
+        /* FIX: Card và Table (Thay thế nền tối) */
+        .card,
+        .table,
+        .table-responsive {
+            background-color: var(--bg-header) !important;
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .card-body,
+        .card-text {
+            color: var(--text-color);
+        }
+
+        .table th,
+        .table td {
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        /* ====================================================================== */
+        /* FIX THANH TIÊU ĐỀ BẢNG (Tên / Ngày tải / Kích thước / Thao tác) */
+        /* ====================================================================== */
+
+        /* XÓA NỀN TRẮNG MẶC ĐỊNH CỦA BOOTSTRAP */
+        .table > :not(caption) > * > * {
+            background-color: transparent !important;
+        }
+
+        /* HEADER BẢNG */
+        .table thead {
+            background-color: var(--bg-hover) !important;
+        }
+
+            .table thead th {
+                background-color: var(--bg-hover) !important;
+                color: var(--text-color) !important;
+                font-weight: 600;
+                border-bottom: 1px solid var(--border-color) !important;
+                vertical-align: middle;
+            }
+
+        /* HOVER DÒNG */
+        .table tbody tr:hover {
+            background-color: var(--bg-hover);
+        }
 
 
- /* Cấu trúc Flexbox chính */
- .main-wrapper {
- display: flex;
- min-height: calc(100vh -64px);
- }
+        /* ====================================================================== */
+        /* >>> FIX: Màu Icon, Tiêu đề Folder & Dropdown Profile <<< */
 
- /* Sidebar mặc định */
- .sidebar {
- width:250px;
- background: #fff;
- box-shadow:2px05px rgba(0,0,0,0.04);
- flex-shrink:0;
- padding-top:18px;
- }
+        /* FIX 1: Đảm bảo tiêu đề folder và văn bản trong card là màu TỐI */
+        .card *,
+        .card a {
+            color: var(--text-color) !important;
+        }
 
- .sidebar .nav-link {
- color: #3c4043;
- padding:10px18px;
- border-radius:8px;
- }
+        /* FIX 2: Khôi phục màu vàng cam cho class text-warning (dùng cho icon folder) */
+        .text-warning,
+        .bi-folder-plus.text-warning,
+        .card .text-warning {
+            color: #FFC107 !important; /* MÀU VÀNG CAM CỦA FOLDER */
+        }
 
- .sidebar .nav-link:hover {
- /* Hover: Nền xanh mint nhạt, chữ xanh lá đậm */
- background: #E0F2F1;
- color: #004D40;
- }
+        /* Ngoại lệ: Văn bản mờ nếu bạn có text-muted */
+        .card .text-muted {
+            color: var(--text-secondary) !important; /* Xám mờ */
+        }
 
- .sidebar .nav-link.active {
- /* Active: Nền xanh mint nhạt, chữ xanh lá đậm, font-weight */
- background: #E0F2F1;
- color: #004D40;
- font-weight:600;
- }
+        /* FIX 3: Loại bỏ nền trắng xung quanh nút 3 chấm và đảm bảo màu icon */
+        .card .btn,
+        .card .btn-link,
+        .card .dropdown-toggle {
+            background-color: transparent !important;
+            border: none !important;
+            color: var(--text-secondary) !important; /* Icon xám */
+            box-shadow: none !important;
+            padding: 0.5rem;
+        }
 
- /* Vùng nội dung chính (mặc định) */
- .content-area {
- flex-grow:1;
- padding:24px;
- overflow-y: auto;
- }
+            .card .btn-link:hover,
+            .card .dropdown-toggle:hover {
+                color: var(--primary-color) !important; /* Icon xanh khi hover */
+                background-color: var(--bg-active) !important; /* Nền xanh rất nhạt khi hover */
+                border-radius: 50%;
+            }
 
- /* CSS QUAN TRỌNG: Đảm bảo nội dung chiếm100% khi sidebar bịẩn */
- .content-area.content-full-width {
- flex-grow:1;
- width:100%; /* Đảm bảo nó chiếm toàn bộ flex space */
- padding-left:24px !important;
- padding-right:24px !important;
- }
+        /* Link/Button link Đăng xuất (Đảm bảo màu nhấn) */
+        .text-primary,
+        .btn-link,
+        a.nav-link {
+            color: var(--primary-color) !important; /* Màu xanh dương nhấn (Primary color) */
+        }
 
- .footer {
- display: none;
- }
+            .btn-link:hover,
+            a.nav-link:hover {
+                color: var(--primary-hover-color) !important; /* Xanh đậm hơn khi hover */
+            }
 
- @@media (max-width:767.98px) {
- .app-header {
- padding:0.5rem0.75rem;
- }
- }
- </style>
+        /* Định kiểu cho nút kích hoạt Dropdown (vùng email trên header) */
+        .user-dropdown-toggle {
+            background-color: var(--bg-hover) !important; /* Màu nền xám nhạt cho vùng email */
+            color: var(--primary-color) !important; /* Màu chữ/icon nhấn (Xanh dương) */
+            border-radius: 20px; /* Góc bo tròn cho vùng email */
+            padding: 0.5rem 1rem !important;
+            font-weight: 600;
+        }
+
+        /* ====================================================================== */
+
+        .footer {
+            display: none;
+        }
+
+        /* ---------------------------------------------------------------------- */
+        /* MEDIA QUERY: Mobile (max-width: 767.98px) - OFFCANVAS FIXES */
+        /* ---------------------------------------------------------------------- */
+        @@media (max-width: 767.98px) {
+            .app-header {
+                padding: 0.5rem 0.75rem;
+            }
+            /* 1. Nền Offcanvas */
+            .offcanvas {
+                background-color: var(--bg-sidebar) !important; /* Nền sidebar */
+                color: var(--text-color);
+            }
+            /* 2. Header Offcanvas */
+            .offcanvas-header {
+                background-color: var(--bg-header);
+                border-bottom-color: var(--border-color);
+                color: var(--text-color);
+            }
+            /* 3. Màu nút đóng Offcanvas (x) */
+            .btn-close {
+                color: var(--text-color);
+                filter: none;
+            }
+            /* 4. Điều chỉnh Nav Links bên trong Offcanvas */
+            .offcanvas-body {
+                padding: 0;
+            }
+
+                .offcanvas-body .px-3 {
+                    padding: 1rem !important;
+                }
+
+                .offcanvas-body .nav {
+                    padding: 0 0.5rem 1rem 0.5rem;
+                }
+
+                .offcanvas-body .nav-link {
+                    color: var(--text-secondary);
+                    padding: 10px 18px;
+                    margin: 0.25rem 0;
+                    border-radius: 8px;
+                }
+
+                    .offcanvas-body .nav-link:hover {
+                        background: var(--bg-hover);
+                        color: var(--text-color);
+                    }
+
+                    .offcanvas-body .nav-link.active {
+                        background: var(--bg-active);
+                        color: var(--primary-color);
+                    }
+        }
+
+        /* NEW: Move three-dots button to top-right of folder card and remove caret */
+        .folder-card {
+            position: relative;
+            overflow: visible;
+        }
+
+            .folder-card .folder-action-btn {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                z-index: 5;
+                background-color: transparent !important;
+                border: none !important;
+                color: var(--text-secondary) !important;
+                padding: 0.25rem !important;
+            }
+
+                /* Hide bootstrap caret for this toggle only */
+                .folder-card .folder-action-btn.dropdown-toggle::after {
+                    display: none !important;
+                }
+
+                .folder-card .folder-action-btn:hover {
+                    color: var(--primary-color) !important;
+                    background-color: var(--bg-hover) !important;
+                    border-radius: 50%;
+                }
+
+        /* Small nudge to shift header search slightly to the right */
+        .header-search-offset {
+            margin-left: 150px !important;
+        }
+
+    </style>
 </head>
 <body>
- <header class="app-header d-flex align-items-center">
- @* Chỉ hiển thị nút mở menu (offcanvas) khi sidebar đang được hiển thị *@
- @if (showSidebar)
- {
- <button class="btn btn-link d-md-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Mở menu">
- <span class="navbar-toggler-icon"></span>
- </button>
- }
+    @* ====================================================================== *@
+    @* SCRIPT: NGĂN CHẶN NHẤP NHÁY (THEME FLICKER) - Đặt ngay sau <body> *@
+    @* ====================================================================== *@
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
- <a class="brand me-3" asp-page="/Index">DocNest</a>
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
 
- <form class="d-none d-md-flex ms-2 me-auto" asp-page="/Document/Search" method="get" role="search">
- <div class="input-group" style="min-width:360px; max-width:600px;">
- <input type="search" name="q" class="form-control rounded-pill" placeholder="Tìm kiếm tài liệu..." aria-label="Tìm kiếm tài liệu">
- <button class="btn btn-outline-secondary rounded-pill ms-2" type="submit">Tìm</button>
- </div>
- </form>
+    <header class="app-header d-flex align-items-center">
+        @* Nút Offcanvas cho Mobile *@
+        @if (showSidebar)
+        {
+            <button class="btn btn-link d-md-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Mở menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        }
 
- <div class="ms-auto d-flex align-items-center">
- <form class="d-md-none me-2" asp-page="/Document/Search" method="get" role="search">
- <div class="input-group">
- <input type="search" name="q" class="form-control" placeholder="Tìm kiếm..." aria-label="Tìm kiếm">
- </div>
- </form>
+        @* LOGO DOCNEST (SỬA ĐỔI) *@
+        <a class="brand me-3" href="@logoRedirectUrl">DocNest</a>
 
- <partial name="_LoginPartial" />
- </div>
- </header>
+        <form class="d-none d-md-flex ms-2 me-auto header-search-offset" asp-page="/Document/Search" method="get" role="search">
+            <div class="input-group" style="min-width:360px; max-width:600px;">
+                <input type="search" name="q" class="form-control rounded-pill" placeholder="Tìm kiếm tài liệu..." aria-label="Tìm kiếm tài liệu">
+                <button class="btn btn-outline-secondary rounded-pill ms-2" type="submit">Tìm</button>
+            </div>
+        </form>
 
- <div class="main-wrapper">
- @* Chỉ hiển thị sidebar khi người dùng đã đăng nhập và không phải trang Identity như Login/Register, hoặc khi được ghi đè từ ViewData *@
- @if (showSidebar)
- {
- <aside class="sidebar d-none d-md-block">
- <div class="px-3 pb-3">
-                    <a class="btn btn-primary w-100 rounded-pill" asp-controller="Documents" asp-action="Create">+ Tải lên / Tạo mới</a>
- </div>
+        <div class="ms-auto d-flex align-items-center">
+            @* NÚT CHUYỂN ĐỔI GIAO DIỆN SÁNG/TỐI *@
+            <button id="theme-toggle" class="btn btn-link me-2" aria-label="Chuyển đổi giao diện">
+                <i class="bi bi-moon-fill" style="font-size: 1.25rem; color: var(--text-secondary);"></i>
+            </button>
 
- <nav class="nav flex-column px-2" aria-label="Sidebar">
- <a class="nav-link @(string.Equals(currentPage, "/Document/MyFiles", StringComparison.OrdinalIgnoreCase) || string.Equals(currentPage, "/Index", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-page="/Document/MyFiles">⭐️ Tài liệu của tôi</a>
- <a class="nav-link @(string.Equals(currentPage, "/Document/SharedWithMe", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-page="/Document/SharedWithMe">📂 Chia sẻ với tôi</a>
- <a class="nav-link @(string.Equals(currentPage, "/Document/Courses", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-page="/Document/Courses">📚 Học phần (Studocu)</a>
- <a class="nav-link @(string.Equals(currentPage, "/Document/Recent", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-page="/Document/Recent">⏰ Gần đây</a>
- <a class="nav-link @(string.Equals(currentPage, "/Document/Trash", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-page="/Document/Trash">🗑️ Thùng rác</a>
- </nav>
- </aside>
- }
+            @* Partial _LoginPartial *@
+            <partial name="_LoginPartial" />
+        </div>
+    </header>
 
- <main role="main" class="@mainContentClass">
- @RenderBody()
- </main>
- </div>
+    @* OFFCANVAS CHO MOBILE *@
+    @if (showSidebar)
+    {
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+            <div class="offcanvas-header app-header">
+                <h5 class="offcanvas-title brand" id="sidebarOffcanvasLabel">DocNest Menu</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                @* Nội dung sidebar được lặp lại ở đây *@
+                <div class="px-3 pb-3">
+                    <div class="dropdown">
+                        <button class="btn btn-primary w-100 rounded-pill dropdown-toggle" id="createDropdownMobile" data-bs-toggle="dropdown" aria-expanded="false">+ Tải lên / Tạo mới</button>
+                        <ul class="dropdown-menu w-100" aria-labelledby="createDropdownMobile">
+                            <li><a class="dropdown-item" asp-controller="Folders" asp-action="Create"><i class="bi bi-folder-plus me-2 text-warning"></i> Thư mục mới</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item" asp-controller="Documents" asp-action="Create"><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i> Tải tệp lên</a></li>
+                            <li>
+                                <form asp-controller="Folders" asp-action="UploadFolder" method="post" enctype="multipart/form-data" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="folderId" value="@layoutFolderId" />
+                                    <label class="dropdown-item mb-0" style="cursor:pointer;">
+                                        <i class="bi bi-folder2-open me-2 text-warning"></i> Tải thư mục
+                                        <input type="file" name="files" webkitdirectory directory multiple style="display:none" onchange="this.closest('form').submit()" />
+                                    </label>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
- <footer class="border-top footer text-muted">
- <div class="container">&copy;2025 - DocNest</div>
- </footer>
+                <nav class="nav flex-column px-2" aria-label="Sidebar Mobile">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">🏠 Trang chủ</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Index">📂 Tài liệu của tôi</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Shared">⇄ Chia sẻ với tôi</a> @* THAY ĐỔI ACTION TỚI Shared *@
+                    <a class="nav-link" asp-controller="Documents" asp-action="Star">⭐️ Gắn sao</a> 
+                    <a class="nav-link" asp-controller="Documents" asp-action="Trash">🗑️ Thùng rác</a>
+                </nav>
+            </div>
+        </div>
+    }
 
- <script src="~/lib/jquery/dist/jquery.min.js"></script>
- <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
- <script src="~/js/site.js" asp-append-version="true"></script>
- @await RenderSectionAsync("Scripts", required: false)
+    <div class="main-wrapper">
+        @* Sidebar Desktop *@
+        @if (showSidebar)
+        {
+            <aside class="sidebar d-none d-md-block">
+                <div class="px-3 pb-3">
+                    <div class="dropdown">
+                        <button class="btn btn-primary w-100 rounded-pill dropdown-toggle" id="createDropdown" data-bs-toggle="dropdown" aria-expanded="false">+ Tải lên / Tạo mới</button>
+                        <ul class="dropdown-menu w-100" aria-labelledby="createDropdown">
+                            <li><a class="dropdown-item" asp-controller="Folders" asp-action="Create"><i class="bi bi-folder-plus me-2 text-warning"></i> Thư mục mới</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item" asp-controller="Documents" asp-action="Create"><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i> Tải tệp lên</a></li>
+                            <li>
+                                <form asp-controller="Folders" asp-action="UploadFolder" method="post" enctype="multipart/form-data" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="folderId" value="@layoutFolderId" />
+                                    <label class="dropdown-item mb-0" style="cursor:pointer;">
+                                        <i class="bi bi-folder2-open me-2 text-warning"></i> Tải thư mục
+                                        <input type="file" name="files" webkitdirectory directory multiple style="display:none" onchange="this.closest('form').submit()" />
+                                    </label>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <nav class="nav flex-column px-2" aria-label="Sidebar">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">🏠 Trang chủ</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Index">📂 Tài liệu của tôi</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Shared">⇄ Chia sẻ với tôi</a> 
+                    <a class="nav-link" asp-controller="Documents" asp-action="Star">⭐️ Gắn sao</a> 
+                    <a class="nav-link" asp-controller="Documents" asp-action="Trash">🗑️ Thùng rác</a> 
+                </nav>
+            </aside>
+        }
+
+        <main role="main" class="@mainContentClass">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">&copy;2025 - DocNest</div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @* ====================================================================== *@
+    @* LOGIC CHUYỂN ĐỔI THEME SÁNG/TỐI (PHẦN XỬ LÝ CLICK VÀ ICON) *@
+    @* ====================================================================== *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButton = document.getElementById('theme-toggle');
+            const body = document.body;
+
+            function applyTheme(theme) {
+                const icon = toggleButton.querySelector('i');
+                if (theme === 'dark') {
+                    body.classList.add('dark-mode');
+                    icon.className = 'bi bi-sun-fill';
+                } else {
+                    body.classList.remove('dark-mode');
+                    icon.className = 'bi bi-moon-fill';
+                }
+            }
+
+            const initialTheme = body.classList.contains('dark-mode') ? 'dark' : 'light';
+            applyTheme(initialTheme);
+
+            toggleButton.addEventListener('click', function() {
+                const currentTheme = body.classList.contains('dark-mode') ? 'dark' : 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                applyTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebDocumentManagement_FileSharing.Data;
+using WebDocumentManagement_FileSharing.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +11,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
  options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+builder.Services.AddTransient<EmailService>();
+
 builder.Services.AddDefaultIdentity<IdentityUser>(options => {
- options.SignIn.RequireConfirmedAccount = false;
- // adjust password options if needed
- options.Password.RequireNonAlphanumeric = false;
- options.Password.RequiredLength =6;
+    options.SignIn.RequireConfirmedEmail = true;
+    options.SignIn.RequireConfirmedAccount = true;
+    // adjust password options if needed
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6;
 })
  .AddRoles<IdentityRole>()
  .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -26,51 +30,51 @@ var app = builder.Build();
 // Seed admin role and user
 using (var scope = app.Services.CreateScope())
 {
- var services = scope.ServiceProvider;
- var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
- var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
- SeedData(userManager, roleManager).GetAwaiter().GetResult();
+    var services = scope.ServiceProvider;
+    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    SeedData(userManager, roleManager).GetAwaiter().GetResult();
 }
 
 static async Task SeedData(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
 {
- var adminEmail = "Admin@gmail.com";
- var adminPassword = "Admin@123"; // change this in production
+    var adminEmail = "Admin@gmail.com";
+    var adminPassword = "Admin@123"; // change this in production
 
- if (!await roleManager.RoleExistsAsync("Admin"))
- {
- await roleManager.CreateAsync(new IdentityRole("Admin"));
- }
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
 
- var adminUser = await userManager.FindByEmailAsync(adminEmail);
- if (adminUser == null)
- {
- adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
- var result = await userManager.CreateAsync(adminUser, adminPassword);
- if (result.Succeeded)
- {
- await userManager.AddToRoleAsync(adminUser, "Admin");
- }
- }
- else
- {
- if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
- {
- await userManager.AddToRoleAsync(adminUser, "Admin");
- }
- }
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+        var result = await userManager.CreateAsync(adminUser, adminPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+    else
+    {
+        if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
- app.UseMigrationsEndPoint();
+    app.UseMigrationsEndPoint();
 }
 else
 {
- app.UseExceptionHandler("/Home/Error");
- // The default HSTS value is30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
- app.UseHsts();
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
@@ -78,6 +82,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Area-aware route mapping must be registered before the default route so URL generation uses /{area}/{controller}/{action}
@@ -89,5 +94,8 @@ app.MapControllerRoute(
  name: "default",
  pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
+
+// Redirect bare /Identity to the Identity UI login page to avoid 404
+app.MapGet("/Identity", () => Results.Redirect("/Identity/Account/Login"));
 
 app.Run();

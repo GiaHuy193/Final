@@ -1,59 +1,601 @@
-﻿@model IEnumerable<WebDocumentManagement_FileSharing.Models.Document>
+﻿@using System.Linq
+@using WebDocumentManagement_FileSharing.Helpers
+@model WebDocumentManagement_FileSharing.Models.FileSystemViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Quản lý tệp tin";
+    var currentReturnUrl = Url.Action("Index", "Documents", new { folderId = Model?.CurrentFolderId });
 }
 
-<h1>Index</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FilePath)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Size)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FilePath)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Size)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+<style>
+
+    /* ================= DROPDOWN 3 CHẤM (CHỈNH SỬA CHO LIGHT MODE) ================= */
+
+    /* Loại bỏ mũi tên mặc định */
+    .dropdown-toggle::after {
+        display: none !important;
+    }
+
+    /* Nút 3 chấm (Folder & Table) */
+    .folder-action-btn,
+    .btn-group .dropdown-toggle {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0.35rem;
+        /* SỬ DỤNG BIẾN */
+        color: var(--text-secondary) !important;
+    }
+
+        .folder-action-btn:hover,
+        .btn-group .dropdown-toggle:hover {
+            /* SỬ DỤNG BIẾN */
+            background-color: var(--bg-active) !important;
+            border-radius: 50%;
+            color: var(--primary-color) !important;
+        }
+
+        .folder-action-btn i,
+        .btn-group .dropdown-toggle i {
+            font-size: 1.2rem;
+        }
+
+
+    /* Folder card gọn hơn */
+    .folder-card {
+        min-height: 110px;
+        position: relative; /* allow absolute actions */
+    }
+
+
+        /* Floating actions in card (top-right) */
+        .folder-card .card-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+        }
+
+
+        /* Make dropdown items easier to click on small cards */
+        .folder-card .dropdown-menu {
+            min-width: 160px;
+        }
+
+
+    /* Floating upload button in header */
+    .page-upload-btn {
+        position: relative;
+    }
+
+
+    /* Remove inner scrollbar on files table so dropdowns can display without being cut */
+    .table-responsive {
+        overflow: visible !important; /* allow dropdowns to overflow */
+    }
+
+
+        /* Hide visual scrollbar if present (optional) */
+        .table-responsive::-webkit-scrollbar {
+            display: none;
+        }
+
+    .table-responsive {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* FIX: Đảm bảo link tên file trong bảng có màu xanh nhấn */
+    .table a {
+        color: var(--primary-color) !important; /* Dùng biến */
+    }
+
+        .table a:hover {
+            color: var(--primary-hover-color) !important; /* Dùng biến */
+        }
+
+    /* FIX: Đảm bảo tên folder trong card có màu đen/tối */
+    .folder-card a,
+    .folder-card a .fw-semibold {
+        color: var(--text-color) !important; /* Dùng biến */
+    }
+
+    /* FIX: Đảm bảo tiêu đề H3 có màu đen/tối */
+    .container h3 {
+        color: var(--text-color) !important; /* Dùng biến */
+    }
+
+
+    @@media (max-width: 575.98px) {
+        .folder-card {
+            min-height: 100px;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-body">
+            <i class="bi bi-cloud-check"></i> Hệ thống lưu trữ
+        </h3>
+
+        <div class="page-upload-btn d-flex align-items-center gap-2">
+            <a class="btn btn-primary" asp-controller="Documents" asp-action="Create"
+               asp-route-folderId="@(Model?.CurrentFolderId ?? 0)"
+               asp-route-returnUrl="@currentReturnUrl">
+                <i class="bi bi-file-earmark-arrow-up me-1"></i> Tải lên
+            </a>
+
+            <form asp-controller="Folders" asp-action="UploadFolder" method="post" enctype="multipart/form-data" class="mb-0">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="folderId" value="@(Model?.CurrentFolderId == null ? 0 : Model.CurrentFolderId)" />
+                <label class="btn btn-secondary mb-0" title="Tải lên thư mục (Chrome/Edge)">
+                    <i class="bi bi-folder2-open me-1"></i> Tải thư mục
+                    <input type="file" name="files" webkitdirectory directory multiple style="display:none" onchange="this.form.submit()" />
+                </label>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row g-3 mb-4">
+        @if (Model.Folders != null && Model.Folders.Any())
+        {
+            foreach (var f in Model.Folders)
+            {
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <div class="card shadow-sm folder-card">
+                        <div class="card-actions">
+                            <div class="dropdown">
+                                <button class="dropdown-toggle folder-action-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Documents" asp-action="Index" asp-route-folderId="@f.Id">
+                                            <i class="bi bi-folder2-open me-2"></i> Mở thư mục
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Documents" asp-action="Create" asp-route-folderId="@f.Id" asp-route-returnUrl="@Url.Action("Index", "Documents", new { folderId = f.Id })">
+                                            <i class="bi bi-file-earmark-arrow-up me-2"></i> Tải lên vào đây
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Folders" asp-action="Rename" asp-route-id="@f.Id">
+                                            <i class="bi bi-pencil-square me-2 text-primary"></i> Đổi tên
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form method="post" asp-controller="Folders" asp-action="Delete" asp-route-id="@f.Id" onsubmit="return confirm('Bạn có chắc muốn xóa thư mục này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash me-2"></i> Xóa</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+
+                            <a asp-action="Index"
+                               asp-route-folderId="@f.Id"
+                               class="text-decoration-none flex-grow-1">
+
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-folder-fill text-warning fs-2"></i>
+                                    <div class="fw-semibold text-truncate">@f.Name</div>
+                                </div>
+
+                                <div class="text-muted small mt-2">
+                                    @f.CreatedDate.ToString("dd/MM/yyyy")
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="p-5 text-center text-muted rounded shadow-sm">
+                    Bạn chưa có thư mục nào
+                </div>
+
+                @if (Model.CurrentFolderId == 0)
+                {
+                    <div class="alert alert-info mt-3">
+                        Đây là thư mục gốc. Hãy tạo một thư mục mới hoặc tải lên tệp tin.
+                    </div>
+                }
+
+            </div>
+        }
+    </div>
+
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Tên</th>
+                    <th>Ngày tải</th>
+                    <th>Kích thước</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Documents != null && Model.Documents.Any())
+                {
+                    foreach (var d in Model.Documents)
+                    {
+                        <tr>
+                            <td>
+                                <i class="bi bi-file-earmark-text text-primary me-2 fs-5"></i>
+                                @{
+                                    var previewType = FilePreviewHelper.GetPreviewType(d.FileName, d.ContentType);
+                                    if (previewType == WebDocumentManagement_FileSharing.Models.FilePreviewType.Image || previewType == WebDocumentManagement_FileSharing.Models.FilePreviewType.Pdf)
+                                    {
+                                        <a href="@Url.Action("Open", "Documents", new { id = d.Id })" target="_blank" class="text-decoration-none">@d.FileName</a>
+                                    }
+                                    else if (previewType == WebDocumentManagement_FileSharing.Models.FilePreviewType.Office)
+                                    {
+                                        <a href="@Url.Action("Open", "Documents", new { id = d.Id })" target="_blank" class="text-decoration-none">@d.FileName</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">@d.FileName</span>
+                                        <span class="badge text-bg-secondary ms-2">Không hỗ trợ</span>
+                                    }
+                                }
+                            </td>
+                            <td>@d.UploadedDate.ToString("dd/MM/yyyy")</td>
+                            <td>@(Math.Round(d.FileSize / 1024.0, 1)) KB</td>
+
+                            @* CỘT THAO TÁC ĐÃ ĐƯỢC CHỈNH SỬA *@
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end align-items-center">
+                                    <a class="btn btn-outline-secondary btn-sm" asp-action="Details" asp-route-id="@d.Id" title="Chi tiết">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    <div class="dropdown">
+                                        <button class="dropdown-toggle folder-action-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item rename-trigger" href="#" data-id="@d.Id" data-name="@d.FileName" data-type="Document" data-bs-toggle="modal" data-bs-target="#renameModal">
+                                                    <i class="bi bi-pencil-square me-2 text-primary"></i> Đổi tên
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item delete-trigger" href="#" data-id="@d.Id" data-name="@d.FileName" data-type="Document" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                                    <i class="bi bi-trash me-2 text-danger"></i> Xóa
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item star-toggle" href="#" data-id="@d.Id" data-type="document">
+                                                    <i class="bi bi-star me-2"></i> Gắn sao
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Documents" asp-action="Download" asp-route-id="@d.Id">
+                                                    <i class="bi bi-download me-2"></i> Tải xuống
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            Không có tệp trong thư mục này
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="renameModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="renameModalLabel">Đổi tên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="renameForm" method="post" asp-controller="Documents" asp-action="Rename">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="rename-id" />
+
+                    <div class="mb-3">
+                        <label for="newName" class="form-label">Tên mới</label>
+                        <input type="text" name="newName" id="rename-newName" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="deleteForm" method="post" asp-controller="Documents" asp-action="Delete">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="delete-id" />
+                    <p>Bạn có chắc muốn xóa <strong id="delete-item-name"></strong> ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* include shared modal partial once per page *@
+<partial name="_ShareModal" />
+
+@section Scripts {
+    <script>
+        (function () {
+            'use strict';
+
+            // Wire up rename triggers
+            document.querySelectorAll('.rename-trigger').forEach(function (el) {
+                el.addEventListener('click', function (ev) {
+                    var id = el.getAttribute('data-id');
+                    var name = el.getAttribute('data-name');
+                    // populate modal fields
+                    var idField = document.getElementById('rename-id');
+                    var nameField = document.getElementById('rename-newName');
+                    if (idField) idField.value = id || '';
+                    if (nameField) nameField.value = name || '';
+                });
+            });
+
+            // Wire up delete triggers
+            document.querySelectorAll('.delete-trigger').forEach(function (el) {
+                el.addEventListener('click', function (ev) {
+                    var id = el.getAttribute('data-id');
+                    var name = el.getAttribute('data-name');
+                    var idField = document.getElementById('delete-id');
+                    var nameSpan = document.getElementById('delete-item-name');
+                    if (idField) idField.value = id || '';
+                    if (nameSpan) nameSpan.textContent = name || '';
+                });
+            });
+
+            // Folder delete buttons (from Home Index folder cards)
+            document.querySelectorAll('.folder-delete-btn').forEach(function(btn){
+                btn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    var id = btn.getAttribute('data-id');
+                    if (!id) return;
+                    if (!confirm('Bạn có chắc muốn xóa thư mục này?')) return;
+
+                    // post form with antiforgery
+                    var form = btn.closest('form');
+                    var token = form.querySelector('input[name="__RequestVerificationToken"]');
+                    var tokenValue = token ? token.value : '';
+
+                    fetch('@Url.Action("Delete", "Folders")', {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': tokenValue,
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({ id: id })
+                    }).then(function(resp){
+                        if (resp.redirected) window.location.href = resp.url;
+                        else if (resp.ok) window.location.reload();
+                        else resp.text().then(t=>{ alert('Xóa thư mục không thành công'); console.error(t); });
+                    }).catch(function(err){ console.error(err); alert('Lỗi xóa thư mục'); });
+                });
+            });
+
+
+            // Intercept delete form submit and send POST via fetch to ensure it works even if something blocks normal form submit
+            var deleteForm = document.getElementById('deleteForm');
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function (ev) {
+                    ev.preventDefault();
+                    var idInput = document.getElementById('delete-id');
+                    var id = idInput ? idInput.value : null;
+                    if (!id) return;
+
+                    // find antiforgery token
+                    var tokenInput = deleteForm.querySelector('input[name="__RequestVerificationToken"]');
+                    var token = tokenInput ? tokenInput.value : '';
+
+                    fetch('@Url.Action("Delete", "Documents")', {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token,
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({ id: id })
+                    }).then(function (resp) {
+                        if (resp.redirected) {
+                            window.location.href = resp.url;
+                            return;
+                        }
+                        if (resp.ok) {
+                            // reload current folder view
+                            window.location.reload();
+                        } else {
+                            resp.text().then(function(t){ console.error('Delete failed', t); alert('Xóa không thành công'); });
+                        }
+                    }).catch(function(err){ console.error(err); alert('Lỗi khi xóa'); });
+                });
+            }
+
+
+            // Wire up share triggers
+            document.querySelectorAll('.share-trigger').forEach(function (el) {
+                el.addEventListener('click', function (ev) {
+                    var id = el.getAttribute('data-id');
+                    var title = el.getAttribute('data-title');
+                    var emailField = document.getElementById('share-email');
+                    var messageField = document.getElementById('share-message');
+                    if (emailField) emailField.value = '';
+                    if (messageField) messageField.value = '';
+                    // populate hidden ID field for form submission
+                    document.getElementById('share-id').value = id || '';
+                });
+            });
+
+            // Robust move-to-body for dropdown menus so they float above scrollable containers
+            document.addEventListener('show.bs.dropdown', function (e) {
+                try {
+                    var dropdown = e.target;
+                    if (!dropdown || !dropdown.classList || !dropdown.classList.contains('dropdown')) return;
+
+                    var toggle = dropdown.querySelector('[data-bs-toggle="dropdown"]');
+                    var menu = dropdown.querySelector('.dropdown-menu');
+                    if (!toggle || !menu) return;
+
+                    // store original parent info for restore
+                    if (!menu.__origParent) {
+                        menu.__origParent = menu.parentNode;
+                        menu.__origNextSibling = menu.nextSibling;
+                    }
+
+                    // mark moved and append to body
+                    menu.setAttribute('data-moved', 'true');
+                    document.body.appendChild(menu);
+
+                    // prepare styles while measuring
+                    menu.style.position = 'fixed';
+                    menu.style.zIndex = 3000;
+                    menu.style.visibility = 'hidden';
+                    // allow bootstrap to add 'show' class; measure in next frame
+                    requestAnimationFrame(function () {
+                        var menuRect = menu.getBoundingClientRect();
+                        var toggleRect = toggle.getBoundingClientRect();
+
+                        var left = toggleRect.right - menuRect.width;
+                        if (left < 8) left = toggleRect.left;
+
+                        var top = toggleRect.bottom;
+                        var viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+
+                        if (top + menuRect.height > viewportHeight - 8) {
+                            top = toggleRect.top - menuRect.height;
+                            if (top < 8) top = 8;
+                        }
+
+                        // Clamp to viewport to avoid adding page scrollbars
+                        var viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+                        var maxLeft = Math.max(8, viewportWidth - menuRect.width - 8);
+                        if (left > maxLeft) left = maxLeft;
+                        if (left < 8) left = 8;
+
+                        var maxTop = Math.max(8, viewportHeight - menuRect.height - 8);
+                        if (top > maxTop) top = maxTop;
+                        if (top < 8) top = 8;
+
+                        menu.style.left = Math.round(left) + 'px';
+                        menu.style.top = Math.round(top) + 'px';
+                        menu.style.visibility = '';
+                    });
+                }
+                catch (ex) {
+                    console.error('Dropdown move error', ex);
+                }
+            });
+
+            document.addEventListener('hidden.bs.dropdown', function (e) {
+                try {
+                    var dropdown = e.target;
+                    if (!dropdown || !dropdown.classList || !dropdown.classList.contains('dropdown')) return;
+
+                    // find moved menu associated with this dropdown
+                    var movedMenu = Array.from(document.querySelectorAll('.dropdown-menu')).find(function (m) { return m.getAttribute('data-moved') === 'true' && m.__origParent; });
+                    if (!movedMenu) return;
+
+                    // restore into original parent
+                    if (movedMenu.__origParent) {
+                        if (movedMenu.__origNextSibling) movedMenu.__origParent.insertBefore(movedMenu, movedMenu.__origNextSibling);
+                        else movedMenu.__origParent.appendChild(movedMenu);
+                    }
+
+                    movedMenu.removeAttribute('data-moved');
+                    movedMenu.style.position = '';
+                    movedMenu.style.left = '';
+                    movedMenu.style.top = '';
+                    movedMenu.style.zIndex = '';
+                    movedMenu.style.visibility = '';
+
+                    delete movedMenu.__origParent;
+                    delete movedMenu.__origNextSibling;
+                }
+                catch (ex) {
+                    console.error('Dropdown restore error', ex);
+                }
+            });
+
+            // Star toggle for documents
+            document.querySelectorAll('.star-toggle').forEach(function(el){
+                el.addEventListener('click', function(e){
+                    e.preventDefault();
+                    var id = el.getAttribute('data-id');
+                    if (!id) return;
+                    fetch('@Url.Action("ToggleDocument", "Star")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                        body: new URLSearchParams({ id: id })
+                    }).then(function(r){ return r.json(); }).then(function(j){ if (j && j.success) { alert(j.isStarred ? 'Đã gắn sao' : 'Bỏ gắn sao'); } else alert('Lỗi'); }).catch(function(){ alert('Lỗi'); });
+                });
+            });
+
+            // Star toggle for folders (on Home page folder dropdown)
+            document.querySelectorAll('.folder-star-toggle').forEach(function(el){
+                el.addEventListener('click', function(e){
+                    e.preventDefault();
+                    var id = el.getAttribute('data-id');
+                    if (!id) return;
+                    fetch('@Url.Action("ToggleFolder", "Star")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                        body: new URLSearchParams({ id: id })
+                    }).then(function(r){ return r.json(); }).then(function(j){ if (j && j.success) { alert(j.isStarred ? 'Đã gắn sao thư mục' : 'Bỏ gắn sao thư mục'); } else alert('Lỗi'); }).catch(function(){ alert('Lỗi'); });
+                });
+            });
+
+        })();
+    </script>
 }
-    </tbody>
-</table>

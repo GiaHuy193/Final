@@ -100,6 +100,12 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
+            // If redirected after registration and requireConfirmation flag is present, show status
+            if (Request.Query.ContainsKey("requireConfirmation") && Request.Query["requireConfirmation"] == "true")
+            {
+                ModelState.AddModelError(string.Empty, "Please confirm your email address. Check your inbox for a confirmation link.");
+            }
+
             ReturnUrl = returnUrl;
         }
 
@@ -115,8 +121,15 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account
                 var user = await _userManager.FindByEmailAsync(Input.Email);
                 if (user == null)
                 {
-                    // Don't reveal that the user does not exist
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    // If user not found, redirect to Register and show message
+                    TempData["Error"] = "Bạn chưa tạo tài khoản";
+                    return RedirectToPage("/Account/Register", new { area = "Identity" });
+                }
+
+                // If user exists but email not confirmed, show explicit message
+                if (!await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError(string.Empty, "Tài khoản chưa xác thực.");
                     return Page();
                 }
 
@@ -147,7 +160,8 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    // Credentials invalid
+                    ModelState.AddModelError(string.Empty, "Bạn nhập sai mật khẩu hoặc tên email.");
                     return Page();
                 }
             }

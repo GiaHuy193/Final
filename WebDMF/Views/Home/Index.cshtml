@@ -1,10 +1,263 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-    // Force show sidebar on Index page
+﻿@using WebDocumentManagement_FileSharing.Helpers
+@model WebDocumentManagement_FileSharing.Models.FileSystemViewModel
+
+@{
+    ViewData["Title"] = "Trang chủ DocNest của tôi";
     ViewData["ForceShowSidebar"] = true;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    /* 1. Xóa mũi tên mặc định của dropdown */
+    .dropdown-toggle::after {
+        display: none !important;
+    }
+
+    /* 2. Cấu hình nút 3 chấm (Three-dots button) */
+    .folder-action-btn {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0.35rem;
+        color: var(--text-secondary) !important;
+    }
+
+        .folder-action-btn:hover {
+            background-color: var(--bg-active) !important;
+            border-radius: 50%;
+            color: var(--primary-color) !important;
+        }
+
+    /* 3. Bố cục thẻ Folder (Folder Card) */
+    .folder-card {
+        min-height: 110px;
+        position: relative; /* Để định vị nút card-actions */
+    }
+
+        /* Đưa nút thao tác lên góc trên bên phải */
+        .folder-card .card-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+        }
+
+        /* 4. Đồng bộ màu chữ theo Theme */
+        .folder-card a, .folder-card a .fw-semibold {
+            color: var(--text-color) !important;
+        }
+
+    /* Đảm bảo dropdown không bị che khuất trong table */
+    .table-responsive {
+        overflow: visible !important;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3><i class="bi bi-cloud-check"></i> Truy cập nhanh</h3>
+    </div>
+
+    @* Hiển thị thông báo *@
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @* PHẦN HIỂN THỊ THƯ MỤC *@
+    <div class="row g-3 mb-4">
+        @if (Model?.Folders != null && Model.Folders.Any())
+        {
+            foreach (var f in Model.Folders)
+            {
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <div class="card shadow-sm folder-card">
+
+                        @* Bố cục nút 3 chấm ở góc phải *@
+                        <div class="card-actions">
+                            <div class="dropdown">
+                                <button class="dropdown-toggle folder-action-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                   
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Folders" asp-action="Download" asp-route-id="@f.Id">
+                                            <i class="bi bi-download me-2"></i> Tải xuống
+                                        </a>
+                                    </li>
+                                   
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Folders" asp-action="Rename" asp-route-id="@f.Id">
+                                            <i class="bi bi-pencil-square me-2 text-info"></i> Đổi tên 
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item folder-star-toggle" href="#" data-id="@f.Id" data-type="folder">
+                                            <i class="bi bi-star me-2 text-warning"></i> Gắn sao
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item share-trigger" href="#" data-id="@f.Id" data-title="@f.Name" data-type="folder">
+                                            <i class="bi bi-share-fill me-2 text-primary"></i> Chia sẻ
+                                        </a>
+                                    </li>
+                                     <li>
+                                         <form method="post" class="folder-delete-form" asp-controller="Folders" asp-action="Delete" asp-route-id="@f.Id" onsubmit="return false;">
+                                             @Html.AntiForgeryToken()
+                                             <button type="button" class="dropdown-item text-danger folder-delete-btn" data-id="@f.Id">
+                                                 <i class="bi bi-trash me-2"></i> Chuyển vào thùng rác
+                                             </button>
+                                         </form>
+                                     </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <a asp-controller="Documents" asp-action="Index" asp-route-folderId="@f.Id" class="text-decoration-none flex-grow-1 mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-folder-fill text-warning fs-2"></i>
+                                    <div class="fw-semibold text-truncate" title="@f.Name">@f.Name</div>
+                                </div>
+                                <div class="text-muted small mt-2">
+                                    @f.CreatedDate.ToString("dd/MM/yyyy")
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="p-5 text-center text-muted bg-body-tertiary rounded shadow-sm">Bạn chưa có thư mục nào</div>
+            </div>
+        }
+    </div>
+
+    @* PHẦN HIỂN THỊ TỆP GẦN ĐÂY *@
+    <h5 class="mb-3">Files gần đây</h5>
+    <div class="table-responsive shadow-sm bg-body rounded border">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:40%">Tên</th>
+                    <th>Ngày tải</th>
+                    <th>Kích thước</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.Documents != null && Model.Documents.Any())
+                {
+                    foreach (var d in Model.Documents)
+                    {
+                        <tr>
+                            <td>
+                                <i class="bi bi-file-earmark-text text-primary me-2 fs-5"></i>
+                                @{
+                                    var previewType = FilePreviewHelper.GetPreviewType(d.FileName, d.ContentType);
+                                    if (previewType != FilePreviewType.NotSupported)
+                                    {
+                                        <a href="@Url.Action("Open", "Documents", new { id = d.Id })" target="_blank" class="fw-normal text-decoration-none">@d.FileName</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="fw-normal text-muted">@d.FileName</span>
+                                        <span class="badge bg-secondary ms-2 small">Không hỗ trợ preview</span>
+                                    }
+                                }
+                            </td>
+                            <td>@d.UploadedDate.ToString("dd/MM/yyyy")</td>
+                            <td class="text-secondary">@(Math.Round(d.FileSize / 1024.0, 1)) KB</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a class="btn btn-outline-secondary" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id" title="Chi tiết"><i class="bi bi-eye"></i></a>
+                                    <a class="btn btn-outline-secondary" asp-controller="Documents" asp-action="Download" asp-route-id="@d.Id" title="Tải xuống"><i class="bi bi-download"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">Không có tệp gần đây</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
+
+@* Include share modal so .share-trigger opens it on this page *@
+<partial name="_ShareModal" />
+
+@section Scripts {
+    <script>
+        (function () {
+            'use strict';
+
+            // Xử lý xóa thư mục qua Fetch API
+            document.querySelectorAll('.folder-delete-btn').forEach(function(btn){
+                btn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    var id = btn.getAttribute('data-id');
+                    if (!id || !confirm('Bạn có chắc muốn xóa thư mục này?')) return;
+
+                    var form = btn.closest('form');
+                    var token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                    fetch('@Url.Action("Delete", "Folders")', {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token,
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({ id: id })
+                    }).then(function(resp){
+                        if (resp.redirected) window.location.href = resp.url;
+                        else if (resp.ok) window.location.reload();
+                        else alert('Lỗi xóa thư mục');
+                    }).catch(function(err){ console.error(err); });
+                });
+            });
+
+            // Xử lý gắn sao thư mục
+            document.querySelectorAll('.folder-star-toggle').forEach(function(el){
+                el.addEventListener('click', function(e){
+                    e.preventDefault();
+                    var id = el.getAttribute('data-id');
+                    if (!id) return;
+
+                    fetch('@Url.Action("ToggleFolder", "Star")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: new URLSearchParams({ id: id })
+                    }).then(function(r){ return r.json(); })
+                      .then(function(j){
+                          if (j && j.success) { alert(j.isStarred ? 'Đã gắn sao thư mục' : 'Bỏ gắn sao thư mục'); }
+                      });
+            });
+
+            // share-trigger handled by shared modal script in _ShareModal; no local handler required
+         })();
+     </script>
+}

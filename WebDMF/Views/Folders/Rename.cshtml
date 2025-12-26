@@ -1,0 +1,18 @@
+﻿@model WebDocumentManagement_FileSharing.Models.Folder
+
+<h3>Đổi tên thư mục</h3>
+<hr />
+
+<form asp-action="Rename" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

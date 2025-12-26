@@ -1,0 +1,401 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "DocNest - Quản lý tài liệu đơn giản hóa";
+    Layout = null; // Loại bỏ Layout chính
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+    <style>
+        /* CSS Tùy chỉnh (Ánh xạ các màu và phong cách từ Tailwind sang Bootstrap) */
+        :root {
+            --bs-primary: #258cf4; /* primary */
+            --bg-light-section: #fcfcfd; /* gần background-light */
+            --bg-header-light: #ffffff;
+            --bg-card: #f8f9fa; /* card background */
+            --text-dark: #101922; /* Tương đương slate-900 */
+            --text-muted-dark: #495057; /* Tương đương slate-600 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light-section);
+            color: var(--text-dark);
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        /* Header */
+        .sticky-header {
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Cards */
+        .feature-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--bs-gray-300);
+            transition: box-shadow 0.3s, transform 0.3s;
+            height: 100%;
+        }
+
+            .feature-card:hover {
+                box-shadow: 0 10px 20px rgba(37, 140, 244, 0.15);
+                transform: translateY(-4px);
+            }
+
+        .icon-bg-primary {
+            background-color: rgba(37, 140, 244, 0.1);
+            color: var(--bs-primary);
+        }
+
+        .icon-bg-purple {
+            background-color: rgba(128, 0, 128, 0.1);
+            color: #8A2BE2; /* Màu tím */
+        }
+
+        .icon-bg-emerald {
+            background-color: rgba(0, 128, 0, 0.1);
+            color: #008000; /* Màu xanh lá */
+        }
+
+        /* CTA button styling */
+        .btn-secondary-custom {
+            background-color: #e9ecef;
+            color: var(--text-dark);
+            border: 1px solid var(--bs-gray-300);
+            font-weight: 600;
+        }
+
+            .btn-secondary-custom:hover {
+                background-color: #dee2e6;
+                color: var(--text-dark);
+            }
+
+        .text-success-green {
+            color: #10b981 !important; /* Tương đương green-500 trong Tailwind */
+        }
+
+        /* Utility */
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-lg {
+            font-size: 1.125rem;
+        }
+    </style>
+</head>
+<body class="bg-light-section text-dark antialiased">
+    <div class="position-relative d-flex min-vh-100 w-100 flex-column overflow-hidden">
+
+        @* HEADER *@
+        <header class="sticky-top w-100 border-bottom border-secondary border-opacity-25 sticky-header">
+            <div class="container-fluid px-4 px-sm-6 px-lg-8">
+                <div class="d-flex h-16 align-items-center justify-content-between" style="height: 64px;">
+                    <div class="d-flex align-items-center gap-2 cursor-pointer">
+                        <div class="text-primary d-flex align-items-center justify-content-center">
+                            <i class="bi bi-folder-fill fs-3"></i>
+                        </div>
+                        <h2 class="text-dark fs-5 fw-bold tracking-tight mb-0">DocNest</h2>
+                    </div>
+                    <div class="d-none d-md-flex flex-grow-1 justify-content-end align-items-center gap-4">
+                        <nav class="d-flex gap-4">
+                            <a class="text-secondary text-sm fw-medium text-decoration-none hover-primary transition-colors" href="#">Tính năng</a>
+                        </nav>
+                        <div class="d-flex gap-3">
+                            @* NÚT ĐĂNG NHẬP *@
+                            <a class="btn btn-secondary-custom btn-sm fw-bold px-4" asp-area="Identity" asp-page="/Account/Login">
+                                Đăng nhập
+                            </a>
+                            @* NÚT BẮT ĐẦU NGAY (ĐĂNG KÝ) *@
+                            <a class="btn btn-primary btn-sm fw-bold px-4 shadow-sm hover:bg-blue-600 transition-colors" asp-area="Identity" asp-page="/Account/Register">
+                                Bắt đầu ngay
+                            </a>
+                        </div>
+                    </div>
+                    <div class="d-md-none">
+                        <i class="bi bi-list fs-4 text-dark cursor-pointer"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow">
+            @* SECTION 1: HERO *@
+            <section class="py-5 py-md-5 py-lg-5 px-4 px-sm-6 px-lg-8 bg-white">
+                <div class="container-fluid mx-auto" style="max-width: 1344px;">
+                    <div class="d-flex flex-column align-items-center text-center">
+                        <div class="d-flex flex-column gap-4 mx-auto" style="max-width: 48rem;">
+                            <h1 class="hero-title text-dark mb-0">
+                                Tài liệu của bạn,<br /><span class="text-primary">Đơn giản hóa.</span>
+                            </h1>
+                            <h2 class="text-secondary fs-5 leading-relaxed mx-auto" style="max-width: 42rem;">
+                                DocNest là cách dễ nhất để tổ chức, bảo mật và chia sẻ tệp tin của bạn. Trải nghiệm tiêu chuẩn mới trong quản lý tài liệu mà không còn lộn xộn.
+                            </h2>
+                            <div class="d-flex flex-column flex-sm-row gap-4 justify-content-center pt-3">
+                                @* NÚT TẠO NEST MIỄN PHÍ *@
+                                <a class="btn btn-primary btn-lg fw-bold px-5 shadow-lg shadow-primary-500/20 hover-scale-105 transition-all"
+                                   asp-area="Identity" asp-page="/Account/Register">
+                                    Tạo Nest miễn phí
+                                </a>
+                                @* Nút Xem Demo đã bị loại bỏ *@
+                            </div>
+                            <div class="pt-3 d-flex flex-wrap align-items-center justify-content-center gap-4 text-sm text-secondary fw-medium">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-check-circle-fill fs-5 text-success-green"></i> Không cần thẻ tín dụng
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-check-circle-fill fs-5 text-success-green"></i> Dùng thử miễn phí 14 ngày
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* SECTION 2: CORE FEATURES *@
+            <section class="py-5 py-md-5 bg-white border-top border-bottom border-gray-200">
+                <div class="container-fluid mx-auto px-4 px-sm-6 px-lg-8" style="max-width: 1344px;">
+                    <div class="d-flex flex-column gap-5">
+                        <div class="text-center mx-auto d-flex flex-column gap-3" style="max-width: 48rem;">
+                            <h2 class="text-dark fs-3 fw-black tracking-tight mb-0">
+                                Tại sao chọn DocNest?
+                            </h2>
+                            <p class="text-secondary fs-5">
+                                Mọi thứ bạn cần để quản lý tệp tin hiệu quả, được xây dựng cho các nhóm làm việc tốc độ cao.
+                            </p>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="feature-card d-flex flex-column gap-4 rounded-4 p-4 hover-shadow transition-all hover-translate-y-negative-1">
+                                    <div class="size-14 rounded-3 icon-bg-primary d-flex align-items-center justify-content-center fs-3" style="width: 56px; height: 56px;">
+                                        <i class="bi bi-folder2-open"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-dark fs-5 fw-bold mb-2">Tổ chức thông minh</h3>
+                                        <p class="text-secondary text-base leading-relaxed mb-0">
+                                            Quên việc sắp xếp thủ công đi. Gắn thẻ AI và cấu trúc thư mục trực quan của chúng tôi giữ cho không gian làm việc của bạn luôn gọn gàng tự động.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-card d-flex flex-column gap-4 rounded-4 p-4 hover-shadow transition-all hover-translate-y-negative-1">
+                                    <div class="size-14 rounded-3 icon-bg-purple d-flex align-items-center justify-content-center fs-3" style="width: 56px; height: 56px;">
+                                        <i class="bi bi-share-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-dark fs-5 fw-bold mb-2">Chia sẻ siêu tốc</h3>
+                                        <p class="text-secondary text-base leading-relaxed mb-0">
+                                            Cộng tác tức thì. Tạo các liên kết bảo mật, có thời hạn và chia sẻ với bất kỳ ai, ở bất cứ đâu chỉ với một cú nhấp chuột.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-card d-flex flex-column gap-4 rounded-4 p-4 hover-shadow transition-all hover-translate-y-negative-1">
+                                    <div class="size-14 rounded-3 icon-bg-emerald d-flex align-items-center justify-content-center fs-3" style="width: 56px; height: 56px;">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-dark fs-5 fw-bold mb-2">Bảo mật cấp ngân hàng</h3>
+                                        <p class="text-secondary text-base leading-relaxed mb-0">
+                                            Ngủ ngon khi biết dữ liệu của bạn được mã hóa với tiêu chuẩn AES-256 cấp doanh nghiệp. Quyền riêng tư của bạn là ưu tiên hàng đầu.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center mt-3">
+                            <button class="btn btn-link text-primary fw-bold text-decoration-none fs-6 group">
+                                Xem tất cả tính năng <i class="bi bi-arrow-right-short fs-5 transition-transform"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* SECTION 3: INTERFACE SHOWCASE (CTA TÓM TẮT) *@
+            <section class="py-5 py-md-5 px-4 px-sm-6 px-lg-8">
+                <div class="mx-auto" style="max-width: 900px;">
+                    <div class="bg-dark rounded-4 overflow-hidden shadow-lg">
+                        <div class="position-relative min-vh-25 d-flex flex-column justify-content-center align-items-center text-center bg-gradient-to-br from-dark via-gray-900 to-black p-4 p-sm-5 text-white">
+
+                            <div class="position-absolute top-0 right-0" style="width: 15rem; height: 15rem; background-color: rgba(37, 140, 244, 0.1); border-radius: 50%; filter: blur(25px); transform: translate(30%, -30%);"></div>
+                            <div class="position-absolute bottom-0 left-0" style="width: 15rem; height: 15rem; background-color: rgba(128, 0, 128, 0.1); border-radius: 50%; filter: blur(25px); transform: translate(-30%, 30%);"></div>
+
+                            <div class="position-relative z-10 mx-auto" style="max-width: 48rem;">
+                                <span class="d-inline-block px-3 py-1 mb-3 rounded-pill bg-primary bg-opacity-25 text-white border border-white border-opacity-50 text-xs fw-bold text-uppercase tracking-wider">
+                                    Trải nghiệm mới
+                                </span>
+                                <h3 class="text-white fs-3 fs-md-2 fw-bold leading-tight mb-3">
+                                    Giao diện thân thiện, trực quan
+                                </h3>
+                                <p class="text-secondary fs-6 leading-relaxed mb-4" style="max-width: 38rem; margin: 0 auto;">
+                                    Được thiết kế cho con người, không phải robot. Điều hướng cuộc sống số của bạn với giao diện người dùng đẹp và dễ sử dụng.
+                                </p>
+                                <button class="btn btn-light fw-bold shadow-lg hover-bg-light transition-colors">
+                                    Khám phá ngay
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* SECTION 4: TESTIMONIALS *@
+            <section class="py-5 py-md-5 bg-white border-top border-bottom border-gray-200">
+                <div class="container-fluid mx-auto px-4 px-sm-6 px-lg-8" style="max-width: 1344px;">
+                    <div class="d-flex flex-column gap-5">
+                        <div class="text-center">
+                            <h2 class="text-dark fs-3 fw-bold tracking-tight mb-2">Được các đội ngũ tin dùng</h2>
+                            <p class="text-secondary fs-6 mt-2">Xem người dùng nói gì về ngôi nhà mới của họ.</p>
+                        </div>
+
+                        <div class="row g-4">
+                            @* Testimonial Card 1 *@
+                            <div class="col-md-4">
+                                <div class="rounded-4 feature-card p-4 d-flex flex-column gap-4 shadow-sm">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-25 d-flex align-items-center justify-content-center text-primary fw-bold fs-5" style="width: 48px; height: 48px;">SJ</div>
+                                        <div>
+                                            <p class="text-dark fw-bold mb-0">Sarah Jenkins</p>
+                                            <p class="text-xs text-secondary text-uppercase tracking-wider fw-semibold mb-0">Giám đốc sản phẩm</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-secondary text-base fst-italic leading-relaxed mb-0 flex-grow-1">
+                                        "DocNest đã thay đổi hoàn toàn cách nhóm chúng tôi chia sẻ tệp. Tính năng tự động gắn thẻ là cứu cánh cho quy trình làm việc hỗn loạn của chúng tôi."
+                                    </p>
+                                    <div class="d-flex text-warning mt-auto">
+                                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* Testimonial Card 2 *@
+                            <div class="col-md-4">
+                                <div class="rounded-4 feature-card p-4 d-flex flex-column gap-4 shadow-sm">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-purple-500 bg-opacity-25 d-flex align-items-center justify-content-center text-purple-700 fw-bold fs-5" style="width: 48px; height: 48px;">MT</div>
+                                        <div>
+                                            <p class="text-dark fw-bold mb-0">Mike Thompson</p>
+                                            <p class="text-xs text-secondary text-uppercase tracking-wider fw-semibold mb-0">Nhà thiết kế tự do</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-secondary text-base fst-italic leading-relaxed mb-0 flex-grow-1">
+                                        "Đơn giản, nhanh chóng và an toàn. Chính xác là những gì tôi cần để gửi các sản phẩm lớn cho khách hàng mà không gặp trở ngại nào."
+                                    </p>
+                                    <div class="d-flex text-warning mt-auto">
+                                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* Testimonial Card 3 *@
+                            <div class="col-md-4">
+                                <div class="rounded-4 feature-card p-4 d-flex flex-column gap-4 shadow-sm">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-success bg-opacity-25 d-flex align-items-center justify-content-center text-success fw-bold fs-5" style="width: 48px; height: 48px;">ER</div>
+                                        <div>
+                                            <p class="text-dark fw-bold mb-0">Elena Rodriguez</p>
+                                            <p class="text-xs text-secondary text-uppercase tracking-wider fw-semibold mb-0">Trưởng nhóm vận hành</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-secondary text-base fst-italic leading-relaxed mb-0 flex-grow-1">
+                                        "Giao diện quá sạch sẽ, tôi thực sự thích việc sắp xếp tài liệu bây giờ. Đây là tiêu chuẩn cho công ty chúng tôi."
+                                    </p>
+                                    <div class="d-flex text-warning mt-auto">
+                                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* SECTION 5: FINAL CTA *@
+            <section class="py-5 py-md-5 px-4 px-sm-6 px-lg-8 bg-primary text-white">
+                <div class="mx-auto text-center d-flex flex-column align-items-center gap-4" style="max-width: 64rem;">
+                    <h2 class="fs-4 fs-sm-3 fs-md-2 fw-black tracking-tight leading-tight">Sẵn sàng dọn dẹp cuộc sống số của bạn?</h2>
+                    <p class="text-blue-100 fs-5" style="max-width: 42rem;">Tham gia cùng hàng nghìn người dùng đã chuyển sang DocNest để có trải nghiệm tài liệu sạch hơn, nhanh hơn và an toàn hơn.</p>
+                    <div class="d-flex flex-column flex-sm-row gap-4 w-100 justify-content-center">
+                        <a class="btn btn-lg bg-white text-primary hover-bg-light fw-bold py-3 px-5 rounded-lg shadow-lg transition-all hover-scale-105 fs-6"
+                           asp-area="Identity" asp-page="/Account/Register">
+                            Bắt đầu miễn phí
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        @* FOOTER *@
+        <footer class="bg-light-section border-top border-secondary border-opacity-25 pt-5 pb-3">
+            <div class="container-fluid mx-auto px-4 px-sm-6 px-lg-8" style="max-width: 1344px;">
+                <div class="row g-4 mb-4 border-bottom border-secondary border-opacity-25 pb-4">
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-folder-fill fs-4 text-primary"></i>
+                            <span class="fw-bold fs-5 text-dark">DocNest</span>
+                        </div>
+                        <p class="text-sm text-secondary mb-0">
+                            Làm cho việc quản lý tài liệu trở nên đơn giản, an toàn và đẹp mắt cho mọi người.
+                        </p>
+                    </div>
+
+                    @* Sản phẩm *@
+                    <div class="col-6 col-md-4">
+                        <h4 class="fw-bold text-dark mb-3 fs-6">Sản phẩm</h4>
+                        <ul class="list-unstyled d-flex flex-column gap-2 text-sm text-secondary">
+                            <li><a class="text-secondary text-decoration-none hover-primary transition-colors" href="#">Tính năng</a></li>
+                            <li><a class="text-secondary text-decoration-none hover-primary transition-colors" href="#">Bảo mật</a></li>
+                        </ul>
+                    </div>
+
+                    @* Pháp lý & Tương tác *@
+                    <div class="col-6 col-md-4">
+                        <h4 class="fw-bold text-dark mb-3 fs-6">Pháp lý & Tương tác</h4>
+                        <ul class="list-unstyled d-flex flex-column gap-2 text-sm text-secondary">
+                            <li><a class="text-secondary text-decoration-none hover-primary transition-colors" href="#">Quyền riêng tư</a></li>
+                            <li><a class="text-secondary text-decoration-none hover-primary transition-colors" href="#">Điều khoản</a></li>
+                            <li><a class="text-secondary text-decoration-none hover-primary transition-colors" href="#">Chính sách Cookie</a></li>
+                        </ul>
+                        <div class="d-flex gap-3 text-secondary pt-3">
+                            <a class="hover-primary transition-colors" href="#"><i class="bi bi-twitter fs-5"></i></a>
+                            <a class="hover-primary transition-colors" href="#"><i class="bi bi-github fs-5"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-top border-secondary border-opacity-25 pt-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                    <p class="text-xs text-secondary mb-0">© 2023 DocNest Inc. Đã đăng ký bản quyền.</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    @* SCRIPT FOR BOOTSTRAP FUNCTIONALITY *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

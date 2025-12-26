@@ -1,0 +1,151 @@
+﻿@using WebDocumentManagement_FileSharing.Models
+@{
+    var accessOptions = new[] { "Read", "Download", "Edit" };
+}
+
+<style>
+    /* --- CẤU HÌNH MÀU SẮC MIDNIGHT BLUE CHO DARK MODE --- */
+    :root {
+        --midnight-bg: #0f172a; /* Nền Modal chính */
+        --midnight-card: #1e293b; /* Nền ô Input/Hộp thông tin */
+        --midnight-border: #334155; /* Màu viền */
+        --midnight-text: #f8fafc; /* Màu chữ chính */
+        --midnight-secondary: #94a3b8; /* Màu chữ phụ */
+    }
+
+    /* Áp dụng màu cho Modal khi ở giao diện tối */
+    /* Nếu hệ thống của bạn dùng class .dark-mode trên body */
+    .dark-mode .custom-share-modal .modal-content {
+        background-color: var(--midnight-bg) !important;
+        color: var(--midnight-text) !important;
+        border: 1px solid var(--midnight-border) !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .dark-mode .custom-share-modal .modal-header,
+    .dark-mode .custom-share-modal .modal-footer {
+        border-color: var(--midnight-border) !important;
+    }
+
+    /* Tùy chỉnh Input và Select để không bị trắng lóa */
+    .dark-mode .custom-share-modal .form-control,
+    .dark-mode .custom-share-modal .form-select {
+        background-color: var(--midnight-card) !important;
+        border-color: var(--midnight-border) !important;
+        color: var(--midnight-text) !important;
+    }
+
+        .dark-mode .custom-share-modal .form-control::placeholder {
+            color: var(--midnight-secondary);
+        }
+
+    /* Hộp thông tin tệp được chọn */
+    .dark-mode .share-file-info {
+        background-color: var(--midnight-card);
+        border: 1px dashed var(--midnight-border);
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .dark-mode .custom-share-modal .btn-close {
+        filter: invert(1) grayscale(100) brightness(200); /* Đổi nút X thành màu trắng */
+    }
+
+    /* Tùy chỉnh nhãn label */
+    .dark-mode .custom-share-modal .form-label {
+        color: var(--midnight-secondary);
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+</style>
+
+<div class="modal fade custom-share-modal" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0" style="border-radius: 12px;">
+            <form method="post" asp-controller="Share" asp-action="ProcessShareGeneric">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="shareModalLabel">
+                        <i class="bi bi-share-fill me-2 text-primary"></i>Chia sẻ mục
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="shareTargetType" name="targetType" value="document" />
+                    <input type="hidden" id="shareTargetId" name="targetId" value="" />
+
+                    <div class="mb-4">
+                        <label class="form-label text-uppercase small">Mục đang chọn</label>
+                        <div class="share-file-info d-flex align-items-center">
+                            <i class="bi bi-folder-fill fs-3 text-warning me-3" id="shareItemIcon"></i>
+                            <div id="shareItemTitle" class="fw-bold text-truncate"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="receiverEmail" class="form-label">Email người nhận</label>
+                        <input type="email" class="form-control" id="receiverEmail" name="receiverEmail"
+                               placeholder="nhap-email@example.com" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="accessType" class="form-label">Quyền truy cập</label>
+                        <select class="form-select" id="accessType" name="accessType">
+                            @foreach (var opt in accessOptions)
+                            {
+                                <option value="@opt">@opt</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 pb-4">
+                    <button type="button" class="btn btn-link text-decoration-none text-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm" style="border-radius: 8px;">
+                        Gửi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // open modal when .share-trigger clicked
+        document.addEventListener('click', function(e){
+            var btn = e.target.closest && e.target.closest('.share-trigger');
+            if (!btn) return;
+            e.preventDefault();
+            var id = btn.getAttribute('data-id') || btn.getAttribute('data-document-id');
+            var title = btn.getAttribute('data-title') || btn.getAttribute('data-document-title') || '';
+            var type = btn.getAttribute('data-type') || 'document';
+
+            var modalEl = document.getElementById('shareModal');
+            if (!modalEl) return;
+
+            var inputId = modalEl.querySelector('#shareTargetId');
+            var inputType = modalEl.querySelector('#shareTargetType');
+            var titleEl = modalEl.querySelector('#shareItemTitle');
+            var iconEl = modalEl.querySelector('#shareItemIcon');
+
+            if (inputId) inputId.value = id || '';
+            if (inputType) inputType.value = type || 'document';
+            if (titleEl) titleEl.textContent = title || '';
+
+            // set icon depending on type
+            if (iconEl) {
+                if (type === 'folder') {
+                    iconEl.className = 'bi bi-folder-fill fs-3 text-warning me-3';
+                } else {
+                    iconEl.className = 'bi bi-file-earmark-richtext-fill fs-3 text-info me-3';
+                }
+            }
+
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        });
+    })();
+</script>

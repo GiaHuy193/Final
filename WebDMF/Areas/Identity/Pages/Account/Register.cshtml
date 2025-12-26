@@ -5,52 +5,140 @@
     ViewData["Title"] = "Đăng ký";
 }
 
+<style>
+    /* ---------------------------------------------------------------------- */
+    /* CSS CỤ THỂ CHO TRANG IDENTITY (SỬ DỤNG BIẾN CSS TỪ LAYOUT) */
+    /* ---------------------------------------------------------------------- */
+
+    /* Card Container (Nền form chính) */
+    .identity-card {
+        background-color: var(--bg-sidebar) !important; /* Thay thế #1B2936 */
+        border: 1px solid var(--border-color) !important; /* Thay thế #38444D */
+        box-shadow: 0 4px 10px var(--shadow-color) !important; /* Thay thế rgba cố định */
+    }
+
+    /* Header của Card (Phần ĐĂNG KÝ lớn) */
+    .identity-header {
+        background-color: var(--bg-sidebar) !important; /* Thay thế #1B2936 */
+        color: var(--primary-color) !important; /* Giữ nguyên màu nhấn Xanh dương */
+        border-bottom: 1px solid var(--border-color) !important; /* Thêm lại viền để tách biệt */
+    }
+
+    /* CARD BODY (Phần chứa form) */
+    .identity-body {
+        padding: 0 2rem 2rem 2rem !important;
+    }
+
+    /* Tiêu đề nhỏ (Thông tin tài khoản) */
+    .identity-section-title {
+        color: var(--text-color) !important; /* Thay thế #F7F9F9 */
+        border-bottom-color: var(--border-color) !important; /* Thay thế #38444D */
+        margin-bottom: 0.5rem !important;
+        padding-top: 0 !important;
+    }
+
+    /* Input Fields */
+    /* Sử dụng biến input chung từ Layout */
+    .form-control {
+        background-color: var(--input-bg) !important; /* Thay thế #E8F0FE */
+        color: var(--text-color) !important; /* Chữ trong input sẽ là màu tối/sáng của theme */
+        border-color: var(--input-border) !important; /* Thay thế #A9C9FF */
+        border-radius: 25px !important;
+        height: calc(2.2rem + 4px) !important;
+        padding: 5px 15px !important;
+    }
+
+    .form-group label {
+        color: var(--text-color) !important; /* Label sử dụng màu chữ chính của theme */
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    /* Nút ĐĂNG KÝ (Primary Button) */
+    .btn-identity-primary {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        color: #fff !important;
+        border-radius: 4px !important;
+    }
+
+        /* Thêm hover state cho nút đăng ký */
+        .btn-identity-primary:hover {
+            background-color: var(--primary-hover-color) !important;
+            border-color: var(--primary-hover-color) !important;
+        }
+
+    /* Văn bản liên kết (Đăng nhập ngay, Quên mật khẩu) */
+    .identity-link {
+        color: var(--primary-color) !important; /* Màu xanh dương nhấn */
+    }
+
+    /* Văn bản phụ (Bạn đã có tài khoản?) */
+    .identity-text-muted {
+        color: var(--text-color) !important; /* Sử dụng màu chữ chính */
+        margin-top: 1rem !important;
+    }
+
+    /* FIX: Đảm bảo văn bản lỗi (text-danger) vẫn là màu đỏ */
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+</style>
+
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-5 col-md-8 col-sm-10">
-            <div class="card shadow-lg border-0 rounded-4">
+            @* Sử dụng class identity-card cho nền tối *@
+            <div class="card shadow-lg border-0 rounded-4 identity-card">
 
-                <div class="card-header bg-success text-white text-center rounded-top-4 py-4">
-                    <h3 class="fw-bold my-0"><i class="bi bi-person-plus-fill me-2"></i>ĐĂNG KÝ</h3>
+                @* Tiêu đề card header *@
+                <div class="card-header text-center rounded-top-4 py-4 identity-header">
+                    <h3 class="fw-bold my-0">ĐĂNG KÝ</h3>
                 </div>
 
-                <div class="card-body p-4 p-md-5">
+                @* Áp dụng class identity-body để điều chỉnh padding trên cùng *@
+                <div class="card-body identity-body">
 
-                    <section class="mb-5">
-                        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                            <h5 class="mb-4 text-center text-success fw-semibold border-bottom pb-2">Thông tin tài khoản</h5>
+                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        @* Tiêu đề section - Khoảng cách đã được giảm tối đa *@
+                        <h5 class="mb-2 text-center fw-semibold identity-section-title">Thông tin tài khoản</h5>
 
-                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                            <div class="form-floating mb-3">
-                                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                                <label asp-for="Input.Email" class="form-label">Địa chỉ Email</label>
-                                <span asp-validation-for="Input.Email" class="text-danger small"></span>
-                            </div>
+                        @* Input Email *@
+                        <div class="form-group mb-3">
+                            <label asp-for="Input.Email">Địa chỉ Email</label>
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
+                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                        </div>
 
-                            <div class="form-floating mb-3">
-                                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                                <label asp-for="Input.Password" class="form-label">Mật khẩu</label>
-                                <span asp-validation-for="Input.Password" class="text-danger small"></span>
-                            </div>
+                        @* Input Mật khẩu *@
+                        <div class="form-group mb-3">
+                            <label asp-for="Input.Password">Mật khẩu</label>
+                            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
 
-                            <div class="form-floating mb-4">
-                                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                                <label asp-for="Input.ConfirmPassword" class="form-label">Xác nhận Mật khẩu</label>
-                                <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
-                            </div>
+                        @* Input Xác nhận Mật khẩu *@
+                        <div class="form-group mb-4">
+                            <label asp-for="Input.ConfirmPassword">Xác nhận Mật khẩu</label>
+                            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                        </div>
 
-                            <div class="d-grid mb-3">
-                                <button id="registerSubmit" type="submit" class="btn btn-success btn-lg fw-bold text-uppercase">ĐĂNG KÝ TÀI KHOẢN</button>
-                            </div>
-                        </form>
-                    </section>
+                        <div class="d-grid mb-3">
+                            @* Nút Đăng ký *@
+                            <button id="registerSubmit" type="submit" class="btn btn-lg fw-bold text-uppercase btn-identity-primary">ĐĂNG KÝ TÀI KHOẢN</button>
+                        </div>
+                    </form>
 
-                    <hr class="my-5" />
-
-                    <p class="text-center small">
+                    @* Link Đăng nhập *@
+                    <p class="text-center small identity-text-muted mt-3">
                         Bạn đã có tài khoản?
-                        <a asp-page="./Login" class="text-success fw-semibold text-decoration-none">Đăng nhập ngay</a>
+                        <a asp-page="./Login" class="fw-semibold text-decoration-none identity-link">Đăng nhập ngay</a>
                     </p>
 
                 </div>

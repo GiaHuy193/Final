@@ -3,36 +3,112 @@
   "WorkspaceRootPath": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Data\\Migrations\\20251208004908_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:WebDMF\\Data\\Migrations\\20251208004908_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\folders\\rename.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\folders\\rename.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\controllers\\documentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\controllers\\documentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\folders\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\folders\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\folders\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\folders\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\documents\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\documents\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\folders\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\folders\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\controllers\\folderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\controllers\\folderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\models\\folder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\models\\folder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\folders\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\folders\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\controllers\\documents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\controllers\\documents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\models\\document.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\models\\document.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251210085220_notnull.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:WebDMF\\Migrations\\20251210085220_notnull.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\folders\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\folders\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\models\\documentversion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\models\\documentversion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\models\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\models\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\documents\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\documents\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\models\\filesystemviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\models\\filesystemviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251210071818_addrelation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:WebDMF\\Migrations\\20251210071818_addrelation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\views\\documents\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\views\\documents\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\models\\sharelink.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\models\\sharelink.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\models\\permission.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\models\\permission.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\migrations\\applicationdbcontextmodelsnapshot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\migrations\\applicationdbcontextmodelsnapshot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Data\\Migrations\\20251208032616_AddFolderTable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:WebDMF\\Data\\Migrations\\20251208032616_AddFolderTable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
@@ -40,12 +116,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\buildTransitive\\Microsoft.AspNetCore.Identity.UI.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\build\\Microsoft.AspNetCore.Identity.UI.props||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_LoginPartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
@@ -67,39 +137,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\ScaffoldingReadMe.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\_ViewStart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\Error.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_ValidationScriptsPartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_Layout.cshtml.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Controllers\\HomeController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\_ViewStart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -128,6 +165,18 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_LoginPartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_LoginPartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\migrations\\20251208035055_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\migrations\\20251208035055_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\migrations\\20251208133345_adddocumentsystemtables.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\migrations\\20251208133345_adddocumentsystemtables.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|c:\\users\\dell\\desktop\\webdmf\\webdmf\\webdmf\\migrations\\20251209001052_demodatabase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DBB32EE-632F-4AB5-A8E8-EF0C1F26F2E4}|WebDMF\\WebDMF.csproj|solutionrelative:webdmf\\migrations\\20251209001052_demodatabase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -137,76 +186,386 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "20251208004908_InitialCreate.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Data\\Migrations\\20251208004908_InitialCreate.cs",
-              "RelativeDocumentMoniker": "WebDMF\\Data\\Migrations\\20251208004908_InitialCreate.cs",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Data\\Migrations\\20251208004908_InitialCreate.cs",
-              "RelativeToolTip": "WebDMF\\Data\\Migrations\\20251208004908_InitialCreate.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-08T00:49:08.757Z",
+              "Title": "Rename.cshtml",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Rename.cshtml",
+              "RelativeDocumentMoniker": "WebDMF\\Views\\Folders\\Rename.cshtml",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Rename.cshtml",
+              "RelativeToolTip": "WebDMF\\Views\\Folders\\Rename.cshtml",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAUwBIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-10T09:15:47.227Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
+              "Title": "FoldersController.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\FoldersController.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Controllers\\FoldersController.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\FoldersController.cs",
+              "RelativeToolTip": "WebDMF\\Controllers\\FoldersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAALQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T01:26:09.431Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Documents.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\Documents.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Controllers\\Documents.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\Documents.cs",
+              "RelativeToolTip": "WebDMF\\Controllers\\Documents.cs",
+              "ViewState": "AgIAAPcAAAAAAAAAAADwvxABAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T03:21:48.768Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "WebDMF\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAA0wEsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-06T09:58:33.848Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "Create.cshtml",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Documents\\Create.cshtml",
-              "RelativeDocumentMoniker": "WebDMF\\Views\\Documents\\Create.cshtml",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Documents\\Create.cshtml",
-              "RelativeToolTip": "WebDMF\\Views\\Documents\\Create.cshtml",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAkAAAAGAAAAAAAAAA==",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Create.cshtml",
+              "RelativeDocumentMoniker": "WebDMF\\Views\\Folders\\Create.cshtml",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Create.cshtml",
+              "RelativeToolTip": "WebDMF\\Views\\Folders\\Create.cshtml",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAUwB8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-08T00:34:06.051Z",
+              "WhenOpened": "2025-12-08T14:20:23.272Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "WebDMF\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "WebDMF\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAFQAAAAAAAAAAAAUwG8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-10T07:57:43.636Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Index.cshtml",
+              "RelativeDocumentMoniker": "WebDMF\\Views\\Folders\\Index.cshtml",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Index.cshtml",
+              "RelativeToolTip": "WebDMF\\Views\\Folders\\Index.cshtml",
+              "ViewState": "AgIAACMAAAAAAAAAAAAEwCoAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-09T12:36:14.623Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "DocumentsController.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\DocumentsController.cs",
-              "RelativeDocumentMoniker": "WebDMF\\Controllers\\DocumentsController.cs",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\DocumentsController.cs",
-              "RelativeToolTip": "WebDMF\\Controllers\\DocumentsController.cs",
-              "ViewState": "AgIAADYAAAAAAAAAAAAcwEcAAAApAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-08T00:33:06.604Z",
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Edit.cshtml",
+              "RelativeDocumentMoniker": "WebDMF\\Views\\Folders\\Edit.cshtml",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Edit.cshtml",
+              "RelativeToolTip": "WebDMF\\Views\\Folders\\Edit.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-10T01:44:22.383Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 3,
+              "Title": "Delete.cshtml",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Delete.cshtml",
+              "RelativeDocumentMoniker": "WebDMF\\Views\\Folders\\Delete.cshtml",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Delete.cshtml",
+              "RelativeToolTip": "WebDMF\\Views\\Folders\\Delete.cshtml",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAACAAAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-10T08:39:11.381Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Details.cshtml",
+              "RelativeDocumentMoniker": "WebDMF\\Views\\Folders\\Details.cshtml",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Folders\\Details.cshtml",
+              "RelativeToolTip": "WebDMF\\Views\\Folders\\Details.cshtml",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAEwCIAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-10T01:44:38.986Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
               "Title": "Document.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\Document.cs",
               "RelativeDocumentMoniker": "WebDMF\\Models\\Document.cs",
               "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\Document.cs",
               "RelativeToolTip": "WebDMF\\Models\\Document.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAxwAkAAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-08T00:30:44.366Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
+              "Title": "Folder.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\Folder.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Models\\Folder.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\Folder.cs",
+              "RelativeToolTip": "WebDMF\\Models\\Folder.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T01:28:10.493Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "20251210085220_notnull.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251210085220_notnull.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Migrations\\20251210085220_notnull.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251210085220_notnull.cs",
+              "RelativeToolTip": "WebDMF\\Migrations\\20251210085220_notnull.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T08:52:20.516Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "DocumentVersion.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\DocumentVersion.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Models\\DocumentVersion.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\DocumentVersion.cs",
+              "RelativeToolTip": "WebDMF\\Models\\DocumentVersion.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T03:01:09.355Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ErrorViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\ErrorViewModel.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Models\\ErrorViewModel.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\ErrorViewModel.cs",
+              "RelativeToolTip": "WebDMF\\Models\\ErrorViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T08:36:01.767Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "FileSystemViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\FileSystemViewModel.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Models\\FileSystemViewModel.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\FileSystemViewModel.cs",
+              "RelativeToolTip": "WebDMF\\Models\\FileSystemViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T13:59:03.16Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "WebDMF\\Data\\ApplicationDbContext.cs",
               "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Data\\ApplicationDbContext.cs",
               "RelativeToolTip": "WebDMF\\Data\\ApplicationDbContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAowCoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-08T00:27:52.305Z",
+              "WhenOpened": "2025-12-10T06:55:38.916Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 15,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Documents\\Index.cshtml",
+              "RelativeDocumentMoniker": "WebDMF\\Views\\Documents\\Index.cshtml",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Documents\\Index.cshtml",
+              "RelativeToolTip": "WebDMF\\Views\\Documents\\Index.cshtml",
+              "ViewState": "AgIAADkAAAAAAAAAAAAAAF0AAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-08T13:49:46.398Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "20251210071818_addrelation.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251210071818_addrelation.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Migrations\\20251210071818_addrelation.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251210071818_addrelation.cs",
+              "RelativeToolTip": "WebDMF\\Migrations\\20251210071818_addrelation.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T07:18:19.445Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Permission.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\Permission.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Models\\Permission.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\Permission.cs",
+              "RelativeToolTip": "WebDMF\\Models\\Permission.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T10:24:50.898Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Documents\\Create.cshtml",
+              "RelativeDocumentMoniker": "WebDMF\\Views\\Documents\\Create.cshtml",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Views\\Documents\\Create.cshtml",
+              "RelativeToolTip": "WebDMF\\Views\\Documents\\Create.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-10T01:40:03.192Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "ShareLink.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\ShareLink.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Models\\ShareLink.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Models\\ShareLink.cs",
+              "RelativeToolTip": "WebDMF\\Models\\ShareLink.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T03:01:34.651Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "20251209001052_demodatabase.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251209001052_demodatabase.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Migrations\\20251209001052_demodatabase.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251209001052_demodatabase.cs",
+              "RelativeToolTip": "WebDMF\\Migrations\\20251209001052_demodatabase.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-09T00:10:52.382Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "20251208133345_AddDocumentSystemTables.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251208133345_AddDocumentSystemTables.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Migrations\\20251208133345_AddDocumentSystemTables.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251208133345_AddDocumentSystemTables.cs",
+              "RelativeToolTip": "WebDMF\\Migrations\\20251208133345_AddDocumentSystemTables.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T13:33:45.648Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "site.css",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\wwwroot\\css\\site.css",
+              "RelativeDocumentMoniker": "WebDMF\\wwwroot\\css\\site.css",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\wwwroot\\css\\site.css",
+              "RelativeToolTip": "WebDMF\\wwwroot\\css\\site.css",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-12-08T04:30:32.04Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "20251208035055_Init.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251208035055_Init.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Migrations\\20251208035055_Init.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\20251208035055_Init.cs",
+              "RelativeToolTip": "WebDMF\\Migrations\\20251208035055_Init.cs",
+              "ViewState": "AgIAAFwBAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T03:50:55.886Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "ApplicationDbContextModelSnapshot.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\ApplicationDbContextModelSnapshot.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Migrations\\ApplicationDbContextModelSnapshot.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Migrations\\ApplicationDbContextModelSnapshot.cs",
+              "RelativeToolTip": "WebDMF\\Migrations\\ApplicationDbContextModelSnapshot.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T10:27:05.649Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Program.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Program.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Program.cs",
+              "RelativeToolTip": "WebDMF\\Program.cs",
+              "ViewState": "AgIAABoAAAAAAAAAAAAAwCcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T00:15:50.835Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "20251208032616_AddFolderTable.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Data\\Migrations\\20251208032616_AddFolderTable.cs",
+              "RelativeDocumentMoniker": "WebDMF\\Data\\Migrations\\20251208032616_AddFolderTable.cs",
+              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Data\\Migrations\\20251208032616_AddFolderTable.cs",
+              "RelativeToolTip": "WebDMF\\Data\\Migrations\\20251208032616_AddFolderTable.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T03:26:16.402Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\appsettings.json",
               "RelativeDocumentMoniker": "WebDMF\\appsettings.json",
@@ -214,38 +573,11 @@
               "RelativeToolTip": "WebDMF\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-12-06T09:38:44.519Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-06T09:38:44.519Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Program.cs",
-              "RelativeDocumentMoniker": "WebDMF\\Program.cs",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Program.cs",
-              "RelativeToolTip": "WebDMF\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAyAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-08T00:15:50.835Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "HomeController.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\HomeController.cs",
-              "RelativeDocumentMoniker": "WebDMF\\Controllers\\HomeController.cs",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDMF\\Controllers\\HomeController.cs",
-              "RelativeToolTip": "WebDMF\\Controllers\\HomeController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAsAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T09:58:33.848Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 36,
               "Title": "Login.cshtml.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml.cs",
               "RelativeDocumentMoniker": "WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml.cs",
@@ -256,7 +588,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 37,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
               "RelativeDocumentMoniker": "WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
@@ -267,7 +599,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 38,
               "Title": "DashboardController.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Controllers\\DashboardController.cs",
               "RelativeDocumentMoniker": "WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Controllers\\DashboardController.cs",
@@ -278,7 +610,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 39,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\Program.cs",
               "RelativeDocumentMoniker": "WebDocumentManagement\u0026FileSharing\\Program.cs",
@@ -289,7 +621,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 40,
               "Title": "Logout.cshtml",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Logout.cshtml",
               "RelativeDocumentMoniker": "WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Logout.cshtml",
@@ -300,7 +632,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 27,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\appsettings.json",
               "RelativeDocumentMoniker": "WebDocumentManagement\u0026FileSharing\\appsettings.json",
@@ -311,7 +643,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 41,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_Layout.cshtml",
@@ -323,7 +655,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 42,
               "Title": "_LoginPartial.cshtml",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\WebDMF\\WebDMF\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_LoginPartial.cshtml",
               "RelativeDocumentMoniker": "WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_LoginPartial.cshtml",
@@ -335,7 +667,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 29,
               "Title": "_LoginPartial.cshtml",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_LoginPartial.cshtml",
               "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_LoginPartial.cshtml",
@@ -347,7 +679,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 30,
               "Title": "Login.cshtml",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml",
               "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml",
@@ -359,7 +691,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 31,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_Layout.cshtml",
@@ -371,7 +703,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 28,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Program.cs",
               "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Program.cs",
@@ -382,7 +714,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 32,
               "Title": "Register.cshtml",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Register.cshtml",
               "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Register.cshtml",
@@ -394,7 +726,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 33,
               "Title": "Logout.cshtml",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Logout.cshtml",
               "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Logout.cshtml",
@@ -406,7 +738,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 34,
               "Title": "DashboardController.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Controllers\\DashboardController.cs",
               "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Controllers\\DashboardController.cs",
@@ -418,7 +750,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 35,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\appsettings.json",
               "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\appsettings.json",
@@ -427,164 +759,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2025-12-03T13:02:54.418Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "Login.cshtml.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml.cs",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml.cs",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml.cs",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\Account\\Login.cshtml.cs",
-              "ViewState": "AgIAABwAAAAAAAAAAAAwwJcAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-05T04:25:47.7Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "ScaffoldingReadMe.txt",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\ScaffoldingReadMe.txt",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\ScaffoldingReadMe.txt",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\ScaffoldingReadMe.txt",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\ScaffoldingReadMe.txt",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2025-12-04T00:38:16.425Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Index.cshtml",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Index.cshtml",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Index.cshtml",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-04T03:36:00.342Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-04T04:01:37.892Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
-              "Title": "_ViewStart.cshtml",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\_ViewStart.cshtml",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\_ViewStart.cshtml",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\_ViewStart.cshtml",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\_ViewStart.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-03T13:02:51.481Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Microsoft.AspNetCore.Identity.UI.targets",
-              "DocumentMoniker": "C:\\Users\\DELL\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\buildTransitive\\Microsoft.AspNetCore.Identity.UI.targets",
-              "RelativeDocumentMoniker": "..\\..\\..\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\buildTransitive\\Microsoft.AspNetCore.Identity.UI.targets",
-              "ToolTip": "C:\\Users\\DELL\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\buildTransitive\\Microsoft.AspNetCore.Identity.UI.targets [Read Only]",
-              "RelativeToolTip": "..\\..\\..\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\buildTransitive\\Microsoft.AspNetCore.Identity.UI.targets [Read Only]",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
-              "WhenOpened": "2025-12-04T00:19:56.842Z",
-              "EditorCaption": " [Read Only]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "Microsoft.AspNetCore.Identity.UI.props",
-              "DocumentMoniker": "C:\\Users\\DELL\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\build\\Microsoft.AspNetCore.Identity.UI.props",
-              "RelativeDocumentMoniker": "..\\..\\..\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\build\\Microsoft.AspNetCore.Identity.UI.props",
-              "ToolTip": "C:\\Users\\DELL\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\build\\Microsoft.AspNetCore.Identity.UI.props [Read Only]",
-              "RelativeToolTip": "..\\..\\..\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.21\\build\\Microsoft.AspNetCore.Identity.UI.props [Read Only]",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
-              "WhenOpened": "2025-12-04T00:19:49.676Z",
-              "EditorCaption": " [Read Only]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
-              "Title": "Error.cshtml",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\Error.cshtml",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\Error.cshtml",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\Error.cshtml",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\Error.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-03T13:02:47.198Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 25,
-              "Title": "_ValidationScriptsPartial.cshtml",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-03T13:02:45.589Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 26,
-              "Title": "_Layout.cshtml.css",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_Layout.cshtml.css",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_Layout.cshtml.css",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_Layout.cshtml.css",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Shared\\_Layout.cshtml.css",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-12-03T13:11:11.457Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 27,
-              "Title": "HomeController.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Controllers\\HomeController.cs",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Controllers\\HomeController.cs",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Controllers\\HomeController.cs",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Controllers\\HomeController.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAYwAgAAAAxAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T13:15:25.884Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 28,
-              "Title": "_ViewStart.cshtml",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-03T13:15:13.256Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 29,
-              "Title": "Privacy.cshtml",
-              "DocumentMoniker": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Privacy.cshtml",
-              "RelativeDocumentMoniker": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Privacy.cshtml",
-              "ToolTip": "C:\\Users\\DELL\\Desktop\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Privacy.cshtml",
-              "RelativeToolTip": "..\\..\\Document Management and Internal File-Sharing System\\WebDocumentManagement\u0026FileSharing\\WebDocumentManagement\u0026FileSharing\\Views\\Home\\Privacy.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-03T13:00:54.888Z"
             }
           ]
         }
