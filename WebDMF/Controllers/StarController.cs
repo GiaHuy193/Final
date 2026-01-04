@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebDocumentManagement_FileSharing.Data;
+using WebDocumentManagement_FileSharing.Helpers;
 
 namespace WebDocumentManagement_FileSharing.Controllers
 {
@@ -25,6 +26,10 @@ namespace WebDocumentManagement_FileSharing.Controllers
             if (doc == null) return NotFound();
             doc.IsStarred = !doc.IsStarred;
             await _context.SaveChangesAsync();
+
+            // audit
+            await AuditHelper.LogAsync(HttpContext, doc.IsStarred ? "STAR_DOCUMENT" : "UNSTAR_DOCUMENT", "Document", doc.Id, doc.FileName, $"User toggled star to {doc.IsStarred}");
+
             return Json(new { success = true, isStarred = doc.IsStarred });
         }
 
@@ -36,6 +41,9 @@ namespace WebDocumentManagement_FileSharing.Controllers
             if (folder == null) return NotFound();
             folder.IsStarred = !folder.IsStarred;
             await _context.SaveChangesAsync();
+
+            await AuditHelper.LogAsync(HttpContext, folder.IsStarred ? "STAR_FOLDER" : "UNSTAR_FOLDER", "Folder", folder.Id, folder.Name, $"User toggled star to {folder.IsStarred}");
+
             return Json(new { success = true, isStarred = folder.IsStarred });
         }
 

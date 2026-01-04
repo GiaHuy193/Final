@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<WebDocumentManagement_FileSharing.Models.Permission>
 @using Microsoft.AspNetCore.Identity
+@using WebDocumentManagement_FileSharing.Models
 @inject UserManager<IdentityUser> UserManager
 
 @{
@@ -10,9 +11,7 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold text-primary">
-            <i class="bi bi-share-fill me-2"></i> Tài liệu được chia sẻ với tôi
-        </h3>
+        <h3>Tài liệu được chia sẻ với tôi</h3>
     </div>
 
     <div class="card shadow-sm border-0 rounded-3">
@@ -75,9 +74,13 @@
                                     @item.SharedDate.ToString("dd/MM/yyyy")
                                 </td>
                                 <td>
-                                    @if (item.AccessType.ToString() == "Read")
+                                    @if (item.AccessType == AccessLevel.Read)
                                     {
                                         <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2">Chỉ xem</span>
+                                    }
+                                    else if (item.AccessType == AccessLevel.Download)
+                                    {
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2">Xem & Tải</span>
                                     }
                                     else
                                     {
@@ -88,9 +91,14 @@
                                     <div class="btn-group shadow-sm">
                                         @if (item.Document != null)
                                         {
-                                            <a asp-action="Download" asp-route-id="@item.DocumentId" class="btn btn-sm btn-white border" title="Tải xuống">
-                                                <i class="bi bi-download"></i>
-                                            </a>
+                                            // Only show download button when permission is Download or Edit (owner always allowed)
+                                            if (item.AccessType != AccessLevel.Read)
+                                            {
+                                                <a asp-action="Download" asp-route-id="@item.DocumentId" class="btn btn-sm btn-white border" title="Tải xuống">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            }
+
                                             <a asp-action="Details" asp-route-id="@item.DocumentId" class="btn btn-sm btn-white border" title="Chi tiết">
                                                 <i class="bi bi-info-circle"></i>
                                             </a>

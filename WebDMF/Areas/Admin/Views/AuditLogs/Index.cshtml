@@ -1,0 +1,199 @@
+﻿@model IEnumerable<WebDocumentManagement_FileSharing.Models.AuditLog>
+
+@{
+    ViewData["Title"] = "Nhật ký hoạt động";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f6f6f8;
+    }
+
+    /* Card Container */
+    .card-log {
+        border: 1px solid #dbdfe6;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        background: white;
+        margin-bottom: 2rem;
+    }
+
+    /* VÙNG CUỘN THÔNG MINH: Giúp thanh cuộn ngang luôn hiển thị */
+    .table-responsive-custom {
+        max-height: 70vh; /* Giới hạn chiều cao bảng (70% màn hình) */
+        overflow: auto;
+        position: relative;
+    }
+
+    /* TIÊU ĐỀ CỐ ĐỊNH KHI CUỘN DỌC */
+    .table-log thead th {
+        background-color: #f9fafb !important;
+        color: #6b7280;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 20; /* Cao hơn các cột sticky */
+        border-bottom: 1px solid #ebedf2;
+    }
+
+    /* CỐ ĐỊNH CỘT 1 (THỜI GIAN) KHI CUỘN NGANG */
+    .sticky-col-1 {
+        position: sticky;
+        left: 0;
+        z-index: 10;
+        background-color: white !important;
+        border-right: 1px solid #f0f0f0;
+        min-width: 140px;
+    }
+
+    /* CỐ ĐỊNH CỘT 2 (NGƯỜI THỰC HIỆN) KHI CUỘN NGANG */
+    .sticky-col-2 {
+        position: sticky;
+        left: 140px; /* Bằng với min-width của cột 1 */
+        z-index: 10;
+        background-color: white !important;
+        border-right: 2px solid #f0f0f0;
+        min-width: 180px;
+    }
+
+    /* Đảm bảo Header của các cột Sticky cũng đứng yên */
+    thead th.sticky-col-1, thead th.sticky-col-2 {
+        z-index: 21 !important;
+    }
+
+    /* Cột chi tiết: Cho phép xuống dòng để bảng không quá rộng */
+    .details-cell {
+        min-width: 350px;
+        max-width: 500px;
+        white-space: normal !important;
+        word-break: break-word;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: #4b5563;
+    }
+
+    /* Hiệu ứng Hover cho dòng */
+    .table-hover tbody tr:hover td {
+        background-color: #f8faff !important;
+    }
+
+    .badge-action {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.4rem 0.6rem;
+        border-radius: 6px;
+        border: 1px solid;
+    }
+</style>
+
+<div class="container-fluid px-5 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small fw-medium">
+                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Admin</a></li>
+                    <li class="breadcrumb-item active">Nhật ký hoạt động</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark mb-1">Nhật ký hoạt động</h2>
+            <p class="text-muted small mb-0">Theo dõi thời gian thực các thao tác trên hệ thống.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-white border shadow-sm d-flex align-items-center gap-2 btn-sm fw-bold">
+                <span class="material-symbols-outlined fs-5">download</span> Xuất báo cáo
+            </button>
+            <button class="btn btn-primary d-flex align-items-center gap-2 btn-sm fw-bold">
+                <span class="material-symbols-outlined fs-5">filter_alt</span> Bộ lọc
+            </button>
+        </div>
+    </div>
+
+    <div class="card card-log">
+        <div class="table-responsive-custom">
+            <table class="table table-hover align-middle mb-0 table-log">
+                <thead>
+                    <tr>
+                        <th class="ps-4 sticky-col-1">Thời gian</th>
+                        <th class="sticky-col-2">Người thực hiện</th>
+                        <th class="text-center" style="width: 140px;">Hành động</th>
+                        <th style="width: 200px;">Đối tượng</th>
+                        <th>Chi tiết thay đổi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var log in Model)
+                        {
+                            // Định nghĩa màu sắc cho từng hành động
+                            var badgeClass = log.Action switch
+                            {
+                                "CONFIG_UPDATE" => "bg-primary-subtle text-primary border-primary-subtle",
+                                "FILE_DELETE" or "FOLDER_DELETE" or "DELETE" => "bg-danger-subtle text-danger border-danger-subtle",
+                                "FILE_UPLOAD" or "FOLDER_CREATE" => "bg-success-subtle text-success border-success-subtle",
+                                "FILE_SHARE" => "bg-info-subtle text-info border-info-subtle",
+                                "USER_LOGIN" => "bg-warning-subtle text-warning border-warning-subtle",
+                                _ => "bg-secondary-subtle text-secondary border-secondary-subtle"
+                            };
+
+                            <tr>
+                                <td class="ps-4 sticky-col-1">
+                                    <div class="fw-bold text-dark small">@log.Timestamp.ToLocalTime().ToString("dd/MM/yyyy")</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">@log.Timestamp.ToLocalTime().ToString("HH:mm:ss")</div>
+                                </td>
+                                <td class="sticky-col-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                                            <span class="material-symbols-outlined fs-6 text-secondary">person</span>
+                                        </div>
+                                        <div class="small fw-semibold text-truncate" style="max-width: 140px;" title="@log.Actor">
+                                            @log.Actor
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-action @badgeClass">
+                                        @log.Action
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        <div class="text-muted" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">@log.TargetType</div>
+                                        <div class="fw-bold text-dark text-truncate" style="max-width: 180px;" title="@log.TargetName">@log.TargetName</div>
+                                    </div>
+                                </td>
+                                <td class="details-cell">
+                                    @log.Details
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <span class="material-symbols-outlined fs-1 text-light d-block mb-3">history_toggle_off</span>
+                                <p class="text-muted">Hệ thống chưa ghi nhận hoạt động nào.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer bg-light bg-opacity-50 border-top-0 py-3 px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted small">Hiển thị tối đa 500 bản ghi mới nhất</span>
+                <div class="small text-secondary fw-medium">
+                    Tổng số: <span class="text-dark">@Model?.Count()</span> hoạt động
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

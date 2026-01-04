@@ -1,0 +1,278 @@
+﻿@model List<WebDocumentManagement_FileSharing.Models.SystemSetting>
+
+@{
+    ViewData["Title"] = "Cấu hình hệ thống";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+<style>
+    /* Bo góc và đổ bóng nhẹ chuẩn hiện đại */
+    .card-settings {
+        border: 1px solid #dbdfe6;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        background-color: #fff;
+    }
+
+    .nav-tabs-settings .nav-link {
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #616f89;
+        font-weight: 600;
+        padding: 0.75rem 0;
+        margin-right: 2rem;
+    }
+
+        .nav-tabs-settings .nav-link.active {
+            color: #135bec;
+            border-bottom-color: #135bec;
+            background: transparent;
+        }
+
+    .form-label-bold {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #111318;
+    }
+
+    .badge-pill-custom {
+        background-color: rgba(19, 91, 236, 0.1);
+        color: #135bec;
+        border: 1px solid rgba(19, 91, 236, 0.2);
+        padding: 0.4rem 0.8rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .quota-select { min-width: 200px; }
+    .ext-checkbox { margin-right: 8px; }
+</style>
+
+<div class="container-fluid px-4 py-4">
+    <header class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Cấu hình</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold h2 mb-0">Cấu hình hệ thống</h1>
+            <p class="text-muted small">Quản lý các cài đặt toàn cục và tham số vận hành ứng dụng DocNest</p>
+        </div>
+        <button type="submit" form="settingsForm" class="btn btn-primary d-flex align-items-center gap-2 px-4 fw-bold shadow-sm">
+            <span class="material-symbols-outlined fs-5">save</span> Lưu thay đổi
+        </button>
+    </header>
+
+    <ul class="nav nav-tabs nav-tabs-settings mb-4 border-bottom">
+        <li class="nav-item"><a class="nav-link active" href="#">Cài đặt chung</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Bảo mật</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Thông báo</a></li>
+    </ul>
+
+    <form id="settingsForm" asp-area="Admin" asp-controller="SystemSettings" asp-action="SaveSettings" method="post">
+
+        <div class="d-flex align-items-center gap-2 mb-3 mt-4">
+            <span class="material-symbols-outlined text-primary">tune</span>
+            <h5 class="mb-0 fw-bold">Thông tin ứng dụng</h5>
+        </div>
+        <div class="card card-settings p-4 mb-4">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label form-label-bold">Tên ứng dụng</label>
+                    <input type="text" class="form-control" name="appName" value="DocNest" />
+                    <div class="form-text small">Tên hiển thị trên thanh tiêu đề và email.</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label form-label-bold">Email hỗ trợ</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5">mail</span></span>
+                        <input type="email" class="form-control" name="supportEmail" value="support@docnest.com" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label form-label-bold">Ngôn ngữ mặc định</label>
+                    <select class="form-select">
+                        <option selected value="vi">Tiếng Việt (Vietnamese)</option>
+                        <option value="en">English (US)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-primary">cloud_upload</span>
+            <h5 class="mb-0 fw-bold">Quản lý tệp & Lưu trữ</h5>
+        </div>
+        <div class="card card-settings p-4 mb-4">
+            @* Render settings list but enhance specific keys *@
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var key = Model[i].SettingKey ?? string.Empty;
+                var desc = Model[i].Description ?? string.Empty;
+                var val = Model[i].SettingValue ?? string.Empty;
+
+                <input type="hidden" name="[@i].Id" value="@Model[i].Id" />
+                <input type="hidden" name="[@i].SettingKey" value="@Model[i].SettingKey" />
+
+                if (key == "StandardQuota" || key == "ProQuota" || key == "PremiumQuota")
+                {
+                    // interpret value as bytes -> MB
+                    long bytes = 0;
+                    long.TryParse(val, out bytes);
+                    var mb = bytes / (1024 * 1024);
+                    var displayLabel = key == "StandardQuota" ? "Quota Standard" : key == "ProQuota" ? "Quota Pro" : "Quota Premium";
+
+                    <div class="d-flex justify-content-between align-items-center @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
+                        <div style="max-width: 70%;">
+                            <div class="fw-bold mb-1">@displayLabel</div>
+                            <div class="text-muted small">@desc</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <select class="form-select quota-select" data-setting-index="@i" aria-label="Quota select">
+                                <option value="500">500 MB</option>
+                                <option value="1024">1 GB</option>
+                                <option value="2048">2 GB</option>
+                                <option value="5120">5 GB</option>
+                                <option value="10240">10 GB</option>
+                                <option value="custom">Tùy chỉnh...</option>
+                            </select>
+                            <input type="number" class="form-control custom-quota-input" data-setting-index="@i" placeholder="MB" min="1" style="width:120px; display:none;" />
+                            <input type="hidden" id="setting-val-@i" name="[@i].SettingValue" value="@val" />
+                        </div>
+                    </div>
+                }
+                else if (key == "AllowedExtensions")
+                {
+                    // show checkboxes for common extensions + custom input
+                    var currentCsv = val ?? string.Empty;
+                    var currentList = currentCsv.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim().ToLower()).ToList();
+                    var common = new[] { ".pdf", ".docx", ".png", ".jpg", ".jpeg", ".zip", ".rar", ".xlsx" };
+
+                    <div class="d-flex justify-content-between align-items-center @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
+                        <div style="max-width: 70%;">
+                            <div class="fw-bold mb-1">Định dạng cho phép</div>
+                            <div class="text-muted small">@desc</div>
+                        </div>
+                        <div class="d-flex flex-column align-items-end">
+                            <div class="mb-2">
+                                @foreach (var ext in common)
+                                {
+                                    var chkId = $"ext_{i}_{ext.Replace('.', '_')}";
+                                    var isChecked = currentList.Contains(ext);
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input ext-checkbox" type="checkbox" id="@chkId" value="@ext" data-setting-index="@i" @(isChecked ? "checked" : "") />
+                                        <label class="form-check-label" for="@chkId">@ext</label>
+                                    </div>
+                                }
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="text" class="form-control form-control-sm me-2" id="ext-custom-@i" placeholder="Thêm .ext, phân tách bằng dấu phẩy" style="min-width:240px;" value="@(currentList.Except(common).Any() ? string.Join(',', currentList.Except(common)) : String.Empty)" />
+                                <input type="hidden" id="setting-val-@i" name="[@i].SettingValue" value="@val" />
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex justify-content-between align-items-center @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
+                        <div style="max-width: 70%;">
+                            <div class="fw-bold mb-1">@Model[i].SettingKey</div>
+                            <div class="text-muted small">@desc</div>
+                        </div>
+                        <div class="input-group w-auto">
+                            <input type="text" name="[@i].SettingValue" class="form-control text-end fw-bold" value="@val" style="width: 240px;">
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-primary">build</span>
+            <h5 class="mb-0 fw-bold">Bảo trì hệ thống</h5>
+        </div>
+        <div class="card card-settings p-4 mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <div class="fw-bold mb-1">Chế độ bảo trì</div>
+                    <div class="text-muted small">Chỉ có Quản trị viên mới có thể truy cập khi bật.</div>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" role="switch" id="maintenanceMode">
+                </div>
+            </div>
+            <div class="border-top pt-4">
+                <label class="form-label form-label-bold">Thông báo bảo trì</label>
+                <textarea class="form-control" rows="3" placeholder="Thông báo cho người dùng..."></textarea>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+    (function(){
+        // helper to convert MB -> bytes
+        function mbToBytes(mb){ return (parseInt(mb) || 0) * 1024 * 1024; }
+
+        // initialize quota selects
+        document.querySelectorAll('.quota-select').forEach(function(sel){
+            var idx = sel.getAttribute('data-setting-index');
+            var hidden = document.getElementById('setting-val-' + idx);
+            var currentBytes = hidden ? parseInt(hidden.value || '0') : 0;
+            var currentMB = Math.round(currentBytes / (1024*1024)) || 0;
+
+            // find matching option
+            var matched = false;
+            for(var i=0;i<sel.options.length;i++){
+                var val = sel.options[i].value;
+                if(val !== 'custom' && parseInt(val) === currentMB){ sel.selectedIndex = i; matched = true; break; }
+            }
+            var customInput = document.querySelector('.custom-quota-input[data-setting-index="' + idx + '"]');
+            if(!matched){ sel.value = 'custom'; if(customInput){ customInput.style.display=''; customInput.value = currentMB>0?currentMB:''; } }
+
+            sel.addEventListener('change', function(){
+                var v = sel.value;
+                if(v === 'custom'){
+                    if(customInput){ customInput.style.display=''; customInput.focus(); }
+                    if(hidden) hidden.value = mbToBytes(customInput.value || 0);
+                } else {
+                    if(customInput){ customInput.style.display='none'; }
+                    if(hidden) hidden.value = mbToBytes(v);
+                }
+            });
+
+            if(customInput){
+                customInput.addEventListener('input', function(){ if(hidden) hidden.value = mbToBytes(customInput.value || 0); });
+            }
+        });
+
+        // initialize extension checkboxes -> update hidden on submit
+        var settingsForm = document.getElementById('settingsForm');
+        if(settingsForm){
+            settingsForm.addEventListener('submit', function(){
+                // for each AllowedExtensions setting, collect checked and custom
+                document.querySelectorAll('[id^="setting-val-"]').forEach(function(hidden){
+                    var idx = hidden.id.replace('setting-val-','');
+                    // find ext-custom for this idx
+                    var customInput = document.getElementById('ext-custom-' + idx);
+                    if(customInput){
+                        var parts = [];
+                        document.querySelectorAll('input.ext-checkbox[data-setting-index="' + idx + '"]:checked').forEach(function(ch){ parts.push(ch.value); });
+                        var custom = (customInput.value || '').split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s.length>0; });
+                        parts = parts.concat(custom);
+                        // normalize and unique
+                        parts = parts.map(function(s){ return s.trim().toLowerCase(); }).filter(function(s,i,a){ return s && a.indexOf(s) === i; });
+                        hidden.value = parts.join(',');
+                    }
+                    // quotas already updated on change
+                });
+            });
+        }
+    })();
+</script>

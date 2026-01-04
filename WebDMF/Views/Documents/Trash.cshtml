@@ -5,7 +5,7 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3><i class="bi bi-trash"></i> Thùng rác</h3>
+        <h3></> Thùng rác</h3>
         <div>
             <form method="post" asp-action="RestoreSelected" class="d-inline">
                 @Html.AntiForgeryToken()
@@ -102,20 +102,24 @@
 
             document.querySelectorAll('.trash-checkbox').forEach(function(cb){ cb.addEventListener('change', updateHidden); });
 
-            // intercept permanent delete to send arrays properly
+            // intercept permanent delete to send arrays properly as CSV strings
             var permForm = document.getElementById('permanentDeleteForm');
             if (permForm){
                 permForm.addEventListener('submit', function(e){
                     e.preventDefault();
                     updateHidden();
-                    var docs = document.getElementById('delDocumentIds').value.split(',').filter(Boolean);
-                    var folders = document.getElementById('delFolderIds').value.split(',').filter(Boolean);
+                    var docsCsv = document.getElementById('delDocumentIds').value || '';
+                    var foldersCsv = document.getElementById('delFolderIds').value || '';
+
+                    if (!docsCsv && !foldersCsv) {
+                        if (!confirm('Bạn chưa chọn mục nào. Bạn có muốn xóa tất cả trong thùng rác không?')) return;
+                    }
 
                     var token = permForm.querySelector('input[name="__RequestVerificationToken"]').value;
                     fetch('@Url.Action("DeletePermanently", "Documents")', {
                         method:'POST',
                         headers:{ 'RequestVerificationToken': token, 'Content-Type':'application/x-www-form-urlencoded' },
-                        body: new URLSearchParams({ documentIds: docs, folderIds: folders })
+                        body: new URLSearchParams({ documentIds: docsCsv, folderIds: foldersCsv })
                     }).then(function(r){ if (r.redirected) window.location.href=r.url; else window.location.reload(); });
                 });
             }
@@ -128,11 +132,13 @@
                     if (!confirm('Bạn có chắc muốn xóa vĩnh viễn tất cả mục trong thùng rác? Hành động này không thể hoàn tác.')) return;
                     var docs = getAllIds('doc');
                     var folders = getAllIds('folder');
+                    var docsCsv = docs.join(',');
+                    var foldersCsv = folders.join(',');
                     var token = document.querySelector('#permanentDeleteForm input[name="__RequestVerificationToken"]').value;
                     fetch('@Url.Action("DeletePermanently", "Documents")', {
                         method:'POST',
                         headers:{ 'RequestVerificationToken': token, 'Content-Type':'application/x-www-form-urlencoded' },
-                        body: new URLSearchParams({ documentIds: docs, folderIds: folders })
+                        body: new URLSearchParams({ documentIds: docsCsv, folderIds: foldersCsv })
                     }).then(function(r){ if (r.redirected) window.location.href=r.url; else window.location.reload(); });
                 });
             }

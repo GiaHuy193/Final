@@ -1,5 +1,9 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using System.Linq
+@using System.IO
+@using Microsoft.AspNetCore.Identity
+@using WebDocumentManagement_FileSharing.Helpers
 @inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 
 @{
     // Logic Razor Page giữ nguyên
@@ -32,6 +36,36 @@
     // Determine folderId from query string for upload-folder forms (layout-level)
     int layoutFolderId = 0;
     int.TryParse(Context.Request.Query["folderId"], out layoutFolderId);
+
+    // Quota widget data
+    long usedOnDisk = 0;
+    long quota = 500L * 1024 * 1024; // 500 MB
+    if (isAuthenticated)
+    {
+        var u = UserManager.GetUserAsync(User).GetAwaiter().GetResult();
+        if (u != null)
+        {
+            var email = !string.IsNullOrEmpty(u.Email) ? u.Email : u.UserName ?? u.Id;
+            var invalid = System.IO.Path.GetInvalidFileNameChars();
+            var cleaned = new string(email.Select(c => invalid.Contains(c) ? '_' : c).ToArray());
+            cleaned = cleaned.Replace('@', '_').Replace(' ', '_').Trim();
+            if (string.IsNullOrEmpty(cleaned)) cleaned = "unknown";
+            var uploadsRoot = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            var userFolder = System.IO.Path.Combine(uploadsRoot, cleaned);
+            if (System.IO.Directory.Exists(userFolder))
+            {
+                try
+                {
+                    var dir = new System.IO.DirectoryInfo(userFolder);
+                    usedOnDisk = dir.GetFiles("*", System.IO.SearchOption.AllDirectories).Sum(f => f.Length);
+                }
+                catch { usedOnDisk = 0; }
+            }
+        }
+    }
+
+    double pct = quota > 0 ? (usedOnDisk * 100.0 / quota) : 0;
+    string barClass = pct < 70 ? "bg-success" : pct < 90 ? "bg-warning" : "bg-danger";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -49,6 +83,9 @@
         /* BIẾN CSS (CSS Variables) - Cho phép chuyển đổi dễ dàng */
         /* ---------------------------------------------------------------------- */
         :root {
+            /* offset to align header logo with sidebar content */
+            --sidebar-offset: 2.5rem; /* matches Bootstrap px-3 (16px) */
+
             /* Màu chủ đạo/Nhấn */
             --primary-color: #1DA1F2;
             --primary-hover-color: #188DD9;
@@ -64,6 +101,8 @@
             --shadow-color: rgba(0, 0, 0, 0.1);
             --input-bg: #FFFFFF;
             --input-border: #CCD6DD;
+            /* Sidebar text color: black in light mode */
+            --sidebar-text-color: #14171A;
         }
 
         /* DARK MODE (Midnight Blue - Giống Twitter) */
@@ -81,6 +120,8 @@
             --shadow-color: rgba(0, 0, 0, 0.5);
             --input-bg: #22303C;
             --input-border: #38444D;
+            /* Sidebar text color: white in dark mode */
+            --sidebar-text-color: #FFFFFF;
         }
 
         /* ---------------------------------------------------------------------- */
@@ -112,7 +153,73 @@
             font-weight: 700;
             font-size: 1.25rem;
             text-decoration: none;
+            padding-left: var(--sidebar-offset); /* align with sidebar content */
         }
+
+        /* sidebar layout to push quota to bottom */
+        .sidebar {
+            width: 250px;
+            background: var(--bg-sidebar);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+            padding-top: 18px;
+            border-right: 1px solid var(--border-color);
+            /* ensure vertical layout so quota can sit at bottom */
+            display: flex !important;
+            flex-direction: column !important;
+            height: calc(100vh - 64px) !important; /* full height under header */
+        }
+
+        /* Ensure sidebar brand uses same offset so logo aligns with items */
+        .sidebar-brand { padding-left: var(--sidebar-offset); }
+
+        /* Apply sidebar text color variable so links/text contrast with sidebar background */
+        .sidebar, .offcanvas {
+            color: var(--sidebar-text-color);
+        }
+
+        .sidebar .nav-link, .offcanvas .nav-link {
+            color: var(--sidebar-text-color) !important;
+        }
+
+        .sidebar .nav-link.active, .offcanvas .nav-link.active {
+            color: var(--primary-color) !important;
+        }
+
+        .sidebar .nav {
+            flex: 1 1 auto;
+            overflow: auto;
+            padding-bottom: 1rem;
+        }
+
+        /* quota widget inside sidebar */
+        .quota-widget {
+            width: calc(100% - 24px);
+            margin: 12px;
+            border-radius: 8px;
+            padding: 10px;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            align-self: center;
+        }
+
+        .quota-widget .small { font-size: 0.8rem; }
+
+        /* ensure offcanvas body can place quota at bottom */
+        .offcanvas-body {
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 1rem;
+        }
+
+        .offcanvas-body .nav {
+            flex: 1 1 auto;
+            overflow: auto;
+        }
+
+        /* Push quota widget to bottom inside offcanvas */
+        .offcanvas-body .quota-widget { margin-top: auto; }
 
         /* NÚT (BUTTONS) */
         .btn-primary {
@@ -123,13 +230,13 @@
 
             .btn-primary:hover {
                 background-color: var(--primary-hover-color);
-                border-color: var(--primary-hover-color);
+                border-color: var,--primary-hover-color);
                 color: #fff;
             }
 
         .btn-outline-secondary {
             color: var(--primary-color);
-            border-color: var(--primary-color);
+            border-color: var,--primary-color);
         }
 
             .btn-outline-secondary:hover {
@@ -142,33 +249,6 @@
             display: flex;
             min-height: calc(100vh - 64px);
         }
-
-        /* SIDEBAR (Desktop) */
-        .sidebar {
-            width: 250px;
-            background: var(--bg-sidebar);
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-            flex-shrink: 0;
-            padding-top: 18px;
-            border-right: 1px solid var(--border-color);
-        }
-
-            .sidebar .nav-link {
-                color: var(--text-secondary);
-                padding: 10px 18px;
-                border-radius: 8px;
-            }
-
-                .sidebar .nav-link:hover {
-                    background: var(--bg-hover);
-                    color: var(--text-color);
-                }
-
-                .sidebar .nav-link.active {
-                    background: var(--bg-active);
-                    color: var(--primary-color);
-                    font-weight: 600;
-                }
 
         /* CONTENT AREA */
         .content-area {
@@ -439,7 +519,7 @@
         }
 
         @* LOGO DOCNEST (SỬA ĐỔI) *@
-        <a class="brand me-3" href="@logoRedirectUrl">DocNest</a>
+        <a class="brand me- d-flex align-items-center gap-2" href="@logoRedirectUrl"><i class="bi bi-cloud-check-fill fs-3"></i> DocNest</a>
 
         <form class="d-none d-md-flex ms-2 me-auto header-search-offset" asp-page="/Document/Search" method="get" role="search">
             <div class="input-group" style="min-width:360px; max-width:600px;">
@@ -464,14 +544,14 @@
     {
         <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
             <div class="offcanvas-header app-header">
-                <h5 class="offcanvas-title brand" id="sidebarOffcanvasLabel">DocNest Menu</h5>
+                <h5 class="offcanvas-title brand d-flex align-items-center gap-2" id="sidebarOffcanvasLabel"><i class="bi bi-cloud-check-fill fs-3"></i> DocNest Menu</h5>
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
                 @* Nội dung sidebar được lặp lại ở đây *@
                 <div class="px-3 pb-3">
                     <div class="dropdown">
-                        <button class="btn btn-primary w-100 rounded-pill dropdown-toggle" id="createDropdownMobile" data-bs-toggle="dropdown" aria-expanded="false">+ Tải lên / Tạo mới</button>
+                        <button class="btn btn-primary w-100 rounded-pill dropdown-toggle" id="createDropdownMobile" data-bs-toggle="dropdown" aria-expanded="false">+ Tạo mới</button>
                         <ul class="dropdown-menu w-100" aria-labelledby="createDropdownMobile">
                             <li><a class="dropdown-item" asp-controller="Folders" asp-action="Create"><i class="bi bi-folder-plus me-2 text-warning"></i> Thư mục mới</a></li>
                             <li><hr class="dropdown-divider" /></li>
@@ -493,10 +573,37 @@
                 <nav class="nav flex-column px-2" aria-label="Sidebar Mobile">
                     <a class="nav-link" asp-controller="Home" asp-action="Index">🏠 Trang chủ</a>
                     <a class="nav-link" asp-controller="Documents" asp-action="Index">📂 Tài liệu của tôi</a>
-                    <a class="nav-link" asp-controller="Documents" asp-action="Shared">⇄ Chia sẻ với tôi</a> @* THAY ĐỔI ACTION TỚI Shared *@
+                    <a class="nav-link" asp-controller="Documents" asp-action="Shared">⇄ Chia sẻ với tôi</a> 
                     <a class="nav-link" asp-controller="Documents" asp-action="Star">⭐️ Gắn sao</a> 
                     <a class="nav-link" asp-controller="Documents" asp-action="Trash">🗑️ Thùng rác</a>
                 </nav>
+
+                @* quota at bottom of offcanvas mobile *@
+                @if (isAuthenticated)
+                {
+                    <div class="quota-widget mt-3 d-md-none">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="small text-secondary">Bộ nhớ đã dùng</div>
+                            <div class="small text-muted">@WebDocumentManagement_FileSharing.Helpers.StorageHelper.FormatSize(usedOnDisk)</div>
+                        </div>
+                        <div class="progress" style="height:10px;">
+                            <div class="progress-bar @barClass" role="progressbar" style="width:@(pct.ToString("0.##") + "%")" aria-valuenow="@((int)Math.Round(pct))" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 small">
+                            <div class="text-secondary">@WebDocumentManagement_FileSharing.Helpers.StorageHelper.FormatSize(usedOnDisk)</div>
+                            <div class="text-secondary">@WebDocumentManagement_FileSharing.Helpers.StorageHelper.FormatSize(quota)</div>
+                        </div>
+                        @if (pct >= 100)
+                        {
+                            <div class="mt-2 small text-danger fw-bold">Bạn đã dùng hết dung lượng.</div>
+                        }
+                        else if (pct >= 90)
+                        {
+                            <div class="mt-2 small text-warning">Bạn sắp hết dung lượng.</div>
+                        }
+                    </div>
+                }
+
             </div>
         </div>
     }
@@ -508,7 +615,7 @@
             <aside class="sidebar d-none d-md-block">
                 <div class="px-3 pb-3">
                     <div class="dropdown">
-                        <button class="btn btn-primary w-100 rounded-pill dropdown-toggle" id="createDropdown" data-bs-toggle="dropdown" aria-expanded="false">+ Tải lên / Tạo mới</button>
+                        <button class="btn btn-primary w-100 rounded-pill dropdown-toggle" id="createDropdown" data-bs-toggle="dropdown" aria-expanded="false">+ Tạo mới</button>
                         <ul class="dropdown-menu w-100" aria-labelledby="createDropdown">
                             <li><a class="dropdown-item" asp-controller="Folders" asp-action="Create"><i class="bi bi-folder-plus me-2 text-warning"></i> Thư mục mới</a></li>
                             <li><hr class="dropdown-divider" /></li>
@@ -518,7 +625,7 @@
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="folderId" value="@layoutFolderId" />
                                     <label class="dropdown-item mb-0" style="cursor:pointer;">
-                                        <i class="bi bi-folder2-open me-2 text-warning"></i> Tải thư mục
+                                        <i class="bi bi-folder2-open me-2 text-warning"></i> Tải thư mục lên
                                         <input type="file" name="files" webkitdirectory directory multiple style="display:none" onchange="this.closest('form').submit()" />
                                     </label>
                                 </form>
@@ -534,6 +641,33 @@
                     <a class="nav-link" asp-controller="Documents" asp-action="Star">⭐️ Gắn sao</a> 
                     <a class="nav-link" asp-controller="Documents" asp-action="Trash">🗑️ Thùng rác</a> 
                 </nav>
+
+                @* quota at bottom of desktop sidebar *@
+                @if (isAuthenticated)
+                {
+                    <div class="quota-widget d-none d-md-block mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="small text-secondary">Bộ nhớ đã dùng</div>
+                            <div class="small text-muted">@WebDocumentManagement_FileSharing.Helpers.StorageHelper.FormatSize(usedOnDisk)</div>
+                        </div>
+                        <div class="progress" style="height:10px;">
+                            <div class="progress-bar @barClass" role="progressbar" style="width:@(pct.ToString("0.##") + "%")" aria-valuenow="@((int)Math.Round(pct))" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 small">
+                            <div class="text-secondary">@WebDocumentManagement_FileSharing.Helpers.StorageHelper.FormatSize(usedOnDisk)</div>
+                            <div class="text-secondary">@WebDocumentManagement_FileSharing.Helpers.StorageHelper.FormatSize(quota)</div>
+                        </div>
+                        @if (pct >= 100)
+                        {
+                            <div class="mt-2 small text-danger fw-bold">Bạn đã dùng hết dung lượng.</div>
+                        }
+                        else if (pct >= 90)
+                        {
+                            <div class="mt-2 small text-warning">Bạn sắp hết dung lượng.</div>
+                        }
+                    </div>
+                }
+
             </aside>
         }
 

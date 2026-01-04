@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebDocumentManagement_FileSharing.Data;
 using WebDocumentManagement_FileSharing.Service;
+using WebDocumentManagement_FileSharing.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,15 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => {
 })
  .AddRoles<IdentityRole>()
  .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddControllersWithViews();
+
+// register IHttpContextAccessor and the audit action filter
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuditActionFilter>();
+
+builder.Services.AddControllersWithViews(options => {
+    // apply audit filter globally to MVC controllers
+    options.Filters.AddService<AuditActionFilter>();
+});
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

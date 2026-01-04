@@ -4,6 +4,6 @@
     {
         Read,
         Download,
-        Edit
+        Edit,
     }
 }

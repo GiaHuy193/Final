@@ -1,0 +1,271 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<style>
+    /* Use shared theme variables (defined in Manage _Layout) so page follows light/dark mode */
+    .profile-container {
+        background-color: var(--bg-body);
+        color: var(--text-color);
+        min-height: 100vh;
+        padding: 3rem 0;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .card {
+        background: var(--bg-card);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        transition: transform 0.2s, background 0.2s, color 0.2s;
+    }
+
+    /* Avatar Styles */
+    .avatar-wrapper {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        margin: 0 auto;
+    }
+
+    .avatar-main {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid var(--bg-card);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        background: var(--bg-card);
+    }
+
+    .avatar-edit-icon {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid var(--bg-card);
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .avatar-edit-icon:hover { transform: scale(1.1) rotate(15deg); }
+
+    /* Modern Circular Quota */
+    .storage-container { padding: 20px; border-radius: 15px; background: var(--bg-card); }
+
+    .storage-svg { transform: rotate(-90deg); filter: drop-shadow(0 0 5px rgba(37, 140, 244, 0.06)); }
+
+    .storage-text { font-size: 1.8rem; font-weight: 900; color: var(--primary-color); }
+
+    .form-label { color: var(--text-muted); margin-bottom: 8px; }
+
+    /* inputs: use transparent background so they adapt; borders use theme border color */
+    .form-control {
+        border-radius: 12px;
+        padding: 14px;
+        border: 1px solid var(--border-color);
+        background-color: transparent;
+        color: var(--text-color);
+    }
+
+    /* Inputs that used .bg-light in markup should appear subtle in both themes */
+    .card .bg-light { background-color: rgba(255,255,255,0.03) !important; color: var(--text-color) !important; }
+
+    .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(37, 140, 244, 0.09); border-color: var(--primary-color); }
+
+    .breadcrumb-item a { color: var(--primary-color); font-weight: 500; }
+
+    /* SVG strokes follow theme */
+    .storage-svg circle:nth-child(1) { stroke: var(--border-color); }
+    .storage-svg circle:nth-child(2) { stroke: var(--primary-color); }
+
+    /* Progress bar uses theme */
+    .progress { background-color: rgba(0,0,0,0.04); }
+    .progress .progress-bar { background-color: var(--primary-color); }
+
+    /* Buttons adapt */
+    .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
+    .btn-outline-primary { color: var(--primary-color); border-color: var(--primary-color); }
+
+    /* quota-specific variables */
+    :root {
+        --success-color: #10b981; /* fallback success */
+        --quota-badge-bg: rgba(16,185,129,0.08);
+        --progress-bg: var(--border-color);
+        --upgrade-btn-bg: #111827; /* fallback dark upgrade button */
+        --upgrade-btn-text: #ffffff;
+    }
+
+    /* quota card text helpers */
+    .quota-title { color: var(--text-color); }
+    .quota-badge { background-color: var(--quota-badge-bg); color: var(--success-color); }
+    .quota-usage { color: var(--text-muted); font-weight:700; }
+    .quota-value { color: var(--text-color); font-weight:700; }
+    .quota-meta { color: var(--text-muted); }
+    .btn-upgrade { background-color: var(--upgrade-btn-bg); color: var(--upgrade-btn-text); border: none; }
+    .btn-upgrade:hover { opacity: 0.95; }
+    .btn-outline-primary { color: var(--primary-color); border-color: var(--primary-color); }
+    /* make sure input-group text matches theme */
+    .input-group-text { background: rgba(255,255,255,0.03); color: var(--text-muted); border: none; }
+</style>
+
+<div class="profile-container">
+    <div class="container">
+        <div class="row mb-5 justify-content-center">
+            <div class="col-lg-10">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">DocNest</a></li>
+                        <li class="breadcrumb-item active">Thiết lập tài khoản</li>
+                    </ol>
+                </nav>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="fw-bold mb-1">Hồ sơ người dùng</h1>
+                        <p class="text-muted mb-0">Quản lý thông tin cá nhân và tài nguyên lưu trữ của bạn.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <partial name="_StatusMessage" for="StatusMessage" />
+
+        <form id="profile-form" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="row g-4 justify-content-center">
+
+                <div class="col-lg-6">
+                    <div class="card p-4 p-md-5 h-100">
+                        <div class="text-center mb-5">
+                            <div class="avatar-wrapper mb-3">
+                                <img id="avatarPreview" src="@Model.AvatarUrl" class="avatar-main" alt="Avatar">
+                                <label for="avatarInput" class="avatar-edit-icon" title="Cập nhật ảnh hồ sơ">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+                                <input type="file" id="avatarInput" name="AvatarUpload" accept="image/*" style="display:none" />
+                            </div>
+                            <h4 class="fw-bold mb-0">@Model.Username</h4>
+                            <button type="button" id="removePhotoBtn" class="btn btn-link text-danger text-decoration-none btn-sm fw-bold">Xóa ảnh hiện tại</button>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Tên người dùng</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><i class="bi bi-person-fill text-muted"></i></span>
+                                    <input asp-for="Username" class="form-control bg-light border-0" disabled />
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Địa chỉ Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><i class="bi bi-envelope-at-fill text-muted"></i></span>
+                                    <input type="email" class="form-control bg-light border-0" value="@User.Identity.Name" disabled />
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Số điện thoại liên hệ</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-telephone-fill text-primary"></i></span>
+                                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Nhập số điện thoại..." />
+                                </div>
+                                <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12 pt-3">
+                                <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">
+                                    <i class="bi bi-save2-fill me-2"></i>Lưu thông tin hồ sơ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card p-4 p-md-5 text-center bg-card border h-100 d-flex flex-column justify-content-center shadow-lg">
+                        <div class="mb-4">
+                            <h5 class="fw-bold quota-title">Dung lượng DocNest</h5>
+                            <span class="badge quota-badge rounded-pill px-3 py-2">Gói miễn phí (Standard)</span>
+                        </div>
+
+                        <div class="position-relative mx-auto my-4" style="width: 200px; height: 200px;">
+                            <svg class="storage-svg" width="200" height="200">
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="var(--border-color)" stroke-width="15" />
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="var(--primary-color)" stroke-width="15"
+                                        stroke-dasharray="534" stroke-dashoffset="@(534 - (534 * Model.StoragePercentage / 100))"
+                                        stroke-linecap="round" style="transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);" />
+                            </svg>
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <div class="storage-text">@Model.StoragePercentage.ToString("0")%</div>
+                                <div class="small quota-meta fw-bold">@Model.FormattedUsed</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 px-3 text-start">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="small fw-bold quota-usage">Đã sử dụng</span>
+                                <span class="small fw-bold quota-value">@Model.FormattedUsed / @Model.FormattedTotal</span>
+                            </div>
+                            <div class="progress mb-4" style="height: 12px; border-radius: 6px; background-color: var(--progress-bg);">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated shadow-sm"
+                                     style="width: @Model.StoragePercentage%; background-color: var(--primary-color);"></div>
+                            </div>
+
+                            <p class="quota-meta small mb-4 fst-italic">Tải thêm tệp tin để cập nhật tình trạng bộ nhớ theo thời gian thực.</p>
+
+                            <hr class="my-4 opacity-50">
+
+                            <div class="d-grid gap-2">
+                                @if (!User.IsInRole("Admin"))
+                                {
+                                    <button type="button" class="btn btn-upgrade rounded-pill fw-bold py-2 shadow-sm">Nâng cấp 5GB (Pro)</button>
+                                    <a asp-page="./ChangePassword" class="btn btn-outline-primary rounded-pill fw-bold py-2 border-2">Bảo mật & Mật khẩu</a>
+                                }
+                                else
+                                {
+                                    <!-- Admin: do not show upgrade or change-password -->
+                                    <span class="small text-muted">Quản trị viên sử dụng mật khẩu quản trị duy nhất.</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Xử lý xem trước ảnh khi người dùng chọn file mới
+        document.getElementById('avatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('avatarPreview').src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Xử lý nút xóa ảnh về mặc định (Chỉ hiển thị tạm thời trên giao diện)
+        document.getElementById('removePhotoBtn').addEventListener('click', function() {
+            document.getElementById('avatarPreview').src = '@Model.AvatarUrl';
+            document.getElementById('avatarInput').value = "";
+        });
+    </script>
+}

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using WebDocumentManagement_FileSharing.Data;
 using WebDocumentManagement_FileSharing.Models;
 using WebDocumentManagement_FileSharing.Models.ViewModel;
+using WebDocumentManagement_FileSharing.Helpers;
 
 
 namespace WebDocumentManagement_FileSharing.Controllers
@@ -103,6 +104,9 @@ namespace WebDocumentManagement_FileSharing.Controllers
                 _context.Permissions.Add(folderPerm);
                 await _context.SaveChangesAsync();
 
+                // Audit: folder shared
+                await AuditHelper.LogAsync(HttpContext, "SHARE_FOLDER", "Folder", folder.Id, folder.Name, $"Shared folder '{folder.Name}' with {receiverEmail} as {level}");
+
                 TempData["Message"] = "Đã chia sẻ thư mục thành công.";
                 return RedirectToAction("Index", "Home");
             }
@@ -132,6 +136,9 @@ namespace WebDocumentManagement_FileSharing.Controllers
 
             _context.Permissions.Add(docPerm);
             await _context.SaveChangesAsync();
+
+            // Audit: document shared
+            await AuditHelper.LogAsync(HttpContext, "SHARE_DOCUMENT", "Document", document.Id, document.FileName, $"Shared document '{document.FileName}' with {receiverEmail} as {level}");
 
             TempData["Message"] = "Chia sẻ tài liệu thành công.";
             return RedirectToAction("Index", "Documents");
@@ -172,6 +179,9 @@ namespace WebDocumentManagement_FileSharing.Controllers
 
             _context.Permissions.Remove(permission);
             await _context.SaveChangesAsync();
+
+            // Audit: permission removed
+            await AuditHelper.LogAsync(HttpContext, "UNSHARE_DOCUMENT", "Permission", permission.Id, permission.DocumentId?.ToString() ?? "", $"Removed permission for user {userId} on documentId={documentId}");
 
             TempData["Message"] = "Đã hủy chia sẻ.";
             return RedirectToAction("Index", "Documents");

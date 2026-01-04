@@ -1,0 +1,21 @@
+@{
+    // Accept any model type; prefer an explicit string model when provided
+    var explicitModelString = Model as string;
+    var message = explicitModelString ?? ViewData["StatusMessage"] as string ?? TempData["Message"] as string ?? TempData["Success"] as string;
+    var error = TempData["Error"] as string;
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @message
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+else if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @error
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}

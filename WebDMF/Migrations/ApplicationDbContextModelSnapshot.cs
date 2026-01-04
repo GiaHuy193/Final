@@ -224,6 +224,51 @@ namespace WebDocumentManagement_FileSharing.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TargetId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TargetName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditLogs");
+                });
+
             modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.Document", b =>
                 {
                     b.Property<int>("Id")
@@ -386,6 +431,61 @@ namespace WebDocumentManagement_FileSharing.Migrations
                     b.HasIndex("FolderId");
 
                     b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.SystemSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SettingKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SettingValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SystemSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Danh sách định dạng tệp tin cho phép upload",
+                            SettingKey = "AllowedExtensions",
+                            SettingValue = ".pdf,.docx,.png,.jpg"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Hạn mức dung lượng tối đa cho tài khoản Standard (Bytes)",
+                            SettingKey = "StandardQuota",
+                            SettingValue = "524288000"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Hạn mức dung lượng tối đa cho tài khoản Pro (Bytes)",
+                            SettingKey = "ProQuota",
+                            SettingValue = "5368709120"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Hạn mức dung lượng tối đa cho tài khoản Premium (Bytes)",
+                            SettingKey = "PremiumQuota",
+                            SettingValue = "10737418240"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

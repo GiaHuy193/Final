@@ -1,8 +1,100 @@
 ﻿@page
 @model ConfirmEmailModel
 @{
-    ViewData["Title"] = "Confirm email";
+    ViewData["Title"] = "Xác nhận Email";
 }
 
-<h1>@ViewData["Title"]</h1>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+    body {
+        background-color: #f6f6f8;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .confirm-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .confirm-card {
+        max-width: 450px;
+        width: 100%;
+        border: none;
+        border-radius: 1.25rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        background: white;
+    }
+
+    .icon-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .icon-success {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+
+    .icon-error {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .btn-login {
+        background-color: #135bec;
+        border: none;
+        color: white !important;
+        padding: 0.8rem;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        transition: all 0.2s;
+    }
+
+        .btn-login:hover {
+            background-color: #104bc2;
+            transform: translateY(-2px);
+        }
+</style>
+
+<div class="confirm-container">
+    <div class="card confirm-card p-4 p-md-5 text-center">
+        @if (Model.StatusMessage?.Contains("Error") == true || Model.StatusMessage?.Contains("fail") == true)
+        {
+            <div class="icon-circle icon-error">
+                <span class="material-symbols-outlined fs-1">error</span>
+            </div>
+            <h3 class="fw-bold text-dark mb-3">Xác nhận thất bại</h3>
+            <p class="text-muted mb-4">
+                Đường dẫn xác nhận có thể đã hết hạn hoặc không hợp lệ. Vui lòng kiểm tra lại email của bạn.
+            </p>
+        }
+        else
+        {
+            <div class="icon-circle icon-success">
+                <span class="material-symbols-outlined fs-1">check_circle</span>
+            </div>
+            <h3 class="fw-bold text-dark mb-3">Xác nhận thành công!</h3>
+            <p class="text-muted mb-4">
+                Cảm ơn bạn đã xác thực email. Tài khoản của bạn hiện đã được kích hoạt và sẵn sàng sử dụng.
+            </p>
+        }
+
+        <div class="d-grid mt-2">
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-login">
+                Đăng nhập ngay
+            </a>
+        </div>
+
+        <div class="mt-4">
+            <a href="/" class="text-decoration-none small text-muted fw-medium"> Quay lại trang chủ </a>
+        </div>
+    </div>
+</div>
