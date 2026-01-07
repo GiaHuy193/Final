@@ -4,6 +4,7 @@
 @using WebDocumentManagement_FileSharing.Helpers
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject WebDocumentManagement_FileSharing.Data.ApplicationDbContext DbContext
 
 @{
     // Logic Razor Page giữ nguyên
@@ -39,7 +40,19 @@
 
     // Quota widget data
     long usedOnDisk = 0;
-    long quota = 500L * 1024 * 1024; // 500 MB
+    // Default to 15 GB
+    long quota = 15L * 1024 * 1024 * 1024; // 15 GB
+    try
+    {
+        // Try to read StandardQuota from SystemSettings
+        var s = DbContext?.SystemSettings?.FirstOrDefault(ss => ss.SettingKey == "StandardQuota");
+        if (s != null && long.TryParse(s.SettingValue, out var q))
+        {
+            quota = q;
+        }
+    }
+    catch { /* ignore DB read errors and fall back to default */ }
+
     if (isAuthenticated)
     {
         var u = UserManager.GetUserAsync(User).GetAwaiter().GetResult();
@@ -49,7 +62,7 @@
             var invalid = System.IO.Path.GetInvalidFileNameChars();
             var cleaned = new string(email.Select(c => invalid.Contains(c) ? '_' : c).ToArray());
             cleaned = cleaned.Replace('@', '_').Replace(' ', '_').Trim();
-            if (string.IsNullOrEmpty(cleaned)) cleaned = "unknown";
+            if (string.IsNullOrEmpty(cleaned)) { cleaned = "unknown"; }
             var uploadsRoot = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
             var userFolder = System.IO.Path.Combine(uploadsRoot, cleaned);
             if (System.IO.Directory.Exists(userFolder))
@@ -192,6 +205,14 @@
             padding-bottom: 1rem;
         }
 
+        /* Sidebar nav icons: white with black outline */
+        .sidebar .nav-link i {
+            color: #ffffff !important;
+            /* create a thin black border/outline around the icon using text-shadow */
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            vertical-align: -0.125em;
+        }
+
         /* quota widget inside sidebar */
         .quota-widget {
             width: calc(100% - 24px);
@@ -230,19 +251,41 @@
 
             .btn-primary:hover {
                 background-color: var(--primary-hover-color);
-                border-color: var,--primary-hover-color);
+                border-color: var(--primary-hover-color);
                 color: #fff;
             }
 
         .btn-outline-secondary {
             color: var(--primary-color);
-            border-color: var,--primary-color);
+            border-color: var(--primary-color);
         }
 
             .btn-outline-secondary:hover {
                 background-color: var(--primary-color);
                 color: #fff;
             }
+
+        /* New: Gradient style for the "+ Tạo mới" buttons to match provided design */
+        .btn-create {
+            background-image: linear-gradient(90deg, #0f1330 0%, #2b0f4a 20%, #6b3bd6 60%, #9b6cf6 100%);
+            color: #fff !important;
+            border: none !important;
+            box-shadow: 0 8px 30px rgba(107, 59, 214, 0.18), inset -8px 0 20px rgba(0,0,0,0.35);
+            padding: 0.625rem 1rem;
+            font-weight: 700;
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
+        }
+
+        .btn-create:hover, .btn-create:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 36px rgba(107, 59, 214, 0.22), inset -6px 0 16px rgba(0,0,0,0.30);
+            color: #fff !important;
+        }
+
+        .btn-create:active {
+            transform: translateY(0);
+            box-shadow: 0 6px 20px rgba(107, 59, 214, 0.15), inset -4px 0 10px rgba(0,0,0,0.28);
+        }
 
         /* MAIN LAYOUT */
         .main-wrapper {
@@ -571,11 +614,11 @@
                 </div>
 
                 <nav class="nav flex-column px-2" aria-label="Sidebar Mobile">
-                    <a class="nav-link" asp-controller="Home" asp-action="Index">🏠 Trang chủ</a>
-                    <a class="nav-link" asp-controller="Documents" asp-action="Index">📂 Tài liệu của tôi</a>
-                    <a class="nav-link" asp-controller="Documents" asp-action="Shared">⇄ Chia sẻ với tôi</a> 
-                    <a class="nav-link" asp-controller="Documents" asp-action="Star">⭐️ Gắn sao</a> 
-                    <a class="nav-link" asp-controller="Documents" asp-action="Trash">🗑️ Thùng rác</a>
+                    <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house-fill me-2"></i> Trang chủ</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Index"><i class="bi bi-folder-fill me-2"></i> Tài liệu của tôi</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Shared"><i class="bi bi-share-fill me-2"></i> Chia sẻ với tôi</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Star"><i class="bi bi-star-fill me-2"></i> Gắn sao</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Trash"><i class="bi bi-trash-fill me-2"></i> Thùng rác</a>
                 </nav>
 
                 @* quota at bottom of offcanvas mobile *@
@@ -635,11 +678,11 @@
                 </div>
 
                 <nav class="nav flex-column px-2" aria-label="Sidebar">
-                    <a class="nav-link" asp-controller="Home" asp-action="Index">🏠 Trang chủ</a>
-                    <a class="nav-link" asp-controller="Documents" asp-action="Index">📂 Tài liệu của tôi</a>
-                    <a class="nav-link" asp-controller="Documents" asp-action="Shared">⇄ Chia sẻ với tôi</a> 
-                    <a class="nav-link" asp-controller="Documents" asp-action="Star">⭐️ Gắn sao</a> 
-                    <a class="nav-link" asp-controller="Documents" asp-action="Trash">🗑️ Thùng rác</a> 
+                    <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house-fill me-2"></i> Trang chủ</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Index"><i class="bi bi-folder-fill me-2"></i> Tài liệu của tôi</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Shared"><i class="bi bi-share-fill me-2"></i> Chia sẻ với tôi</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Star"><i class="bi bi-star-fill me-2"></i> Gắn sao</a>
+                    <a class="nav-link" asp-controller="Documents" asp-action="Trash"><i class="bi bi-trash-fill me-2"></i> Thùng rác</a>
                 </nav>
 
                 @* quota at bottom of desktop sidebar *@

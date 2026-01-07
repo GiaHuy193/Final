@@ -4,149 +4,257 @@
 @{
     ViewData["Title"] = "Đăng ký";
 }
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
-    /* ---------------------------------------------------------------------- */
-    /* CSS CỤ THỂ CHO TRANG IDENTITY (SỬ DỤNG BIẾN CSS TỪ LAYOUT) */
-    /* ---------------------------------------------------------------------- */
-
-    /* Card Container (Nền form chính) */
-    .identity-card {
-        background-color: var(--bg-sidebar) !important; /* Thay thế #1B2936 */
-        border: 1px solid var(--border-color) !important; /* Thay thế #38444D */
-        box-shadow: 0 4px 10px var(--shadow-color) !important; /* Thay thế rgba cố định */
+    /* --- 1. CẤU HÌNH BIẾN MÀU (ĐỒNG BỘ LOGIN) --- */
+    :root {
+        --primary: #0f172a;
+        --accent: #8b5cf6;
+        --bg-body: #ffffff;
+        --card-bg: rgba(255, 255, 255, 0.9);
+        --input-bg: #f8fafc;
+        --input-border: #cbd5e1;
+        --text-def: #0f172a;
     }
 
-    /* Header của Card (Phần ĐĂNG KÝ lớn) */
-    .identity-header {
-        background-color: var(--bg-sidebar) !important; /* Thay thế #1B2936 */
-        color: var(--primary-color) !important; /* Giữ nguyên màu nhấn Xanh dương */
-        border-bottom: 1px solid var(--border-color) !important; /* Thêm lại viền để tách biệt */
+    /* DARK MODE SETUP */
+    [data-bs-theme="dark"] {
+        --bg-body: #020617;
+        --card-bg: rgba(15, 23, 42, 0.75);
+        --input-bg: rgba(30, 41, 59, 0.6);
+        --input-border: #475569;
+        --text-def: #ffffff;
     }
 
-    /* CARD BODY (Phần chứa form) */
-    .identity-body {
-        padding: 0 2rem 2rem 2rem !important;
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: var(--bg-body);
+        transition: all 0.3s ease;
+        /* Nền Gradient Mesh y hệt trang Login */
+        background-image: radial-gradient(at 0% 0%, rgba(15, 23, 42, 0.2) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+        background-attachment: fixed;
     }
 
-    /* Tiêu đề nhỏ (Thông tin tài khoản) */
-    .identity-section-title {
-        color: var(--text-color) !important; /* Thay thế #F7F9F9 */
-        border-bottom-color: var(--border-color) !important; /* Thay thế #38444D */
-        margin-bottom: 0.5rem !important;
-        padding-top: 0 !important;
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
     }
 
-    /* Input Fields */
-    /* Sử dụng biến input chung từ Layout */
-    .form-control {
-        background-color: var(--input-bg) !important; /* Thay thế #E8F0FE */
-        color: var(--text-color) !important; /* Chữ trong input sẽ là màu tối/sáng của theme */
-        border-color: var(--input-border) !important; /* Thay thế #A9C9FF */
-        border-radius: 25px !important;
-        height: calc(2.2rem + 4px) !important;
-        padding: 5px 15px !important;
+    .register-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        width: 100%;
+        max-width: 500px;
+        padding: 3rem;
     }
 
-    .form-group label {
-        color: var(--text-color) !important; /* Label sử dụng màu chữ chính của theme */
-        font-size: 0.9rem;
-        margin-bottom: 0.25rem;
-        display: block;
+    /* --- 2. XỬ LÝ TEXT (ID ưu tiên cao nhất) --- */
+    #reg-header {
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: #0f172a;
+        transition: color 0.3s;
     }
 
-    /* Nút ĐĂNG KÝ (Primary Button) */
-    .btn-identity-primary {
-        background-color: var(--primary-color) !important;
-        border-color: var(--primary-color) !important;
-        color: #fff !important;
-        border-radius: 4px !important;
+    #reg-sub {
+        color: #64748b;
+        font-weight: 500;
     }
 
-        /* Thêm hover state cho nút đăng ký */
-        .btn-identity-primary:hover {
-            background-color: var(--primary-hover-color) !important;
-            border-color: var(--primary-hover-color) !important;
+    /* ÉP MÀU KHI DARK MODE (BẮT BUỘC TRẮNG) */
+    html[data-bs-theme="dark"] #reg-header, [data-bs-theme="dark"] #reg-header {
+        color: #ffffff !important;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+
+    html[data-bs-theme="dark"] #reg-sub, [data-bs-theme="dark"] #reg-sub {
+        color: #cbd5e1 !important;
+    }
+
+    /* --- 3. NÚT ĐĂNG KÝ (STYLE GRADIENT XANH ĐEN) --- */
+    .btn-glow {
+        background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+        border: none;
+        padding: 14px;
+        width: 100%;
+        border-radius: 50px;
+        font-weight: 800;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.4);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        color: #ffffff !important; /* Luôn trắng */
+        transition: all 0.3s ease;
+    }
+
+        .btn-glow:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #1e293b 0%, #4338ca 100%);
+            box-shadow: 0 8px 25px rgba(55, 48, 163, 0.4);
         }
 
-    /* Văn bản liên kết (Đăng nhập ngay, Quên mật khẩu) */
-    .identity-link {
-        color: var(--primary-color) !important; /* Màu xanh dương nhấn */
+    /* 4. INPUT & LOGO */
+    .form-control {
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--input-border);
+        background-color: var(--input-bg);
+        color: var(--text-def) !important;
     }
 
-    /* Văn bản phụ (Bạn đã có tài khoản?) */
-    .identity-text-muted {
-        color: var(--text-color) !important; /* Sử dụng màu chữ chính */
-        margin-top: 1rem !important;
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+        }
+
+    .input-group-text {
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-right: none;
+        border-radius: 12px 0 0 12px;
+        color: var(--text-def);
+        opacity: 0.7;
     }
 
-    /* FIX: Đảm bảo văn bản lỗi (text-danger) vẫn là màu đỏ */
-    .text-danger {
-        color: #dc3545 !important;
+    .brand-logo {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: white;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
+    .link-primary-custom {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .btn-toggle {
+        border-radius: 0 12px 12px 0 !important;
+        color: var(--text-def);
+        border-color: var(--input-border);
+        background-color: var(--input-bg);
+        opacity: 0.7;
+    }
+
+    .form-label {
+        color: var(--text-def) !important;
+        opacity: 0.8;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 4px;
+    }
 </style>
 
-
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-5 col-md-8 col-sm-10">
-            @* Sử dụng class identity-card cho nền tối *@
-            <div class="card shadow-lg border-0 rounded-4 identity-card">
-
-                @* Tiêu đề card header *@
-                <div class="card-header text-center rounded-top-4 py-4 identity-header">
-                    <h3 class="fw-bold my-0">ĐĂNG KÝ</h3>
-                </div>
-
-                @* Áp dụng class identity-body để điều chỉnh padding trên cùng *@
-                <div class="card-body identity-body">
-
-                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                        @* Tiêu đề section - Khoảng cách đã được giảm tối đa *@
-                        <h5 class="mb-2 text-center fw-semibold identity-section-title">Thông tin tài khoản</h5>
-
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-
-                        @* Input Email *@
-                        <div class="form-group mb-3">
-                            <label asp-for="Input.Email">Địa chỉ Email</label>
-                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
-                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
-                        </div>
-
-                        @* Input Mật khẩu *@
-                        <div class="form-group mb-3">
-                            <label asp-for="Input.Password">Mật khẩu</label>
-                            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
-                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
-                        </div>
-
-                        @* Input Xác nhận Mật khẩu *@
-                        <div class="form-group mb-4">
-                            <label asp-for="Input.ConfirmPassword">Xác nhận Mật khẩu</label>
-                            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
-                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
-                        </div>
-
-                        <div class="d-grid mb-3">
-                            @* Nút Đăng ký *@
-                            <button id="registerSubmit" type="submit" class="btn btn-lg fw-bold text-uppercase btn-identity-primary">ĐĂNG KÝ TÀI KHOẢN</button>
-                        </div>
-                    </form>
-
-                    @* Link Đăng nhập *@
-                    <p class="text-center small identity-text-muted mt-3">
-                        Bạn đã có tài khoản?
-                        <a asp-page="./Login" class="fw-semibold text-decoration-none identity-link">Đăng nhập ngay</a>
-                    </p>
-
-                </div>
-            </div>
+<div class="register-container">
+    <div class="register-card">
+        <div class="text-center mb-4">
+            <div class="brand-logo"><i class="bi bi-cloud-plus-fill"></i></div>
+            <h2 id="reg-header" class="mb-2">Tạo tài khoản mới</h2>
+            <p id="reg-sub" class="small">Nhập thông tin chi tiết để bắt đầu.</p>
         </div>
+
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <input asp-for="Input.Email" class="form-control" placeholder="name@example.com" autocomplete="username" />
+                </div>
+                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Password" class="form-label">Mật khẩu</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input asp-for="Input.Password" class="form-control" type="password" placeholder="••••••••" id="password" autocomplete="new-password" />
+                    <button class="btn btn-outline-secondary border-start-0 btn-toggle" type="button" onclick="togglePwd('password', this)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Input.Password" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Input.ConfirmPassword" class="form-label">Xác nhận mật khẩu</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                    <input asp-for="Input.ConfirmPassword" class="form-control" type="password" placeholder="••••••••" id="confirm-password" autocomplete="new-password" />
+                    <button class="btn btn-outline-secondary border-start-0 btn-toggle" type="button" onclick="togglePwd('confirm-password', this)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <button id="registerSubmit" type="submit" class="btn-glow mb-4" style="color: #ffffff !important;">ĐĂNG KÝ NGAY</button>
+
+            <div class="text-center">
+                <p class="small mb-0" style="color: var(--text-def)">Đã có tài khoản? <a asp-page="./Login" style="color: #8b5cf6; font-weight: 700;">Đăng nhập</a></p>
+                <a href="/" class="small text-decoration-none mt-2 d-inline-block" style="color: var(--text-def); opacity: 0.7;">
+                    <i class="bi bi-arrow-left"></i> Quay lại trang chủ
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Hàm ẩn hiện mật khẩu (dùng chung cho cả 2 ô input)
+        function togglePwd(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
+
+        // Script cưỡng chế màu trắng khi Dark Mode (Bàn tay sắt)
+        function forceColors() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches ||
+                           document.documentElement.getAttribute('data-bs-theme') === 'dark';
+
+            // Chọn tất cả các thành phần văn bản
+            const elementsToColor = document.querySelectorAll('h2, p:not(.text-danger), label, span:not(.text-danger), i:not(.bi-cloud-plus-fill)');
+
+            if (isDark) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                elementsToColor.forEach(el => el.style.color = '#ffffff');
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                elementsToColor.forEach(el => el.style.color = '#0f172a');
+            }
+        }
+
+        // Chạy script
+        forceColors();
+        window.addEventListener('click', forceColors);
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', forceColors);
+    </script>
 }

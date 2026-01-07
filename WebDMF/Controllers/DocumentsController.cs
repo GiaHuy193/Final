@@ -414,13 +414,47 @@ namespace WebDocumentManagement_FileSharing.Controllers
                     return Forbid();
             }
 
-            var old = document.Title;
-            document.Title = newName; // Cập nhật tiêu đề hiển thị
+            // preserve original extension
+            var originalExt = Path.GetExtension(document.FileName) ?? string.Empty;
+            var inputName = Path.GetFileName(newName);
+            string newFileName;
+            if (Path.HasExtension(inputName))
+            {
+                // if user provided an extension, use it only if it matches original; otherwise keep original
+                var inputExt = Path.GetExtension(inputName);
+                if (!string.Equals(inputExt, originalExt, StringComparison.OrdinalIgnoreCase))
+                {
+                    // ignore provided extension and keep original to avoid mismatches
+                    newFileName = Path.GetFileNameWithoutExtension(inputName) + originalExt;
+                }
+                else
+                {
+                    newFileName = inputName;
+                }
+            }
+            else
+            {
+                newFileName = inputName + originalExt;
+            }
+
+            // check duplicate filename in same folder for the owner
+            var ownerId = document.OwnerId;
+            bool exists = await _context.Documents.AnyAsync(d => d.FolderId == document.FolderId && d.FileName == newFileName && d.Id != id && d.OwnerId == ownerId && !d.IsDeleted);
+            if (exists)
+            {
+                TempData["Error"] = "Đã tồn tại tệp có cùng tên trong thư mục này.";
+                return RedirectToAction(nameof(Index), new { folderId = document.FolderId });
+            }
+
+            var oldName = document.FileName;
+            document.FileName = newFileName;
+            document.Title = Path.GetFileNameWithoutExtension(newFileName);
             await _context.SaveChangesAsync();
 
-            // Audit: rename document
-            await AuditHelper.LogAsync(HttpContext, "RENAME_DOCUMENT", "Document", document.Id, document.FileName, $"Renamed document title from '{old}' to '{newName}'");
+            // Audit: rename document (use file name change)
+            await AuditHelper.LogAsync(HttpContext, "RENAME_DOCUMENT", "Document", document.Id, document.FileName, $"Renamed document from '{oldName}' to '{newFileName}'");
 
+            TempData["Message"] = "Đổi tên tệp thành công.";
             return RedirectToAction(nameof(Index), new { folderId = document.FolderId });
         }
 
@@ -487,11 +521,12 @@ namespace WebDocumentManagement_FileSharing.Controllers
                 return Forbid();
             }
 
+            // For images and pdfs return inline; for other previewable files redirect to Preview action (Google Docs Viewer)
             return previewType switch
             {
                 FilePreviewType.Image => PhysicalFile(physicalPath, document.ContentType ?? "image/*"),
                 FilePreviewType.Pdf => PhysicalFile(physicalPath, "application/pdf"),
-                _ => RedirectToAction(nameof(Download), new { id })
+                _ => RedirectToAction(nameof(Preview), new { id })
             };
         }
         // ================================================
@@ -919,6 +954,83 @@ namespace WebDocumentManagement_FileSharing.Controllers
             await _context.SaveChangesAsync();
             TempData["Message"] = "Đã chuyển tệp tin vào thùng rác.";
             return RedirectToAction(nameof(Index), new { folderId = document.FolderId });
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Preview(int id, string? token = null)
+        {
+            var document = await _context.Documents.FindAsync(id);
+            if (document == null || document.IsDeleted) return NotFound();
+
+            // 1. Kiểm tra quyền truy cập qua Token (Share Link)
+            if (!string.IsNullOrEmpty(token))
+            {
+                var link = await _context.ShareLinks.FirstOrDefaultAsync(s => s.Token == token);
+                if (link == null)
+                    return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
+
+                // Kiểm tra xem link này có trỏ đúng vào document này hoặc thư mục cha của nó không
+                var targetMatches = false;
+                if (string.Equals(link.TargetType, "document", StringComparison.OrdinalIgnoreCase) && link.TargetId == id)
+                {
+                    targetMatches = true;
+                }
+                else if (string.Equals(link.TargetType, "folder", StringComparison.OrdinalIgnoreCase))
+                {
+                    int? curFolderId = document.FolderId;
+                    while (curFolderId.HasValue)
+                    {
+                        if (curFolderId.Value == link.TargetId) { targetMatches = true; break; }
+                        var parent = await _context.Folders.FindAsync(curFolderId.Value);
+                        if (parent == null) break;
+                        curFolderId = parent.ParentId;
+                    }
+                }
+
+                if (!targetMatches)
+                    return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
+
+                // Nếu link yêu cầu đăng nhập (IsPublic = false)
+                if (!link.IsPublic)
+                {
+                    if (!(User?.Identity?.IsAuthenticated == true))
+                    {
+                        var returnUrl = Url.Action("Preview", "Documents", new { id = id, token = token });
+                        return RedirectToPage("/Account/Login", new { area = "Identity", ReturnUrl = returnUrl });
+                    }
+                }
+            }
+            // 2. Nếu không có token, kiểm tra quyền sở hữu hoặc quyền được chia sẻ trực tiếp
+            else
+            {
+                if (!(User?.Identity?.IsAuthenticated == true))
+                {
+                    var returnUrl = Url.Action("Preview", "Documents", new { id = id });
+                    return RedirectToPage("/Account/Login", new { area = "Identity", ReturnUrl = returnUrl });
+                }
+
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (document.OwnerId != userId)
+                {
+                    var hasAccess = await HasAccessToDocumentAsync(id, userId);
+                    if (!hasAccess)
+                    {
+                        return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
+                    }
+                }
+            }
+
+            // --- PHẦN QUAN TRỌNG ĐỂ CHẠY LOCAL PREVIEW ---
+
+            // Gán dữ liệu vào ViewBag để View LocalPreview có thể sử dụng
+            ViewBag.DocumentId = id;
+            ViewBag.DocumentName = document.FileName;
+
+            // Đường dẫn file để JS fetch dữ liệu 
+            ViewBag.FileUrl = Url.Action("Download", "Documents", new { id = id });
+
+            // Trả về View Local Preview 
+            return View("Preview");
         }
     }
 }

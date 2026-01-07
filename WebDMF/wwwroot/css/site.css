@@ -1,22 +1,90 @@
-﻿html {
-  font-size: 14px;
+﻿/* --- CẤU HÌNH BIẾN MÀU CHUNG --- */
+:root {
+    --focus-ring-color: white; /* Light mode dùng viền trắng */
+    --body-bg: #ffffff;
+    --text-color: #212529;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+/* KHI Ở DARK MODE */
+[data-bs-theme="dark"] {
+    --focus-ring-color: #0f172a; /* Dark mode dùng viền xanh đen cho tiệp màu nền */
+    --body-bg: #020617;
+    --text-color: #ffffff;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* SỬA LẠI ĐOẠN NÀY ĐỂ KHÔNG BỊ VIỀN TRẮNG LỆCH TÔNG */
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    /* Dùng biến --focus-ring-color thay vì cứng màu white */
+    box-shadow: 0 0 0 0.1rem var(--focus-ring-color), 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    /* Thêm dòng này để các trang khác cũng ăn theo màu nền Dark Mode */
+    background-color: var(--body-bg);
+    color: var(--text-color);
+    transition: background-color 0.3s ease;
 }
+
+/* Ensure dropdowns aren't clipped by card containers */
+.folder-card, .file-card, .card, .table-responsive, .card-body {
+    overflow: visible !important;
+}
+
+/* Ensure dropdown menus appear above other elements */
+.dropdown-menu {
+    z-index: 5000 !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Round corners for folder and document cards globally */
+/* ------------------------------------------------------------------ */
+:root {
+    --card-radius: 16px;
+}
+
+/* Apply rounded corners to cards used for folders and files */
+.folder-card, .file-card, .card {
+    border-radius: var(--card-radius) !important;
+}
+
+/* Make sure the top cover and bottom body keep rounded corners */
+.folder-cover {
+    border-top-left-radius: var(--card-radius) !important;
+    border-top-right-radius: var(--card-radius) !important;
+    overflow: hidden; /* clip content inside cover */
+}
+
+.folder-body, .file-card-body, .card-body {
+    border-bottom-left-radius: var(--card-radius) !important;
+    border-bottom-right-radius: var(--card-radius) !important;
+}
+
+/* For preview areas inside file cards (images/iframes) ensure they respect rounded corners */
+.file-preview-area, .file-preview-area img, .office-preview-iframe {
+    border-top-left-radius: calc(var(--card-radius) - 2px) !important;
+    border-top-right-radius: calc(var(--card-radius) - 2px) !important;
+    overflow: hidden;
+}
+
+/* Small adjustment for table rows or elements inside cards */
+.folder-card a, .file-card a {
+    border-radius: inherit;
+}
+
+/* End of rounding rules */

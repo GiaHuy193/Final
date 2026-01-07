@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -10,7 +11,7 @@ using WebDocumentManagement_FileSharing.Data;
 using WebDocumentManagement_FileSharing.Models;
 using WebDocumentManagement_FileSharing.Models.ViewModel;
 using WebDocumentManagement_FileSharing.Helpers;
-
+using System.Security.Cryptography;
 
 namespace WebDocumentManagement_FileSharing.Controllers
 {
@@ -187,7 +188,98 @@ namespace WebDocumentManagement_FileSharing.Controllers
             return RedirectToAction("Index", "Documents");
         }
 
-        // (No ownership transfer helper required; folder sharing uses Permission records.)
+        // ======================================================
+        // 5️⃣ TẠO LINK CHIA SẺ
+        // ======================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateShareLink(string targetType, int targetId, string accessType, string scope)
+        {
+            // scope: "public" or "restricted"
+            if (string.IsNullOrEmpty(targetType)) return BadRequest();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // validate target exists and ownership if folder
+            if (targetType == "folder")
+            {
+                var folder = await _context.Folders.FindAsync(targetId);
+                if (folder == null) return NotFound();
+                if (folder.OwnerId != userId) return Forbid();
+            }
+            else
+            {
+                var doc = await _context.Documents.FindAsync(targetId);
+                if (doc == null) return NotFound();
+                if (doc.OwnerId != userId) return Forbid();
+            }
+
+            if (!Enum.TryParse(accessType, out AccessLevel level)) level = AccessLevel.Read;
+            var isPublic = string.Equals(scope, "public", StringComparison.OrdinalIgnoreCase);
+
+            // generate short token
+            var token = GenerateToken();
+
+            var link = new ShareLink
+            {
+                Token = token,
+                TargetType = targetType,
+                TargetId = targetId,
+                AccessType = level,
+                IsPublic = isPublic,
+                CreatedBy = userId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Add(link);
+            await _context.SaveChangesAsync();
+
+            var url = Url.Action("OpenShared", "Share", new { token = token }, Request.Scheme);
+            // If called via AJAX (from modal), return JSON with url
+            if (Request.Headers != null && string.Equals(Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new { url = url });
+            }
+
+            TempData["ShareLink"] = url;
+            return RedirectToAction("Index", targetType == "folder" ? "Home" : "Documents");
+        }
+
+        // Resolve a share link token and allow access or present restricted flow
+        [AllowAnonymous]
+        public async Task<IActionResult> OpenShared(string token)
+        {
+            if (string.IsNullOrEmpty(token)) return NotFound();
+            var link = await _context.Set<ShareLink>().FirstOrDefaultAsync(s => s.Token == token);
+            if (link == null) return NotFound();
+
+            // if public, show resource according to type and access
+            if (link.IsPublic)
+            {
+                if (link.TargetType == "folder")
+                {
+                    return RedirectToAction("Index", "Folders", new { folderId = link.TargetId });
+                }
+                else
+                {
+                    // Redirect to Documents/Preview and include token so DocumentsController can validate
+                    return RedirectToAction("Preview", "Documents", new { id = link.TargetId, token = token });
+                }
+            }
+
+            // restricted: require login -- redirect to login with returnUrl to this token route
+            var returnUrl = Url.Action("OpenShared", "Share", new { token = token });
+            return RedirectToPage("/Account/Login", new { area = "Identity", ReturnUrl = returnUrl });
+        }
+
+        private string GenerateToken()
+        {
+            // generate a URL-safe token of ~16 chars
+            var bytes = new byte[12];
+            RandomNumberGenerator.Fill(bytes);
+            return WebEncoders.Base64UrlEncode(bytes);
+        }
     }
 }
 

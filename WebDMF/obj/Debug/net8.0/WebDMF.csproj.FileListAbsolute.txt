@@ -1177,3 +1177,14 @@ C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\obj\Debug\net8.0\refint\WebDMF.
 C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\obj\Debug\net8.0\WebDMF.pdb
 C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\obj\Debug\net8.0\WebDMF.genruntimeconfig.cache
 C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\obj\Debug\net8.0\ref\WebDMF.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\Xceed.Document.NET.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\Xceed.Drawing.NET.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\Xceed.Words.NET.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\ExcelDataReader.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\ExcelDataReader.DataSet.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\SkiaSharp.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\System.IO.Packaging.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\runtimes\osx\native\libSkiaSharp.dylib
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\runtimes\win-arm64\native\libSkiaSharp.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\runtimes\win-x64\native\libSkiaSharp.dll
+C:\Users\HUY\Desktop\WebDMF\WebDMF\WebDMF\WebDMF\bin\Debug\net8.0\runtimes\win-x86\native\libSkiaSharp.dll

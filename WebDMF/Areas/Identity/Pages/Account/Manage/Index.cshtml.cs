@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Http;
 using WebDocumentManagement_FileSharing.Helpers; // Đảm bảo đã có namespace này
+using WebDocumentManagement_FileSharing.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
 {
@@ -15,14 +17,16 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        private const long QuotaBytes = 500L * 1024 * 1024; // 500 MB
+        private readonly ApplicationDbContext _db;
 
         public IndexModel(
             UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            SignInManager<IdentityUser> signInManager,
+            ApplicationDbContext db)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _db = db;
         }
 
         public string Username { get; set; }
@@ -42,7 +46,7 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
 
         // --- CÁC THUỘC TÍNH MỚI CHO QUOTA ---
         public long UsedStorage { get; set; }
-        public long TotalStorage { get; set; } = QuotaBytes;
+        public long TotalStorage { get; set; }
         public double StoragePercentage { get; set; }
         public string FormattedUsed { get; set; }
         public string FormattedTotal { get; set; }
@@ -53,6 +57,17 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Số điện thoại")]
             public string PhoneNumber { get; set; }
+        }
+
+        private async Task<long> GetSystemQuotaBytesAsync(string key, long fallback)
+        {
+            try
+            {
+                var s = await _db.SystemSettings.FirstOrDefaultAsync(x => x.SettingKey == key);
+                if (s != null && long.TryParse(s.SettingValue, out var v)) return v;
+            }
+            catch { }
+            return fallback;
         }
 
         private async Task LoadAsync(IdentityUser user)
@@ -97,6 +112,11 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
             }
 
             UsedStorage = usedOnDisk;
+
+            // Determine total storage from system settings. Default fallback: Standard 15GB
+            var standardFallback = 15L * 1024 * 1024 * 1024; // 15 GB
+            TotalStorage = await GetSystemQuotaBytesAsync("StandardQuota", standardFallback);
+
             // Tính phần trăm, tối đa là 100%
             StoragePercentage = Math.Min(100, (double)UsedStorage / TotalStorage * 100);
 

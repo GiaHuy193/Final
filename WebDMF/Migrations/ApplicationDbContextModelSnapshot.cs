@@ -433,6 +433,43 @@ namespace WebDocumentManagement_FileSharing.Migrations
                     b.ToTable("Permissions");
                 });
 
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.ShareLink", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccessType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TargetId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ShareLinks");
+                });
+
             modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.SystemSetting", b =>
                 {
                     b.Property<int>("Id")
@@ -470,21 +507,14 @@ namespace WebDocumentManagement_FileSharing.Migrations
                             Id = 2,
                             Description = "Hạn mức dung lượng tối đa cho tài khoản Standard (Bytes)",
                             SettingKey = "StandardQuota",
-                            SettingValue = "524288000"
+                            SettingValue = "16106127360"
                         },
                         new
                         {
                             Id = 3,
-                            Description = "Hạn mức dung lượng tối đa cho tài khoản Pro (Bytes)",
-                            SettingKey = "ProQuota",
-                            SettingValue = "5368709120"
-                        },
-                        new
-                        {
-                            Id = 4,
                             Description = "Hạn mức dung lượng tối đa cho tài khoản Premium (Bytes)",
                             SettingKey = "PremiumQuota",
-                            SettingValue = "10737418240"
+                            SettingValue = "107374182400"
                         });
                 });
 

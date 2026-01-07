@@ -118,13 +118,13 @@
                 <input type="hidden" name="[@i].Id" value="@Model[i].Id" />
                 <input type="hidden" name="[@i].SettingKey" value="@Model[i].SettingKey" />
 
-                if (key == "StandardQuota" || key == "ProQuota" || key == "PremiumQuota")
+                if (key == "StandardQuota" || key == "PremiumQuota")
                 {
                     // interpret value as bytes -> MB
                     long bytes = 0;
                     long.TryParse(val, out bytes);
                     var mb = bytes / (1024 * 1024);
-                    var displayLabel = key == "StandardQuota" ? "Quota Standard" : key == "ProQuota" ? "Quota Pro" : "Quota Premium";
+                    var displayLabel = key == "StandardQuota" ? "Quota Standard" : "Quota Premium";
 
                     <div class="d-flex justify-content-between align-items-center @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
                         <div style="max-width: 70%;">
@@ -133,11 +133,10 @@
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <select class="form-select quota-select" data-setting-index="@i" aria-label="Quota select">
-                                <option value="500">500 MB</option>
                                 <option value="1024">1 GB</option>
-                                <option value="2048">2 GB</option>
                                 <option value="5120">5 GB</option>
-                                <option value="10240">10 GB</option>
+                                <option value="15360">15 GB</option>
+                                <option value="102400">100 GB</option>
                                 <option value="custom">Tùy chỉnh...</option>
                             </select>
                             <input type="number" class="form-control custom-quota-input" data-setting-index="@i" placeholder="MB" min="1" style="width:120px; display:none;" />
@@ -275,4 +274,4 @@
             });
         }
     })();
-</script>
+</script></script>

@@ -35,6 +35,17 @@ namespace WebDocumentManagement_FileSharing.Controllers
         }
 
         // ======================================================
+        // INDEX (redirect to Documents Index for folder view)
+        // ======================================================
+        public IActionResult Index(int? folderId)
+        {
+            if (folderId.HasValue && folderId.Value != 0)
+                return RedirectToAction("Index", "Documents", new { folderId = folderId.Value });
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        // ======================================================
         // CREATE
         // ======================================================
         public IActionResult Create(int? parentId)
@@ -97,35 +108,38 @@ namespace WebDocumentManagement_FileSharing.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Rename(int id, Folder input)
+        public async Task<IActionResult> Rename(int id, string newName)
         {
-            if (id != input.Id)
-                return NotFound();
+            if (id <= 0) return NotFound();
+
+            if (string.IsNullOrWhiteSpace(newName))
+            {
+                TempData["Error"] = "Tên mới không hợp lệ.";
+                return RedirectToAction("Index", new { folderId = (int?)null });
+            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var folder = await _context.Folders.FirstOrDefaultAsync(f => f.Id == id && f.OwnerId == userId);
 
-            if (folder == null)
-                return NotFound();
+            if (folder == null) return NotFound();
 
             bool exists = await _context.Folders.AnyAsync(f =>
                 f.ParentId == folder.ParentId &&
-                f.Name == input.Name &&
+                f.Name == newName &&
                 f.Id != id &&
                 f.OwnerId == userId &&
                 !f.IsDeleted);
 
             if (exists)
             {
-                ModelState.AddModelError("", "Tên thư mục đã tồn tại.");
-                return View(input);
+                TempData["Error"] = "Tên thư mục đã tồn tại.";
+                return RedirectAfterFolderAction(folder.ParentId);
             }
 
             var oldName = folder.Name;
-            folder.Name = input.Name;
+            folder.Name = newName;
             await _context.SaveChangesAsync();
 
-            // Audit log: rename (Vietnamese friendly)
             var renamer = User?.Identity?.Name ?? userId;
             await AuditHelper.LogAsync(HttpContext, "RENAME_FOLDER", "Folder", folder.Id, folder.Name, $"Người dùng '{renamer}' đã đổi tên thư mục từ '{oldName}' thành '{folder.Name}'.");
 

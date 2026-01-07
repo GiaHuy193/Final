@@ -15,16 +15,20 @@ namespace WebDocumentManagement_FileSharing.Data
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<SystemSetting> SystemSettings { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<ShareLink> ShareLinks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
             base.OnModelCreating(modelBuilder);
 
+            // Seed system settings: AllowedExtensions, StandardQuota (15GB), PremiumQuota (100GB)
             modelBuilder.Entity<SystemSetting>().HasData(
-            new SystemSetting { Id = 1, SettingKey = "AllowedExtensions", SettingValue = ".pdf,.docx,.png,.jpg", Description = "Danh sách định dạng tệp tin cho phép upload" },
-            new SystemSetting { Id = 2, SettingKey = "StandardQuota", SettingValue = "524288000", Description = "Hạn mức dung lượng tối đa cho tài khoản Standard (Bytes)" },
-            new SystemSetting { Id = 3, SettingKey = "ProQuota", SettingValue = "5368709120", Description = "Hạn mức dung lượng tối đa cho tài khoản Pro (Bytes)" },
-            new SystemSetting { Id = 4, SettingKey = "PremiumQuota", SettingValue = "10737418240", Description = "Hạn mức dung lượng tối đa cho tài khoản Premium (Bytes)" });
+                new SystemSetting { Id = 1, SettingKey = "AllowedExtensions", SettingValue = ".pdf,.docx,.png,.jpg", Description = "Danh sách định dạng tệp tin cho phép upload" },
+                // StandardQuota: 15 GB in bytes
+                new SystemSetting { Id = 2, SettingKey = "StandardQuota", SettingValue = "16106127360", Description = "Hạn mức dung lượng tối đa cho tài khoản Standard (Bytes)" },
+                // PremiumQuota: 100 GB in bytes
+                new SystemSetting { Id = 3, SettingKey = "PremiumQuota", SettingValue = "107374182400", Description = "Hạn mức dung lượng tối đa cho tài khoản Premium (Bytes)" }
+            );
 
             // configure AuditLog timestamp default
             modelBuilder.Entity<AuditLog>().Property(a => a.Timestamp).HasDefaultValueSql("GETUTCDATE()");

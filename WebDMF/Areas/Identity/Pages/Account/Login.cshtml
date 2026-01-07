@@ -5,59 +5,238 @@
     ViewData["Title"] = "Đăng nhập";
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
+<style>
+    /* --- CẤU HÌNH CƠ BẢN --- */
+    :root {
+        --primary: #0f172a;
+        --accent: #8b5cf6;
+        --bg-body: #ffffff;
+        --card-bg: rgba(255, 255, 255, 0.9);
+        --input-bg: #f8fafc;
+        --input-border: #cbd5e1;
+        --text-def: #0f172a; /* Màu đen cho Light Mode */
+    }
 
-            <div class="card shadow rounded-3 border-0">
-                <div class="card-body p-4">
+    /* DARK MODE SETUP */
+    [data-bs-theme="dark"] {
+        --bg-body: #020617;
+        --card-bg: rgba(15, 23, 42, 0.75);
+        --input-bg: rgba(30, 41, 59, 0.6);
+        --input-border: #475569;
+        --text-def: #ffffff; /* Màu trắng cho Dark Mode */
+    }
 
-                    <h3 class="text-center mb-4 text-primary fw-bold">ĐĂNG NHẬP</h3>
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-def);
+        transition: all 0.3s ease;
+        background-image: radial-gradient(at 0% 0%, rgba(15, 23, 42, 0.2) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+        background-attachment: fixed;
+    }
 
-                    <form id="account" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                        @if (ModelState.ErrorCount > 0)
-                        {
-                            foreach (var err in ModelState.Values.SelectMany(v => v.Errors))
-                            {
-                                <div class="alert alert-info">@err.ErrorMessage</div>
-                            }
-                        }
+    .login-container {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-                        <div class="form-group mb-3">
-                            <label asp-for="Input.Email" class="form-label fw-semibold">Email</label>
-                            <input asp-for="Input.Email" class="form-control rounded-pill" placeholder="name@example.com" />
-                            <span asp-validation-for="Input.Email" class="text-danger"></span>
-                        </div>
+    .login-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
 
-                        <div class="form-group mb-3">
-                            <label asp-for="Input.Password" class="form-label fw-semibold">Mật khẩu</label>
-                            <input asp-for="Input.Password" class="form-control rounded-pill" type="password" />
-                            <span asp-validation-for="Input.Password" class="text-danger"></span>
-                        </div>
+    /* --- [QUAN TRỌNG NHẤT] KÍCH HOẠT CHẾ ĐỘ TRẮNG TOÀN DIỆN KHI DARK MODE --- */
 
-                        <div class="form-check mb-3">
-                            <input asp-for="Input.RememberMe" class="form-check-input" />
-                            <label asp-for="Input.RememberMe" class="form-check-label">Ghi nhớ đăng nhập?</label>
-                        </div>
+    /* 1. Ép tất cả chữ và icon trong card thành màu trắng */
+    [data-bs-theme="dark"] .login-card,
+    [data-bs-theme="dark"] .login-card h2,
+    [data-bs-theme="dark"] .login-card p,
+    [data-bs-theme="dark"] .login-card label,
+    [data-bs-theme="dark"] .login-card span,
+    [data-bs-theme="dark"] .login-card i, /* Icon Bootstrap */
+    [data-bs-theme="dark"] .login-card .form-control,
+    [data-bs-theme="dark"] .login-card .input-group-text,
+    [data-bs-theme="dark"] .login-card .btn-toggle-password {
+        color: #ffffff !important;
+    }
 
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">
-                            ĐĂNG NHẬP
-                        </button>
-                    </form>
+        /* 2. Riêng các đường link (Quên mật khẩu/Tạo tài khoản) giữ màu tím accent cho đẹp */
+        [data-bs-theme="dark"] .login-card a {
+            color: var(--accent) !important;
+        }
 
-                    <div class="text-center mt-3">
-                        <a asp-page="./ForgotPassword" class="fw-semibold small text-decoration-none">Bạn quên mật khẩu?</a>
+    /* 3. Text Shadow cho tiêu đề để nổi trên nền tối */
+    [data-bs-theme="dark"] #welcome-header {
+        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+
+    /* ----------------------------------------------------------------------- */
+
+    /* Xử lý hiển thị Light Mode (Mặc định) */
+    #welcome-header {
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: #0f172a;
+        transition: color 0.3s;
+    }
+
+    #sub-header {
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    /* NÚT ĐĂNG NHẬP */
+    .btn-glow {
+        background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+        color: #ffffff !important; /* Luôn trắng */
+        border: none;
+        padding: 14px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.4);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        transition: all 0.3s ease;
+    }
+
+        .btn-glow:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #1e293b 0%, #4338ca 100%);
+            box-shadow: 0 8px 25px rgba(55, 48, 163, 0.4);
+        }
+
+    /* Input & Icons */
+    .form-control {
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--input-border);
+        background-color: var(--input-bg);
+        color: var(--text-def); /* Nhận biến màu */
+    }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+        }
+
+    .input-group-text {
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-right: none;
+        border-radius: 12px 0 0 12px;
+        color: var(--text-def);
+        opacity: 0.7;
+    }
+
+    /* Icon con mắt */
+    .btn-toggle-password {
+        border-radius: 0 12px 12px 0 !important;
+        color: var(--text-def);
+        border-color: var(--input-border);
+        background-color: var(--input-bg);
+        opacity: 0.7;
+    }
+
+    .brand-logo {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: white;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .link-primary-custom {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .form-label, .form-check-label {
+        color: var(--text-def);
+        opacity: 0.8;
+    }
+</style>
+
+<div class="container login-container">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-7 col-lg-6 col-xl-5">
+
+            <div class="card login-card p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="brand-logo">
+                        <i class="bi bi-cloud-fill"></i>
                     </div>
 
-                    <div class="text-center mt-2">
-                        <span class="text-muted small">Bạn chưa có tài khoản?</span>
-                        <a asp-page="./Register" class="fw-semibold small text-decoration-none">Đăng ký ngay</a>
-                    </div>
-
+                    <h2 id="welcome-header" class="mb-2">Chào mừng trở lại!</h2>
+                    <p id="sub-header" class="small">Vui lòng đăng nhập để tiếp tục.</p>
                 </div>
+
+                <form id="account" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger small rounded-3 mb-4" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Email" class="form-label small fw-bold ps-1">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Input.Email" class="form-control" placeholder="name@example.com" />
+                        </div>
+                        <span asp-validation-for="Input.Email" class="text-danger small ms-1"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label asp-for="Input.Password" class="form-label small fw-bold ps-1">Mật khẩu</label>
+                            <a asp-page="./ForgotPassword" class="link-primary-custom small" tabindex="-1">Quên mật khẩu?</a>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input asp-for="Input.Password" class="form-control" type="password" placeholder="••••••••" id="password-input" />
+                            <button class="btn btn-toggle-password border border-start-0" type="button" id="toggle-password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.Password" class="text-danger small ms-1"></span>
+                    </div>
+
+                    <div class="mb-4 form-check ps-4">
+                        <input asp-for="Input.RememberMe" class="form-check-input" style="cursor: pointer; border-color: var(--input-border); background-color: var(--input-bg);" />
+                        <label asp-for="Input.RememberMe" class="form-check-label small fw-medium" style="cursor: pointer; margin-top: 2px;">
+                            Ghi nhớ phiên đăng nhập
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-glow w-100 mb-4" style="color: #ffffff !important;">
+                        ĐĂNG NHẬP
+                    </button>
+
+                    <div class="text-center">
+                        <span class="small fw-medium">Bạn chưa có tài khoản?</span>
+                        <a asp-page="./Register" class="link-primary-custom ms-1">Tạo tài khoản mới</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="/" class="text-decoration-none small hover-primary fw-bold" style="color: var(--text-def)">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại trang chủ
+                </a>
             </div>
 
         </div>
@@ -66,4 +245,31 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('toggle-password').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password-input');
+            const icon = this.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+
+        function updateTheme() {
+            const html = document.documentElement;
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (html.getAttribute('data-bs-theme') === 'dark' || html.classList.contains('dark') || systemDark) {
+                html.setAttribute('data-bs-theme', 'dark');
+            } else {
+                html.setAttribute('data-bs-theme', 'light');
+            }
+        }
+        updateTheme();
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+    </script>
 }

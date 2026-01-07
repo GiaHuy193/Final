@@ -1,0 +1,263 @@
+﻿@{
+    Layout = null; // Loại bỏ hoàn toàn sidebar/navbar hệ thống để tràn màn hình
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xem trước - @ViewBag.DocumentName</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #323639; /* Nền tối sang trọng */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .preview-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Thanh công cụ phía trên */
+        .preview-toolbar {
+            background: #202124;
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Vùng hiển thị tài liệu chính */
+        #document-viewer {
+            flex-grow: 1;
+            overflow: auto;
+            display: block; /* Để cuộn tự nhiên cho các file dài */
+            padding: 30px 15px;
+        }
+
+        /* Hiệu ứng tờ giấy trắng (Dành cho Word và Excel) */
+        .paper-effect {
+            background-color: white !important;
+            margin: 0 auto;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            min-height: 100%;
+            width: fit-content;
+            min-width: 850px; /* Độ rộng tiêu chuẩn A4 */
+            color: black !important;
+        }
+
+        /* Tinh chỉnh cho file Ảnh */
+        .image-viewer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100%;
+        }
+
+            .image-viewer img {
+                max-width: 90%;
+                max-height: 85vh;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                background: white;
+            }
+
+        /* CSS cho file Excel */
+        .excel-table-container {
+            color: black !important;
+            background-color: white !important;
+        }
+
+            .excel-table-container table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+            .excel-table-container td {
+                border: 1px solid #ddd !important;
+                padding: 4px 8px;
+            }
+        
+        /* Tinh chỉnh cho trình phát Video */
+        .video-viewer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background: black; /* Nền đen để xem video tập trung hơn */
+        }
+
+            .video-viewer video {
+                max-width: 90%;
+                max-height: 90%;
+                outline: none;
+                box-shadow: 0 0 30px rgba(0,0,0,0.7);
+            }
+
+        /* CSS cho file Word (docx-preview) */
+        .docx-wrapper {
+            background: transparent !important;
+            padding: 0 !important;
+            display: flex;
+            justify-content: center;
+        }
+
+        .docx {
+            box-shadow: 0 0 15px rgba(0,0,0,0.5) !important;
+            margin-bottom: 30px !important;
+        }
+
+        /* Tinh chỉnh Iframe cho PDF */
+        .pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="preview-wrapper">
+        <div class="preview-toolbar">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-file-earmark-text me-2 fs-4 text-info"></i>
+                <span class="fw-bold">@ViewBag.DocumentName</span>
+            </div>
+            <div class="btn-group">
+                <button onclick="toggleFullScreen()" class="btn btn-sm btn-outline-light me-2">
+                    <i class="bi bi-fullscreen"></i> Toàn màn hình
+                </button>
+                <a href="@Url.Action("Download", "Documents", new { id = ViewBag.DocumentId })" class="btn btn-sm btn-success me-2">
+                    <i class="bi bi-download"></i> Tải về
+                </a>
+                <button onclick="window.close()" class="btn btn-sm btn-danger">
+                    <i class="bi bi-x-lg"></i> Đóng
+                </button>
+            </div>
+        </div>
+
+        <div id="document-viewer">
+            <div id="loading" class="text-center mt-5 text-white">
+                <div class="spinner-border text-light" role="status"></div>
+                <p class="mt-2">Đang xử lý tài tài liệu...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+    <script src="https://unpkg.com/docx-preview/dist/docx-preview.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <script>
+        const fileUrl = '@Url.Action("Download", "Documents", new { id = ViewBag.DocumentId })';
+        const fileName = '@ViewBag.DocumentName'.toLowerCase();
+
+        async function loadPreview() {
+            const container = document.getElementById('document-viewer');
+            try {
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error("Không thể tải tệp tin từ máy chủ.");
+
+                const blob = await response.blob();
+                document.getElementById('loading').style.display = 'none';
+
+                // 1. Xử lý PDF (Sử dụng Iframe tràn viền)
+                if (fileName.endsWith('.pdf')) {
+                    const url = URL.createObjectURL(blob);
+                    container.style.padding = "0"; // PDF không cần padding
+                    container.innerHTML = `<iframe src="${url}" class="pdf-viewer"></iframe>`;
+                }
+                // 2. Xử lý Word (.docx)
+                else if (fileName.endsWith('.docx')) {
+                    const paper = document.createElement('div');
+                    paper.className = 'docx-container'; // docx-preview tự tạo wrapper
+                    container.appendChild(paper);
+                    await docx.renderAsync(blob, container);
+                }
+                // 3. Xử lý Excel (.xlsx, .xls) - Sửa lỗi chìm chữ
+                else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                    const arrayBuffer = await blob.arrayBuffer();
+                    const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const htmlString = XLSX.utils.sheet_to_html(firstSheet);
+
+                    // Bọc vào hiệu ứng tờ giấy trắng
+                    container.innerHTML = `
+                        <div class="paper-effect">
+                            <div class="excel-table-container">${htmlString}</div>
+                        </div>`;
+
+                    const table = container.querySelector('table');
+                    if(table) {
+                        table.classList.add('table', 'table-bordered', 'table-sm');
+                        table.style.color = "black";
+                    }
+                }
+
+                // 5. Xử lý Video (MP4, WebM, Ogg)
+                else if (['mp4', 'webm', 'ogg'].some(ext => fileName.endsWith(ext))) {
+                    const url = URL.createObjectURL(blob);
+                    container.style.padding = "0"; // Xóa padding để video rộng rãi
+                    container.innerHTML = `
+                        <div class="video-viewer">
+                            <video controls autoplay>
+                                <source src="${url}" type="video/${fileName.split('.').pop()}">
+                                Trình duyệt của bạn không hỗ trợ xem video trực tiếp.
+                            </video>
+                        </div>`;
+                }
+
+                // 4. Xử lý Ảnh
+                else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].some(ext => fileName.endsWith(ext))) {
+                    const url = URL.createObjectURL(blob);
+                    container.innerHTML = `
+                        <div class="image-viewer">
+                            <img src="${url}" alt="Preview" />
+                        </div>`;
+                }
+                else {
+                    container.innerHTML = `
+                        <div class="alert alert-warning m-5 shadow-sm text-center">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Định dạng file này chưa hỗ trợ xem trực tuyến. Vui lòng sử dụng nút <b>Tải về</b>.
+                        </div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-danger m-5 shadow-sm text-center">
+                        <i class="bi bi-x-circle me-2"></i>
+                        <b>Lỗi:</b> ${error.message}
+                    </div>`;
+            }
+        }
+
+        // Chế độ toàn màn hình trình duyệt
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Không thể mở toàn màn hình: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        loadPreview();
+    </script>
+</body>
+</html>

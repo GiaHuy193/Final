@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using WebDocumentManagement_FileSharing.Data;
 using WebDocumentManagement_FileSharing.Service;
 using WebDocumentManagement_FileSharing.Helpers;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

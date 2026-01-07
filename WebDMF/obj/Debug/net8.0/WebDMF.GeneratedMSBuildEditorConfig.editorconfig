@@ -150,12 +150,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Documents/GooglePreview.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXEdvb2dsZVByZXZpZXcuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Documents/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Documents/Preview.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXFByZXZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Documents/Shared.cshtml]

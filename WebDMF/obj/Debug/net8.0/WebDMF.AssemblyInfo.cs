@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WebDMF")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+967706faee8fe90af857a61f24a95132f049971c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+28b536461e2acfc2bd78bf0e6d46c9bc2f890649")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebDMF")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebDMF")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

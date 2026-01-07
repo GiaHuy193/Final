@@ -4,107 +4,220 @@
 }
 
 <style>
-    /* --- CẤU HÌNH MÀU SẮC MIDNIGHT BLUE CHO DARK MODE --- */
+    /* --- MODERN LIGHT THEME --- */
     :root {
-        --midnight-bg: #0f172a; /* Nền Modal chính */
-        --midnight-card: #1e293b; /* Nền ô Input/Hộp thông tin */
-        --midnight-border: #334155; /* Màu viền */
-        --midnight-text: #f8fafc; /* Màu chữ chính */
-        --midnight-secondary: #94a3b8; /* Màu chữ phụ */
+        --share-primary: #6366f1; /* Indigo */
+        --share-bg: #ffffff;
+        --share-input-bg: #f8fafc;
+        --share-border: #e2e8f0;
+        --share-text: #1e293b;
+        --share-text-muted: #64748b;
     }
 
-    /* Áp dụng màu cho Modal khi ở giao diện tối */
-    /* Nếu hệ thống của bạn dùng class .dark-mode trên body */
-    .dark-mode .custom-share-modal .modal-content {
-        background-color: var(--midnight-bg) !important;
-        color: var(--midnight-text) !important;
-        border: 1px solid var(--midnight-border) !important;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    /* Thiết kế Modal */
+    .custom-share-modal .modal-content {
+        border-radius: 24px; /* Bo góc lớn hiện đại */
+        border: none;
+        overflow: hidden;
+        background-color: var(--share-bg);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
-    .dark-mode .custom-share-modal .modal-header,
-    .dark-mode .custom-share-modal .modal-footer {
-        border-color: var(--midnight-border) !important;
+    .custom-share-modal .modal-header {
+        padding: 1.5rem 1.5rem 0.5rem;
+        border-bottom: none;
     }
 
-    /* Tùy chỉnh Input và Select để không bị trắng lóa */
-    .dark-mode .custom-share-modal .form-control,
-    .dark-mode .custom-share-modal .form-select {
-        background-color: var(--midnight-card) !important;
-        border-color: var(--midnight-border) !important;
-        color: var(--midnight-text) !important;
+    .custom-share-modal .modal-footer {
+        border-top: none;
+        padding: 1rem 1.5rem 1.5rem;
+        background-color: #f8fafc; /* Nền footer hơi xám nhẹ */
     }
 
-        .dark-mode .custom-share-modal .form-control::placeholder {
-            color: var(--midnight-secondary);
+    /* Card thông tin file */
+    .share-file-card {
+        background-color: #f1f5f9;
+        border-radius: 16px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .share-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background-color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-right: 12px;
+        font-size: 1.5rem;
+    }
+
+    /* Inputs & Selects */
+    .custom-share-modal .form-control,
+    .custom-share-modal .form-select {
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--share-border);
+        background-color: var(--share-bg);
+        font-size: 0.95rem;
+        color: var(--share-text);
+        transition: all 0.2s ease;
+    }
+
+        .custom-share-modal .form-control:focus,
+        .custom-share-modal .form-select:focus {
+            border-color: var(--share-primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background-color: white;
         }
 
-    /* Hộp thông tin tệp được chọn */
-    .dark-mode .share-file-info {
-        background-color: var(--midnight-card);
-        border: 1px dashed var(--midnight-border);
-        padding: 12px;
-        border-radius: 8px;
+    /* Labels */
+    .form-label-modern {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        color: var(--share-text-muted);
+        margin-bottom: 0.5rem;
+        display: block;
     }
 
-    .dark-mode .custom-share-modal .btn-close {
-        filter: invert(1) grayscale(100) brightness(200); /* Đổi nút X thành màu trắng */
+    /* Buttons */
+    .btn-share-primary {
+        background-color: var(--share-primary);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+        transition: transform 0.1s ease;
     }
 
-    /* Tùy chỉnh nhãn label */
-    .dark-mode .custom-share-modal .form-label {
-        color: var(--midnight-secondary);
+        .btn-share-primary:hover {
+            background-color: #4f46e5;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    .btn-share-secondary {
+        background-color: white;
+        color: var(--share-text);
+        border: 1px solid var(--share-border);
+        border-radius: 12px;
+        padding: 0.6rem 1rem;
         font-weight: 500;
-        font-size: 0.85rem;
     }
+
+        .btn-share-secondary:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+    /* Input Group đẹp hơn */
+    .modern-input-group {
+        position: relative;
+    }
+
+        .modern-input-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--share-text-muted);
+            z-index: 5;
+        }
+
+        .modern-input-group input {
+            padding-left: 40px !important;
+        }
 </style>
 
-<div class="modal fade custom-share-modal" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+<div class="modal fade custom-share-modal" id="shareModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0" style="border-radius: 12px;">
-            <form method="post" asp-controller="Share" asp-action="ProcessShareGeneric">
+        <div class="modal-content">
+            <form id="shareForm" method="post" asp-controller="Share" asp-action="ProcessShareGeneric">
                 @Html.AntiForgeryToken()
 
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="shareModalLabel">
-                        <i class="bi bi-share-fill me-2 text-primary"></i>Chia sẻ mục
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark" style="font-size: 1.25rem;">Chia sẻ tài liệu</h5>
+                        <p class="text-muted small mb-0">Cấp quyền truy cập cho người khác</p>
+                    </div>
+                    <button type="button" class="btn-close bg-light rounded-circle p-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body">
+                <div class="modal-body px-4 pt-3">
                     <input type="hidden" id="shareTargetType" name="targetType" value="document" />
                     <input type="hidden" id="shareTargetId" name="targetId" value="" />
 
-                    <div class="mb-4">
-                        <label class="form-label text-uppercase small">Mục đang chọn</label>
-                        <div class="share-file-info d-flex align-items-center">
-                            <i class="bi bi-folder-fill fs-3 text-warning me-3" id="shareItemIcon"></i>
-                            <div id="shareItemTitle" class="fw-bold text-truncate"></div>
+                    <div class="share-file-card">
+                        <div class="share-icon-box text-primary">
+                            <i class="bi bi-file-earmark-text-fill" id="shareItemIcon"></i>
+                        </div>
+                        <div class="overflow-hidden w-100">
+                            <label class="d-block text-uppercase fw-bold text-muted" style="font-size: 0.65rem;">Đang chọn</label>
+                            <div id="shareItemTitle" class="fw-bold text-dark text-truncate" style="font-size: 1rem;">Tên tài liệu</div>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="receiverEmail" class="form-label">Email người nhận</label>
-                        <input type="email" class="form-control" id="receiverEmail" name="receiverEmail"
-                               placeholder="nhap-email@example.com" required />
+                    <div class="mb-4">
+                        <label for="receiverEmail" class="form-label-modern">Gửi lời mời qua Email</label>
+                        <div class="d-flex gap-2">
+                            <div class="modern-input-group flex-grow-1">
+                                <i class="bi bi-envelope"></i>
+                                <input type="email" class="form-control" id="receiverEmail" name="receiverEmail" placeholder="Nhập email người nhận..." />
+                            </div>
+                            <select class="form-select w-auto" id="accessType" name="accessType" style="min-width: 130px;">
+                                <option value="Read">Chỉ xem</option>
+                                <option value="Download">Tải về</option>
+                                <option value="Edit">Chỉnh sửa</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="accessType" class="form-label">Quyền truy cập</label>
-                        <select class="form-select" id="accessType" name="accessType">
-                            @foreach (var opt in accessOptions)
-                            {
-                                <option value="@opt">@opt</option>
-                            }
-                        </select>
+                    <hr class="border-light-subtle my-4">
+
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label-modern mb-0"><i class="bi bi-link-45deg me-1 fs-6"></i> Liên kết chia sẻ</label>
+                        </div>
+
+                        <div class="d-flex gap-2 mb-3">
+                            <select class="form-select flex-grow-1 bg-light border-0" id="shareScope">
+                                <option value="public">🌐 Bất kỳ ai có liên kết (Công khai)</option>
+                                <option value="restricted">🔒 Chỉ người dùng đã đăng nhập</option>
+                            </select>
+                            <button type="button" id="createLinkBtn" class="btn btn-share-secondary text-nowrap">
+                                Tạo Link
+                            </button>
+                        </div>
+
+                        <div class="collapse" id="generatedLinkBox">
+                            <div class="bg-light p-3 rounded-3 border border-dashed d-flex align-items-center gap-2 mt-2">
+                                <i class="bi bi-globe2 text-success fs-5"></i>
+                                <input type="text" id="generatedLink" class="form-control bg-white border-0 shadow-none" readonly value="https://docnest.com/s/..." />
+                                <button type="button" id="copyLinkBtn" class="btn btn-sm btn-white border shadow-sm rounded-circle p-2" title="Sao chép">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <div class="text-success small mt-2 fw-medium ms-1">
+                                <i class="bi bi-check-circle-fill me-1"></i> Link đã sẵn sàng để chia sẻ.
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="modal-footer border-0 pb-4">
-                    <button type="button" class="btn btn-link text-decoration-none text-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm" style="border-radius: 8px;">
-                        Gửi
+                <div class="modal-footer justify-content-end gap-2">
+                    <button type="button" class="btn btn-light fw-medium px-4 rounded-3 text-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-share-primary d-flex align-items-center">
+                        <span>Gửi lời mời</span>
+                        <i class="bi bi-send-fill ms-2 small"></i>
                     </button>
                 </div>
             </form>
@@ -114,7 +227,7 @@
 
 <script>
     (function(){
-        // open modal when .share-trigger clicked
+        // --- LOGIC MỞ MODAL ---
         document.addEventListener('click', function(e){
             var btn = e.target.closest && e.target.closest('.share-trigger');
             if (!btn) return;
@@ -133,19 +246,98 @@
 
             if (inputId) inputId.value = id || '';
             if (inputType) inputType.value = type || 'document';
-            if (titleEl) titleEl.textContent = title || '';
+            if (titleEl) titleEl.textContent = title || 'Không có tên';
 
-            // set icon depending on type
+            // Đổi icon theo loại file
             if (iconEl) {
                 if (type === 'folder') {
-                    iconEl.className = 'bi bi-folder-fill fs-3 text-warning me-3';
+                    iconEl.className = 'bi bi-folder-fill text-warning';
                 } else {
-                    iconEl.className = 'bi bi-file-earmark-richtext-fill fs-3 text-info me-3';
+                    var ext = title.split('.').pop().toLowerCase();
+                    if (ext === 'pdf') iconEl.className = 'bi bi-file-earmark-pdf-fill text-danger';
+                    else if (['doc', 'docx'].includes(ext)) iconEl.className = 'bi bi-file-earmark-word-fill text-primary';
+                    else if (['xls', 'xlsx'].includes(ext)) iconEl.className = 'bi bi-file-earmark-excel-fill text-success';
+                    else iconEl.className = 'bi bi-file-earmark-richtext-fill text-primary';
                 }
             }
 
+            // Reset trạng thái link cũ
+            var box = document.getElementById('generatedLinkBox');
+            if (box) box.classList.remove('show');
+            var gen = modalEl.querySelector('#generatedLink'); if (gen) gen.value = '';
+
             var modal = new bootstrap.Modal(modalEl);
             modal.show();
+        });
+
+        // --- LOGIC TẠO LINK ---
+        var createBtn = document.getElementById('createLinkBtn');
+        if (createBtn) createBtn.addEventListener('click', function(){
+            var modalEl = document.getElementById('shareModal');
+            var targetType = modalEl.querySelector('#shareTargetType').value;
+            var targetId = modalEl.querySelector('#shareTargetId').value;
+            var accessType = modalEl.querySelector('#accessType').value;
+            var scope = modalEl.querySelector('#shareScope').value;
+
+            if (!targetId) return alert('Lỗi: Không tìm thấy ID mục cần chia sẻ.');
+
+            var tokenEl = modalEl.querySelector('input[name="__RequestVerificationToken"]');
+            var token = tokenEl ? tokenEl.value : '';
+
+            // Hiệu ứng Loading
+            var originalText = createBtn.innerHTML;
+            createBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            createBtn.disabled = true;
+
+            fetch('@Url.Action("CreateShareLink", "Share")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({ targetType: targetType, targetId: targetId, accessType: accessType, scope: scope })
+            }).then(function(resp){
+                if (!resp.ok) return resp.text().then(t=>{ throw new Error(t || 'Lỗi server'); });
+                return resp.json();
+            }).then(function(j){
+                if (j && j.url) {
+                    var box = document.getElementById('generatedLinkBox');
+                    var gen = document.getElementById('generatedLink');
+                    if (gen) gen.value = j.url;
+                    // Mở collapse chứa link
+                    new bootstrap.Collapse(box, { show: true });
+                } else {
+                    alert('Không thể tạo liên kết.');
+                }
+            }).catch(function(err){
+                console.error(err);
+                alert('Lỗi: ' + (err.message || ''));
+            }).finally(() => {
+                createBtn.innerHTML = originalText;
+                createBtn.disabled = false;
+            });
+        });
+
+        // --- LOGIC SAO CHÉP LINK ---
+        var copyBtn = document.getElementById('copyLinkBtn');
+        if (copyBtn) copyBtn.addEventListener('click', function(){
+            var gen = document.getElementById('generatedLink');
+            if (!gen || !gen.value) return;
+
+            navigator.clipboard.writeText(gen.value).then(function(){
+                var icon = copyBtn.querySelector('i');
+                var originalClass = icon.className;
+
+                // Đổi icon thành dấu tích xanh
+                icon.className = 'bi bi-check-lg text-success';
+                copyBtn.classList.add('border-success');
+
+                setTimeout(function(){
+                    icon.className = originalClass;
+                    copyBtn.classList.remove('border-success');
+                }, 2000);
+            });
         });
     })();
 </script>
