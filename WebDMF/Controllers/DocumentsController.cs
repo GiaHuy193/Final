@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using WebDocumentManagement_FileSharing.Data;
 using WebDocumentManagement_FileSharing.Helpers;
 using WebDocumentManagement_FileSharing.Models;
+using WebDocumentManagement_FileSharing.Models.ViewModel;
 
 namespace WebDocumentManagement_FileSharing.Controllers
 {
@@ -20,9 +21,9 @@ namespace WebDocumentManagement_FileSharing.Controllers
     public class DocumentsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public DocumentsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public DocumentsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -138,6 +139,124 @@ namespace WebDocumentManagement_FileSharing.Controllers
             }
 
             return View(viewModel);
+        }
+
+        // ==========================================
+        // SEARCH - Tìm kiếm theo tên thư mục, tên tệp hoặc email người tải lên
+        // Trả về View Index với kết quả lọc
+        // ==========================================
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> Search(string q)
+        {
+            // Accept alternative query name used in some layouts
+            if (string.IsNullOrWhiteSpace(q)) q = Request.Query["query"].ToString();
+            if (string.IsNullOrWhiteSpace(q)) return RedirectToAction(nameof(Index));
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+
+            // find user IDs whose email matches query (for email-based search)
+            var matchingUserIds = await _userManager.Users
+                .Where(u => u.Email != null && EF.Functions.Like(u.Email, $"%{q}%"))
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            // Folders: match by name OR owner email
+            var folders = await _context.Folders
+                .Where(f => !f.IsDeleted && (
+                    EF.Functions.Like(f.Name, $"%{q}%")
+                    || matchingUserIds.Contains(f.OwnerId)
+                ))
+                .OrderBy(f => f.Name)
+                .ToListAsync();
+
+            // Documents: match by filename OR owner email
+            var documents = await _context.Documents
+                .Where(d => !d.IsDeleted && (
+                    EF.Functions.Like(d.FileName, $"%{q}%")
+                    || matchingUserIds.Contains(d.OwnerId)
+                ))
+                .OrderByDescending(d => d.UploadedDate)
+                .ToListAsync();
+
+            var vm = new FileSystemViewModel
+            {
+                CurrentFolderId = null,
+                Folders = folders,
+                Documents = documents
+            };
+
+            // Compute effective access for listed items for current user
+            foreach (var d in vm.Documents)
+            {
+                vm.DocumentAccess[d.Id] = await GetEffectiveAccessForUserOnDocumentAsync(d.Id, userId);
+            }
+            foreach (var f in vm.Folders)
+            {
+                vm.FolderAccess[f.Id] = await GetEffectiveAccessForUserOnFolderAsync(f.Id, userId);
+            }
+
+            // If no exact matches, prepare fuzzy suggestions (closest names)
+            if ((vm.Folders == null || !vm.Folders.Any()) && (vm.Documents == null || !vm.Documents.Any()))
+            {
+                var qLower = q.ToLowerInvariant();
+
+                // candidate folders
+                var folderCandidates = await _context.Folders
+                    .Where(f => !f.IsDeleted)
+                    .Select(f => new { f.Id, f.Name })
+                    .ToListAsync();
+
+                var folderSuggest = folderCandidates
+                    .Select(c => new { c.Id, c.Name, Dist = Levenshtein(c.Name?.ToLowerInvariant() ?? string.Empty, qLower) })
+                    .OrderBy(x => x.Dist).ThenBy(x => x.Name)
+                    .Take(5)
+                    .ToList();
+
+                ViewBag.SuggestFolders = folderSuggest;
+
+                // candidate documents
+                var docCandidates = await _context.Documents
+                    .Where(d => !d.IsDeleted)
+                    .Select(d => new { d.Id, d.FileName })
+                    .ToListAsync();
+
+                var docSuggest = docCandidates
+                    .Select(c => new { Id = c.Id, Name = c.FileName, Dist = Levenshtein((c.FileName ?? string.Empty).ToLowerInvariant(), qLower) })
+                    .OrderBy(x => x.Dist).ThenBy(x => x.Name)
+                    .Take(8)
+                    .ToList();
+
+                ViewBag.SuggestDocs = docSuggest;
+            }
+
+            ViewBag.SearchQuery = q;
+            return View("Index", vm);
+        }
+
+        // Simple Levenshtein distance for fuzzy matching suggestions
+        private static int Levenshtein(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a)) return b?.Length ?? 0;
+            if (string.IsNullOrEmpty(b)) return a.Length;
+
+            var la = a.Length;
+            var lb = b.Length;
+            var d = new int[la + 1, lb + 1];
+
+            for (int i = 0; i <= la; i++) d[i, 0] = i;
+            for (int j = 0; j <= lb; j++) d[0, j] = j;
+
+            for (int i = 1; i <= la; i++)
+            {
+                for (int j = 1; j <= lb; j++)
+                {
+                    int cost = (b[j - 1] == a[i - 1]) ? 0 : 1;
+                    d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + cost);
+                }
+            }
+
+            return d[la, lb];
         }
 
         // ==========================================
@@ -512,16 +631,18 @@ namespace WebDocumentManagement_FileSharing.Controllers
                 return Forbid();
             }
 
-            // If user has only Read permission, allow inline preview for images and pdfs but do not allow download endpoint
+            // If user has only Read permission, allow inline preview for images, pdfs, videos and office preview (redirect to Preview for office)
             if (access != null && access == AccessLevel.Read)
             {
                 if (previewType == FilePreviewType.Image) return PhysicalFile(physicalPath, document.ContentType ?? "image/*");
                 if (previewType == FilePreviewType.Pdf) return PhysicalFile(physicalPath, "application/pdf");
-                // for other types deny full download
+                if (previewType == FilePreviewType.Video) return PhysicalFile(physicalPath, document.ContentType ?? "video/mp4");
+                if (previewType == FilePreviewType.Office) return RedirectToAction(nameof(Preview), new { id });
+                // for other types deny full download/preview
                 return Forbid();
             }
 
-            // For images and pdfs return inline; for other previewable files redirect to Preview action (Google Docs Viewer)
+            // For images and pdfs return inline; for other previewable files redirect to Preview action
             return previewType switch
             {
                 FilePreviewType.Image => PhysicalFile(physicalPath, document.ContentType ?? "image/*"),
@@ -529,6 +650,92 @@ namespace WebDocumentManagement_FileSharing.Controllers
                 _ => RedirectToAction(nameof(Preview), new { id })
             };
         }
+
+        // New: Stream endpoint for preview JS to fetch file blob without forcing download
+        [AllowAnonymous]
+        public async Task<IActionResult> Stream(int id, string? token = null)
+        {
+            var document = await _context.Documents.FindAsync(id);
+            if (document == null || document.IsDeleted) return NotFound();
+
+            var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", document.FilePath.TrimStart('/'));
+            if (!System.IO.File.Exists(physicalPath)) return NotFound();
+
+            // Determine preview type
+            var previewType = FilePreviewHelper.GetPreviewType(document.FileName, document.ContentType);
+
+            // Token-based share handling
+            ShareLink? link = null;
+            if (!string.IsNullOrEmpty(token))
+            {
+                link = await _context.ShareLinks.FirstOrDefaultAsync(s => s.Token == token);
+                if (link == null)
+                    return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
+
+                // Verify target matches
+                var targetMatches = false;
+                if (string.Equals(link.TargetType, "document", StringComparison.OrdinalIgnoreCase) && link.TargetId == id)
+                {
+                    targetMatches = true;
+                }
+                else if (string.Equals(link.TargetType, "folder", StringComparison.OrdinalIgnoreCase))
+                {
+                    int? curFolderId = document.FolderId;
+                    while (curFolderId.HasValue)
+                    {
+                        if (curFolderId.Value == link.TargetId) { targetMatches = true; break; }
+                        var parent = await _context.Folders.FindAsync(curFolderId.Value);
+                        if (parent == null) break;
+                        curFolderId = parent.ParentId;
+                    }
+                }
+
+                if (!targetMatches)
+                    return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
+
+                // If link requires login
+                if (!link.IsPublic)
+                {
+                    if (!(User?.Identity?.IsAuthenticated == true))
+                    {
+                        return Challenge();
+                    }
+                }
+
+                // If link grants only Read, restrict to previewable types
+                if (link.AccessType == AccessLevel.Read)
+                {
+                    if (!(previewType == FilePreviewType.Image || previewType == FilePreviewType.Pdf || previewType == FilePreviewType.Video || previewType == FilePreviewType.Office))
+                        return Forbid();
+                }
+                // else Download/Edit allow full stream
+            }
+            else
+            {
+                // Non-token: require authentication and permissions
+                if (!(User?.Identity?.IsAuthenticated == true)) return Challenge();
+
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (document.OwnerId != userId)
+                {
+                    var access = await GetEffectiveAccessForUserOnDocumentAsync(id, userId);
+                    if (access == null) return Forbid();
+                    if (access == AccessLevel.Read)
+                    {
+                        if (!(previewType == FilePreviewType.Image || previewType == FilePreviewType.Pdf || previewType == FilePreviewType.Video || previewType == FilePreviewType.Office))
+                            return Forbid();
+                    }
+                }
+            }
+
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(document.FileName, out var contentType))
+                contentType = document.ContentType ?? "application/octet-stream";
+
+            // Return inline stream (do not set download file name so browsers will attempt inline display)
+            return PhysicalFile(physicalPath, contentType);
+        }
+
         // ================================================
         // SHARE (GET) - Hiển thị trang nhập Email chia sẻ
         // ================================================
@@ -559,7 +766,21 @@ namespace WebDocumentManagement_FileSharing.Controllers
                 .OrderByDescending(p => p.SharedDate)
                 .ToList();
 
-            return View(combined);
+            // 4. Also compute items that *I* have shared (where current user is owner of document or folder)
+            var sharedByMe = await _context.Permissions
+                .Include(p => p.Document)
+                .Include(p => p.Folder)
+                .Where(p => (p.Document != null && p.Document.OwnerId == userId) || (p.Folder != null && p.Folder.OwnerId == userId))
+                .OrderByDescending(p => p.SharedDate)
+                .ToListAsync();
+
+            var vm = new SharedListingsViewModel
+            {
+                SharedWithMe = combined,
+                SharedByMe = sharedByMe
+            };
+
+            return View(vm);
         }
 
         // ==================================================
@@ -956,6 +1177,8 @@ namespace WebDocumentManagement_FileSharing.Controllers
             return RedirectToAction(nameof(Index), new { folderId = document.FolderId });
         }
 
+
+            
         [AllowAnonymous]
         public async Task<IActionResult> Preview(int id, string? token = null)
         {
@@ -1027,7 +1250,9 @@ namespace WebDocumentManagement_FileSharing.Controllers
             ViewBag.DocumentName = document.FileName;
 
             // Đường dẫn file để JS fetch dữ liệu 
-            ViewBag.FileUrl = Url.Action("Download", "Documents", new { id = id });
+            // Use Stream endpoint so preview page can fetch blob even when Download enforces attachment
+            ViewBag.Token = token;
+            ViewBag.FileUrl = Url.Action("Stream", "Documents", new { id = id, token = token });
 
             // Trả về View Local Preview 
             return View("Preview");

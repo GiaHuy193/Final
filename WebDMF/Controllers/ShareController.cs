@@ -19,11 +19,11 @@ namespace WebDocumentManagement_FileSharing.Controllers
     public class ShareController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public ShareController(
             ApplicationDbContext context,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -146,50 +146,105 @@ namespace WebDocumentManagement_FileSharing.Controllers
         }
 
         // ======================================================
-        // 3️⃣ FILE ĐƯỢC SHARE VỚI TÔI
+        // 3️⃣ FILE ĐƯỢC SHARE VỚI TÔI + TÔI ĐÃ CHIA SẺ
         // ======================================================
         public async Task<IActionResult> SharedWithMe()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             // Include both Document and Folder navigation so view can render either
-            var sharedPermissions = await _context.Permissions
+            var sharedWithMe = await _context.Permissions
                 .Where(p => p.UserId == userId)
                 .Include(p => p.Document)
                 .Include(p => p.Folder)
                 .OrderByDescending(p => p.SharedDate)
                 .ToListAsync();
 
-            return View(sharedPermissions);
+            // Permissions where current user is the owner of the document or folder
+            var sharedByMe = await _context.Permissions
+                .Include(p => p.Document)
+                .Include(p => p.Folder)
+                .Where(p => (p.Document != null && p.Document.OwnerId == userId) || (p.Folder != null && p.Folder.OwnerId == userId))
+                .OrderByDescending(p => p.SharedDate)
+                .ToListAsync();
+
+            var vm = new SharedListingsViewModel
+            {
+                SharedWithMe = sharedWithMe,
+                SharedByMe = sharedByMe
+            };
+
+            // return the shared view that lives under Views/Documents/Shared.cshtml
+            return View("~/Views/Documents/Shared.cshtml", vm);
         }
 
         // ======================================================
-        // 4️⃣ HỦY CHIA SẺ
+        // 4️⃣ HỦY CHIA SẺ THEO ID PERMISSION (CHO CHỦ SỞ HỮU)
         // ======================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Remove(int documentId, string userId)
+        public async Task<IActionResult> RevokePermission(int id)
         {
             var permission = await _context.Permissions
-                .FirstOrDefaultAsync(p =>
-                    p.DocumentId == documentId &&
-                    p.UserId == userId);
+                .Include(p => p.Document)
+                .Include(p => p.Folder)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (permission == null)
                 return NotFound();
 
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var ownerId = permission.Document?.OwnerId ?? permission.Folder?.OwnerId;
+
+            if (ownerId != currentUserId)
+                return Forbid();
+
             _context.Permissions.Remove(permission);
             await _context.SaveChangesAsync();
 
-            // Audit: permission removed
-            await AuditHelper.LogAsync(HttpContext, "UNSHARE_DOCUMENT", "Permission", permission.Id, permission.DocumentId?.ToString() ?? "", $"Removed permission for user {userId} on documentId={documentId}");
+            await AuditHelper.LogAsync(HttpContext, "UNSHARE", "Permission", permission.Id, permission.DocumentId?.ToString() ?? permission.FolderId?.ToString() ?? "", $"Removed permission id={permission.Id} by owner {currentUserId}");
 
-            TempData["Message"] = "Đã hủy chia sẻ.";
-            return RedirectToAction("Index", "Documents");
+            TempData["Message"] = "Đã thu hồi quyền chia sẻ.";
+            // Redirect to Documents/Shared which displays both "shared with me" and "shared by me"
+            return RedirectToAction("Shared", "Documents");
         }
 
         // ======================================================
-        // 5️⃣ TẠO LINK CHIA SẺ
+        // 5️⃣ CẬP NHẬT QUYỀN TRUY CẬP (CHO CHỦ SỞ HỮU)
+        // ======================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePermission(int id, string accessType)
+        {
+            var permission = await _context.Permissions
+                .Include(p => p.Document)
+                .Include(p => p.Folder)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (permission == null)
+                return NotFound();
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var ownerId = permission.Document?.OwnerId ?? permission.Folder?.OwnerId;
+
+            if (ownerId != currentUserId)
+                return Forbid();
+
+            if (!Enum.TryParse(accessType, out AccessLevel level)) level = AccessLevel.Read;
+
+            permission.AccessType = level;
+            _context.Permissions.Update(permission);
+            await _context.SaveChangesAsync();
+
+            await AuditHelper.LogAsync(HttpContext, "UPDATE_PERMISSION", "Permission", permission.Id, permission.DocumentId?.ToString() ?? permission.FolderId?.ToString() ?? "", $"Updated permission id={permission.Id} to {level} by owner {currentUserId}");
+
+            TempData["Message"] = "Đã cập nhật quyền truy cập.";
+            // Redirect to Documents/Shared which displays both "shared with me" and "shared by me"
+            return RedirectToAction("Shared", "Documents");
+        }
+
+        // ======================================================
+        // 6️⃣ TẠO LINK CHIA SẺ
         // ======================================================
         [HttpPost]
         [ValidateAntiForgeryToken]

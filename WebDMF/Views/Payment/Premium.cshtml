@@ -1,0 +1,193 @@
+﻿@{
+    ViewData["Title"] = "Nâng cấp gói Premium";
+}
+
+<style>
+    /* 1. Class bo góc cực mạnh cho cả trên và dưới */
+    .card-rounded-xl {
+        border-radius: 30px !important; /* Bo 30px cho mềm mại */
+        overflow: hidden; /* Cắt bỏ phần thừa của header để bo góc mượt */
+    }
+
+    /* 2. Hiệu ứng Card Premium */
+    .premium-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        background: #fff;
+        position: relative;
+        z-index: 1;
+    }
+
+        /* Tạo viền gradient (Border Gradient) */
+        .premium-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 30px;
+            padding: 3px; /* Độ dày viền */
+            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none; /* Để bấm được nút bên trong */
+        }
+
+        .premium-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px -12px rgba(13, 110, 253, 0.25);
+        }
+
+    /* Badge Khuyên dùng (nằm đè lên viền) */
+    .recommended-badge {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        white-space: nowrap;
+    }
+
+    /* Nút bấm */
+    .btn-rounded {
+        border-radius: 50px; /* Bo tròn nút bấm tối đa */
+        padding: 12px 24px;
+        font-weight: 700;
+        transition: transform 0.2s;
+    }
+
+        .btn-rounded:hover {
+            transform: scale(1.05);
+        }
+
+    /* Gói Free */
+    .free-card {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+
+    /* Check icon styling */
+    .check-icon {
+        width: 24px;
+        height: 24px;
+        background: #e7f1ff;
+        color: #0d6efd;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        font-size: 0.8rem;
+    }
+
+    .premium-check {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+        color: white;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bolder display-5 text-dark mb-3">Chọn gói phù hợp với bạn</h1>
+        <p class="text-muted fs-5">Nâng cấp để mở khóa toàn bộ tiềm năng của DocNest</p>
+    </div>
+
+    <div class="row justify-content-center align-items-center g-4">
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-rounded-xl free-card h-100 shadow-sm p-4">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-4 text-center">
+                        <h5 class="fw-bold text-muted text-uppercase small ls-1">Cơ bản</h5>
+                        <h2 class="display-4 fw-bold text-dark mb-0">0đ</h2>
+                        <span class="text-muted">/tháng</span>
+                    </div>
+
+                    <ul class="list-unstyled flex-grow-1 mb-4">
+                        <li class="mb-3 d-flex align-items-center">
+                            <span class="check-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="text-secondary">15 GB Lưu trữ</span>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <span class="check-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="text-secondary">Xem tài liệu cơ bản</span>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center text-muted opacity-50">
+                            <i class="bi bi-x fs-4 me-2 ms-1"></i> Không quảng cáo
+                        </li>
+                        <li class="mb-3 d-flex align-items-center text-muted opacity-50">
+                            <i class="bi bi-x fs-4 me-2 ms-1"></i> Hỗ trợ ưu tiên
+                        </li>
+                    </ul>
+
+                    <button class="btn btn-outline-secondary btn-rounded w-100 mt-auto" disabled>Đang sử dụng</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-rounded-xl premium-card h-100 shadow-lg p-0">
+
+                <div class="recommended-badge">
+                    <span class="badge bg-warning text-dark border border-2 border-white shadow-sm rounded-pill px-3 py-2">
+                        <i class="bi bi-star-fill me-1"></i> PHỔ BIẾN NHẤT
+                    </span>
+                </div>
+
+                <div class="card-body p-5 d-flex flex-column text-center">
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-primary text-uppercase small ls-1 mb-3">PREMIUM</h5>
+                        <h2 class="display-3 fw-bolder text-primary mb-0">$8.99</h2>
+                        <span class="text-muted fw-semibold">/tháng</span>
+                    </div>
+
+                    <p class="text-muted small mb-4">Thanh toán an toàn 1 lần, hủy bất kỳ lúc nào.</p>
+                    <hr class="opacity-10 mb-4">
+
+                    <ul class="list-unstyled flex-grow-1 mb-5 text-start px-2">
+                        <li class="mb-3 d-flex align-items-center fw-bold text-dark">
+                            <span class="check-icon premium-check"><i class="bi bi-check-lg"></i></span>
+                            <span>100 GB Lưu trữ <span class="badge bg-danger-subtle text-danger rounded-pill ms-2" style="font-size: 0.6em;">HOT</span></span>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <span class="check-icon premium-check"><i class="bi bi-check-lg"></i></span>
+                            <span>Tốc độ tải Max Speed</span>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <span class="check-icon premium-check"><i class="bi bi-check-lg"></i></span>
+                            <span>Tắt toàn bộ quảng cáo</span>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <span class="check-icon premium-check"><i class="bi bi-check-lg"></i></span>
+                            <span>Hỗ trợ kỹ thuật 24/7</span>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <span class="check-icon premium-check"><i class="bi bi-check-lg"></i></span>
+                            <span>Backup dữ liệu tự động</span>
+                        </li>
+                    </ul>
+
+                    <form asp-area="" asp-controller="Payment" asp-action="PayPalCheckout" method="post" class="mt-auto w-100">
+                        <button type="submit" class="btn btn-primary btn-rounded w-100 shadow-sm py-3 fs-6 text-uppercase ls-1 bg-gradient">
+                            <i class="bi bi-paypal me-2"></i> Nâng cấp ngay
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-4 text-center">
+        <div class="col-md-4 mb-3">
+            <div class="text-primary mb-2"><i class="bi bi-shield-check fs-2"></i></div>
+            <h6 class="fw-bold">Bảo mật SSL 256-bit</h6>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="text-primary mb-2"><i class="bi bi-clock-history fs-2"></i></div>
+            <h6 class="fw-bold">Hoàn tiền trong 7 ngày</h6>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="text-primary mb-2"><i class="bi bi-headset fs-2"></i></div>
+            <h6 class="fw-bold">Hỗ trợ nhanh chóng</h6>
+        </div>
+    </div>
+</div>

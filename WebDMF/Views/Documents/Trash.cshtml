@@ -3,78 +3,225 @@
     ViewData["Title"] = "Thùng rác";
 }
 
+<style>
+    /* --- CLEAN WHITE THEME --- */
+    :root {
+        --bg-body: #f8f9fa;
+        --bg-card: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --primary-color: #3b82f6;
+        --danger-color: #ef4444;
+    }
+
+    body {
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+    }
+
+    /* --- PAGE HEADER --- */
+    .page-title {
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* --- TOOLBAR --- */
+    .trash-toolbar {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    /* --- SECTION CARD --- */
+    .trash-section {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .trash-header {
+        background-color: #f1f5f9;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* --- LIST ITEM --- */
+    .list-group-flush .list-group-item {
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+        transition: background-color 0.2s;
+        cursor: pointer;
+    }
+
+        .list-group-flush .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-group-flush .list-group-item:hover {
+            background-color: #f8fafc;
+        }
+
+    /* Checkbox custom */
+    .form-check-input {
+        width: 1.2em;
+        height: 1.2em;
+        margin-top: 0;
+        cursor: pointer;
+        border-color: #cbd5e1;
+    }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+    /* Item Name */
+    .item-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.2rem;
+    }
+
+    .item-meta {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    /* Icons */
+    .trash-icon-folder {
+        color: #f59e0b;
+        font-size: 1.5rem;
+        margin-right: 15px;
+    }
+
+    .trash-icon-file {
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        margin-right: 15px;
+    }
+
+    /* Empty state */
+    .empty-trash {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+    }
+</style>
+
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3></> Thùng rác</h3>
-        <div>
-            <form method="post" asp-action="RestoreSelected" class="d-inline">
+
+    <div class="trash-toolbar">
+        <h3 class="page-title mb-0">
+            <i class="bi bi-trash3 text-danger"></i> Thùng rác
+        </h3>
+
+        <div class="d-flex gap-2">
+            <form method="post" asp-action="RestoreSelected" id="restoreForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="documentIds" id="restoreDocumentIds" />
                 <input type="hidden" name="folderIds" id="restoreFolderIds" />
-                <button type="submit" class="btn btn-outline-primary">Khôi phục đã chọn</button>
+                <button type="submit" class="btn btn-outline-primary fw-medium" title="Khôi phục các mục đã chọn">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Khôi phục
+                </button>
             </form>
-            <form method="post" asp-action="DeletePermanently" class="d-inline ms-2" id="permanentDeleteForm">
+
+            <form method="post" asp-action="DeletePermanently" id="permanentDeleteForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="documentIds" id="delDocumentIds" />
                 <input type="hidden" name="folderIds" id="delFolderIds" />
-                <button type="submit" class="btn btn-danger">Xóa vĩnh viễn đã chọn</button>
+                <button type="submit" class="btn btn-outline-danger fw-medium" title="Xóa vĩnh viễn các mục đã chọn">
+                    <i class="bi bi-x-lg me-1"></i> Xóa vĩnh viễn
+                </button>
             </form>
-            <button id="deleteAllBtn" class="btn btn-outline-danger ms-2">Xóa tất cả</button>
+
+            <div class="vr mx-2"></div>
+
+            <button id="deleteAllBtn" class="btn btn-danger fw-bold">
+                <i class="bi bi-trash-fill me-1"></i> Dọn sạch thùng rác
+            </button>
         </div>
     </div>
 
     <form id="trashForm">
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5>Tệp</h5>
-                <div class="list-group mb-3">
-                    @if (Model?.Documents != null && Model.Documents.Any())
-                    {
-                        foreach (var d in Model.Documents)
-                        {
-                            <label class="list-group-item d-flex align-items-center">
-                                <input class="form-check-input me-2 trash-checkbox" type="checkbox" data-type="doc" data-id="@d.Id" />
-                                <div class="flex-grow-1">@d.FileName <div class="text-muted small">@d.UploadedDate.ToString("dd/MM/yyyy")</div></div>
-                                <div class="text-end ms-3">
-                                    <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@d.Id">Chi tiết</a>
-                                </div>
-                            </label>
-                        }
-                    }
-                    else
-                    {
-                        <div class="text-muted">Không có tệp trong thùng rác.</div>
-                    }
-                </div>
 
-                <h5>Thư mục</h5>
-                <div class="list-group">
-                    @if (Model?.Folders != null && Model.Folders.Any())
+        <div class="trash-section">
+            <div class="trash-header">Thư mục</div>
+            <div class="list-group list-group-flush">
+                @if (Model?.Folders != null && Model.Folders.Any())
+                {
+                    foreach (var f in Model.Folders)
                     {
-                        foreach (var f in Model.Folders)
-                        {
-                            <label class="list-group-item d-flex align-items-center">
-                                <input class="form-check-input me-2 trash-checkbox" type="checkbox" data-type="folder" data-id="@f.Id" />
-                                <div class="flex-grow-1">@f.Name <div class="text-muted small">@f.CreatedDate.ToString("dd/MM/yyyy")</div></div>
-                                <div class="text-end ms-3">
-                                    <a class="btn btn-sm btn-outline-secondary" asp-controller="Folders" asp-action="Details" asp-route-id="@f.Id">Chi tiết</a>
-                                </div>
-                            </label>
-                        }
+                        <label class="list-group-item d-flex align-items-center">
+                            <input class="form-check-input me-3 trash-checkbox" type="checkbox" data-type="folder" data-id="@f.Id" />
+                            <i class="bi bi-folder-fill trash-icon-folder"></i>
+                            <div class="flex-grow-1">
+                                <div class="item-name">@f.Name</div>
+                                <div class="item-meta">Đã xóa: @f.CreatedDate.ToString("dd/MM/yyyy")</div>
+                            </div>
+                            <a class="btn btn-sm btn-light text-secondary border" asp-controller="Folders" asp-action="Details" asp-route-id="@f.Id">
+                                <i class="bi bi-info-circle"></i>
+                            </a>
+                        </label>
                     }
-                    else
-                    {
-                        <div class="text-muted">Không có thư mục trong thùng rác.</div>
-                    }
-                </div>
+                }
+                else
+                {
+                    <div class="empty-trash">Không có thư mục nào trong thùng rác.</div>
+                }
             </div>
         </div>
+
+        <div class="trash-section">
+            <div class="trash-header">Tệp tin</div>
+            <div class="list-group list-group-flush">
+                @if (Model?.Documents != null && Model.Documents.Any())
+                {
+                    foreach (var d in Model.Documents)
+                    {
+                        <label class="list-group-item d-flex align-items-center">
+                            <input class="form-check-input me-3 trash-checkbox" type="checkbox" data-type="doc" data-id="@d.Id" />
+                            <i class="bi bi-file-earmark-text trash-icon-file"></i>
+                            <div class="flex-grow-1">
+                                <div class="item-name">@d.FileName</div>
+                                <div class="item-meta">Đã xóa: @d.UploadedDate.ToString("dd/MM/yyyy")</div>
+                            </div>
+                            <a class="btn btn-sm btn-light text-secondary border" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id">
+                                <i class="bi bi-info-circle"></i>
+                            </a>
+                        </label>
+                    }
+                }
+                else
+                {
+                    <div class="empty-trash">Không có tệp tin nào trong thùng rác.</div>
+                }
+            </div>
+        </div>
+
     </form>
 </div>
 
 @section Scripts {
     <script>
         (function(){
+            // --- Helper Functions ---
             var getChecked = function(type){
                 var ids = [];
                 document.querySelectorAll('.trash-checkbox').forEach(function(cb){
@@ -94,15 +241,36 @@
             var updateHidden = function(){
                 var docs = getChecked('doc');
                 var folders = getChecked('folder');
+
+                // Update hidden inputs for Restore form
                 document.getElementById('restoreDocumentIds').value = docs.join(',');
                 document.getElementById('restoreFolderIds').value = folders.join(',');
+
+                // Update hidden inputs for Delete form
                 document.getElementById('delDocumentIds').value = docs.join(',');
                 document.getElementById('delFolderIds').value = folders.join(',');
             };
 
+            // Listen for checkbox changes
             document.querySelectorAll('.trash-checkbox').forEach(function(cb){ cb.addEventListener('change', updateHidden); });
 
-            // intercept permanent delete to send arrays properly as CSV strings
+            // --- Handlers ---
+
+            // 1. Restore Selected
+            var restoreForm = document.getElementById('restoreForm');
+            if (restoreForm){
+                restoreForm.addEventListener('submit', function(e){
+                    updateHidden();
+                    var d = document.getElementById('restoreDocumentIds').value;
+                    var f = document.getElementById('restoreFolderIds').value;
+                    if(!d && !f) {
+                        e.preventDefault();
+                        alert('Vui lòng chọn ít nhất một mục để khôi phục.');
+                    }
+                });
+            }
+
+            // 2. Delete Selected Permanently
             var permForm = document.getElementById('permanentDeleteForm');
             if (permForm){
                 permForm.addEventListener('submit', function(e){
@@ -112,41 +280,53 @@
                     var foldersCsv = document.getElementById('delFolderIds').value || '';
 
                     if (!docsCsv && !foldersCsv) {
-                        if (!confirm('Bạn chưa chọn mục nào. Bạn có muốn xóa tất cả trong thùng rác không?')) return;
+                        alert('Vui lòng chọn mục để xóa.');
+                        return;
                     }
+
+                    if (!confirm('Bạn có chắc muốn xóa vĩnh viễn các mục đã chọn? Hành động này không thể hoàn tác.')) return;
 
                     var token = permForm.querySelector('input[name="__RequestVerificationToken"]').value;
                     fetch('@Url.Action("DeletePermanently", "Documents")', {
                         method:'POST',
                         headers:{ 'RequestVerificationToken': token, 'Content-Type':'application/x-www-form-urlencoded' },
                         body: new URLSearchParams({ documentIds: docsCsv, folderIds: foldersCsv })
-                    }).then(function(r){ if (r.redirected) window.location.href=r.url; else window.location.reload(); });
+                    }).then(function(r){
+                        if (r.redirected) window.location.href=r.url;
+                        else window.location.reload();
+                    });
                 });
             }
 
-            // delete all button (permanently) - collects all trashed ids regardless of selection
+            // 3. Delete All (Empty Trash)
             var deleteAllBtn = document.getElementById('deleteAllBtn');
             if (deleteAllBtn){
                 deleteAllBtn.addEventListener('click', function(e){
                     e.preventDefault();
-                    if (!confirm('Bạn có chắc muốn xóa vĩnh viễn tất cả mục trong thùng rác? Hành động này không thể hoàn tác.')) return;
+
                     var docs = getAllIds('doc');
                     var folders = getAllIds('folder');
+
+                    if (docs.length === 0 && folders.length === 0) {
+                        alert('Thùng rác đang trống.');
+                        return;
+                    }
+
+                    if (!confirm('CẢNH BÁO: Bạn có chắc chắn muốn làm sạch thùng rác? Tất cả dữ liệu sẽ bị xóa vĩnh viễn và KHÔNG THỂ khôi phục.')) return;
+
                     var docsCsv = docs.join(',');
                     var foldersCsv = folders.join(',');
                     var token = document.querySelector('#permanentDeleteForm input[name="__RequestVerificationToken"]').value;
+
                     fetch('@Url.Action("DeletePermanently", "Documents")', {
                         method:'POST',
                         headers:{ 'RequestVerificationToken': token, 'Content-Type':'application/x-www-form-urlencoded' },
                         body: new URLSearchParams({ documentIds: docsCsv, folderIds: foldersCsv })
-                    }).then(function(r){ if (r.redirected) window.location.href=r.url; else window.location.reload(); });
+                    }).then(function(r){
+                        if (r.redirected) window.location.href=r.url;
+                        else window.location.reload();
+                    });
                 });
-            }
-
-            // restore form already uses normal post; update hidden before submit
-            var restoreForm = document.querySelector('form[asp-action="RestoreSelected"]');
-            if (restoreForm){
-                restoreForm.addEventListener('submit', function(){ updateHidden(); });
             }
         })();
     </script>

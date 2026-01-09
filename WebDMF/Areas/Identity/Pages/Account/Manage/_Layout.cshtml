@@ -125,8 +125,9 @@
                     </li>
 
                     @using Microsoft.AspNetCore.Identity
-                    @inject SignInManager<IdentityUser> SignInManager
-                    @inject UserManager<IdentityUser> UserManager
+                    @using WebDocumentManagement_FileSharing.Models
+                    @inject SignInManager<ApplicationUser> SignInManager
+                    @inject UserManager<ApplicationUser> UserManager
 
                     @if (SignInManager.IsSignedIn(User))
                     {

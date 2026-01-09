@@ -4,7 +4,7 @@ using WebDocumentManagement_FileSharing.Models;
 
 namespace WebDocumentManagement_FileSharing.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
@@ -16,6 +16,7 @@ namespace WebDocumentManagement_FileSharing.Data
         public DbSet<SystemSetting> SystemSettings { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<ShareLink> ShareLinks { get; set; }
+        public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {

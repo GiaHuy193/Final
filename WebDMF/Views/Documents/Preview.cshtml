@@ -140,7 +140,7 @@
                 <button onclick="toggleFullScreen()" class="btn btn-sm btn-outline-light me-2">
                     <i class="bi bi-fullscreen"></i> Toàn màn hình
                 </button>
-                <a href="@Url.Action("Download", "Documents", new { id = ViewBag.DocumentId })" class="btn btn-sm btn-success me-2">
+                <a id="downloadBtn" class="btn btn-sm btn-success me-2">
                     <i class="bi bi-download"></i> Tải về
                 </a>
                 <button onclick="window.close()" class="btn btn-sm btn-danger">
@@ -162,13 +162,17 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <script>
-        const fileUrl = '@Url.Action("Download", "Documents", new { id = ViewBag.DocumentId })';
+        // Use the stream endpoint passed from controller
+        const fileUrl = '@ViewBag.FileUrl';
+        const downloadUrl = '@Url.Action("Download", "Documents", new { id = ViewBag.DocumentId })';
         const fileName = '@ViewBag.DocumentName'.toLowerCase();
+
+        document.getElementById('downloadBtn').setAttribute('href', downloadUrl);
 
         async function loadPreview() {
             const container = document.getElementById('document-viewer');
             try {
-                const response = await fetch(fileUrl);
+                const response = await fetch(fileUrl, { credentials: 'same-origin' });
                 if (!response.ok) throw new Error("Không thể tải tệp tin từ máy chủ.");
 
                 const blob = await response.blob();

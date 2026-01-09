@@ -1,13 +1,16 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebDocumentManagement_FileSharing.Data;
 using WebDocumentManagement_FileSharing.Service;
 using WebDocumentManagement_FileSharing.Helpers;
+using WebDocumentManagement_FileSharing.Models; // Bắt buộc có dòng này để dùng ApplicationUser
 using System.Text;
+using PayPalCheckoutSdk.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
 System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -16,22 +19,30 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddTransient<EmailService>();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => {
+// Cấu hình PayPal Client
+builder.Services.AddSingleton(x => {
+    var config = builder.Configuration.GetSection("PayPal");
+    var clientId = config["ClientId"];
+    var secret = config["Secret"];
+
+    PayPalEnvironment environment = new SandboxEnvironment(clientId, secret);
+    return new PayPalHttpClient(environment);
+});
+
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
     options.SignIn.RequireConfirmedEmail = true;
     options.SignIn.RequireConfirmedAccount = true;
-    // adjust password options if needed
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 6;
 })
  .AddRoles<IdentityRole>()
  .AddEntityFrameworkStores<ApplicationDbContext>();
+// --------------------------
 
-// register IHttpContextAccessor and the audit action filter
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuditActionFilter>();
 
 builder.Services.AddControllersWithViews(options => {
-    // apply audit filter globally to MVC controllers
     options.Filters.AddService<AuditActionFilter>();
 });
 builder.Services.AddRazorPages();
@@ -42,15 +53,17 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    // --- SỬA Ở ĐÂY (Bước 2) ---
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     SeedData(userManager, roleManager).GetAwaiter().GetResult();
 }
 
-static async Task SeedData(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+// --- SỬA Ở ĐÂY (Bước 3) ---
+static async Task SeedData(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
 {
     var adminEmail = "Admin@gmail.com";
-    var adminPassword = "Admin@123"; // change this in production
+    var adminPassword = "Admin@123";
 
     if (!await roleManager.RoleExistsAsync("Admin"))
     {
@@ -60,7 +73,15 @@ static async Task SeedData(UserManager<IdentityUser> userManager, RoleManager<Id
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
     if (adminUser == null)
     {
-        adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+        // Khởi tạo ApplicationUser
+        adminUser = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true,
+            IsPremium = true
+        };
+
         var result = await userManager.CreateAsync(adminUser, adminPassword);
         if (result.Succeeded)
         {
@@ -75,8 +96,8 @@ static async Task SeedData(UserManager<IdentityUser> userManager, RoleManager<Id
         }
     }
 }
+// --------------------------
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -84,7 +105,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -96,7 +116,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Area-aware route mapping must be registered before the default route so URL generation uses /{area}/{controller}/{action}
 app.MapControllerRoute(
  name: "areas",
  pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
@@ -106,7 +125,6 @@ app.MapControllerRoute(
  pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-// Redirect bare /Identity to the Identity UI login page to avoid 404
 app.MapGet("/Identity", () => Results.Redirect("/Identity/Account/Login"));
 
 app.Run();

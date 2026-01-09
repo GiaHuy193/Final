@@ -7,21 +7,22 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Http;
-using WebDocumentManagement_FileSharing.Helpers; // Đảm bảo đã có namespace này
+using WebDocumentManagement_FileSharing.Helpers;
 using WebDocumentManagement_FileSharing.Data;
 using Microsoft.EntityFrameworkCore;
+using WebDocumentManagement_FileSharing.Models;
 
 namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ApplicationDbContext _db;
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             ApplicationDbContext db)
         {
             _userManager = userManager;
@@ -37,26 +38,31 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public InputModel Input { get; set; }
 
-        // bind file upload
         [BindProperty]
         public IFormFile AvatarUpload { get; set; }
 
-        // avatar url to display in view
         public string AvatarUrl { get; set; }
 
-        // --- CÁC THUỘC TÍNH MỚI CHO QUOTA ---
+        // Các thuộc tính hiển thị Quota
         public long UsedStorage { get; set; }
         public long TotalStorage { get; set; }
         public double StoragePercentage { get; set; }
         public string FormattedUsed { get; set; }
         public string FormattedTotal { get; set; }
-        // ------------------------------------
+        public bool IsPremium { get; set; }
 
         public class InputModel
         {
             [Phone]
             [Display(Name = "Số điện thoại")]
             public string PhoneNumber { get; set; }
+
+            [Display(Name = "Giới tính")]
+            public string Gender { get; set; }
+
+            [DataType(DataType.Date)]
+            [Display(Name = "Ngày sinh")]
+            public DateTime? DateOfBirth { get; set; }
         }
 
         private async Task<long> GetSystemQuotaBytesAsync(string key, long fallback)
@@ -70,35 +76,45 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
             return fallback;
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        // --- HÀM MỚI: TẠO TÊN THƯ MỤC CHUẨN (Dùng chung để tránh lệch) ---
+        private async Task<string> GetUserFolderNameAsync(ApplicationUser user)
+        {
+            var email = await _userManager.GetEmailAsync(user);
+            string rawName;
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                rawName = email;
+            }
+            else
+            {
+                rawName = await _userManager.GetUserIdAsync(user);
+            }
+
+            var invalid = Path.GetInvalidFileNameChars();
+            var cleaned = new string(rawName.Select(c => invalid.Contains(c) ? '_' : c).ToArray());
+            // Thêm ToLowerInvariant() để đảm bảo tên thư mục luôn là chữ thường
+            return cleaned.Replace('@', '_').Replace(' ', '_').Trim().ToLowerInvariant();
+        }
+        // ----------------------------------------------------------------
+
+        private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
+            IsPremium = user.IsPremium;
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                Gender = user.Gender,
+                DateOfBirth = user.DateOfBirth
             };
 
-            // --- LOGIC TÍNH TOÁN DUNG LƯỢNG ---
-            var email = await _userManager.GetEmailAsync(user);
-            // Logic chuẩn hóa tên thư mục (phải khớp với logic trong Controllers)
-            var folderName = "unknown";
-            if (!string.IsNullOrEmpty(email))
-            {
-                var invalid = Path.GetInvalidFileNameChars();
-                var cleaned = new string(email.Select(c => invalid.Contains(c) ? '_' : c).ToArray());
-                folderName = cleaned.Replace('@', '_').Replace(' ', '_').Trim();
-            }
-            else
-            {
-                var userId = await _userManager.GetUserIdAsync(user);
-                var invalid = Path.GetInvalidFileNameChars();
-                var cleaned = new string(userId.Select(c => invalid.Contains(c) ? '_' : c).ToArray());
-                folderName = cleaned.Replace('@', '_').Replace(' ', '_').Trim();
-            }
+            // 1. Lấy tên thư mục chuẩn
+            var folderName = await GetUserFolderNameAsync(user);
 
             var userPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", folderName);
             long usedOnDisk = 0;
@@ -110,22 +126,20 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
                 }
                 catch { usedOnDisk = 0; }
             }
-
             UsedStorage = usedOnDisk;
 
-            // Determine total storage from system settings. Default fallback: Standard 15GB
-            var standardFallback = 15L * 1024 * 1024 * 1024; // 15 GB
-            TotalStorage = await GetSystemQuotaBytesAsync("StandardQuota", standardFallback);
+            long standardBytes = 16106127360;
+            long premiumBytes = 107374182400;
 
-            // Tính phần trăm, tối đa là 100%
-            StoragePercentage = Math.Min(100, (double)UsedStorage / TotalStorage * 100);
+            standardBytes = await GetSystemQuotaBytesAsync("StandardQuota", standardBytes);
+            premiumBytes = await GetSystemQuotaBytesAsync("PremiumQuota", premiumBytes);
 
-            // Sử dụng Helper để format số liệu cho đẹp (ví dụ: 120 MB)
+            TotalStorage = user.IsPremium ? premiumBytes : standardBytes;
+            StoragePercentage = TotalStorage > 0 ? Math.Min(100, (double)UsedStorage / TotalStorage * 100) : 0;
+
             FormattedUsed = StorageHelper.FormatSize(UsedStorage);
             FormattedTotal = StorageHelper.FormatSize(TotalStorage);
-            // ------------------------------------
 
-            // --- Avatar URL: nếu có file avatar trong uploads/{user}/avatar.* thì dùng, không thì dùng ui-avatars ---
             string avatarRelative = null;
             var allowedExts = new[] { ".png", ".jpg", ".jpeg", ".gif" };
             if (Directory.Exists(userPath))
@@ -143,7 +157,8 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
 
             if (!string.IsNullOrEmpty(avatarRelative))
             {
-                AvatarUrl = avatarRelative;
+                // Thêm ticks để chống cache
+                AvatarUrl = avatarRelative + "?v=" + DateTime.Now.Ticks;
             }
             else
             {
@@ -165,30 +180,18 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return NotFound("Không tìm thấy User ID.");
 
-            // Handle avatar upload first if present
+            // Lấy User trực tiếp từ DB để tracking
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return NotFound("User không tồn tại trong DB.");
+
+            // --- XỬ LÝ UPLOAD AVATAR ---
             if (AvatarUpload != null && AvatarUpload.Length > 0)
             {
-                var email = await _userManager.GetEmailAsync(user);
-                var folderName = "unknown";
-                if (!string.IsNullOrEmpty(email))
-                {
-                    var invalid = Path.GetInvalidFileNameChars();
-                    var cleaned = new string(email.Select(c => invalid.Contains(c) ? '_' : c).ToArray());
-                    folderName = cleaned.Replace('@', '_').Replace(' ', '_').Trim();
-                }
-                else
-                {
-                    var userId = await _userManager.GetUserIdAsync(user);
-                    var invalid = Path.GetInvalidFileNameChars();
-                    var cleaned = new string(userId.Select(c => invalid.Contains(c) ? '_' : c).ToArray());
-                    folderName = cleaned.Replace('@', '_').Replace(' ', '_').Trim();
-                }
+                // 2. Dùng hàm chung để lấy tên thư mục chuẩn
+                var folderName = await GetUserFolderNameAsync(user);
 
                 var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 var userFolder = Path.Combine(uploadsRoot, folderName);
@@ -198,20 +201,16 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
                 var allowed = new[] { ".png", ".jpg", ".jpeg", ".gif" };
                 if (!allowed.Contains(ext))
                 {
-                    StatusMessage = "Định dạng ảnh không được hỗ trợ. Vui lòng chọn PNG/JPG/GIF.";
+                    StatusMessage = "Định dạng ảnh không hỗ trợ. Chỉ chấp nhận PNG/JPG/GIF.";
                     await LoadAsync(user);
                     return Page();
                 }
 
-                // remove existing avatar files with other extensions
+                // Xóa ảnh cũ
                 foreach (var e in allowed)
                 {
                     var exist = Path.Combine(userFolder, "avatar" + e);
-                    try
-                    {
-                        if (System.IO.File.Exists(exist)) System.IO.File.Delete(exist);
-                    }
-                    catch { }
+                    try { if (System.IO.File.Exists(exist)) System.IO.File.Delete(exist); } catch { }
                 }
 
                 var dest = Path.Combine(userFolder, "avatar" + ext);
@@ -221,12 +220,11 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
                     {
                         await AvatarUpload.CopyToAsync(fs);
                     }
-
-                    StatusMessage = "Ảnh đại diện đã được cập nhật.";
+                    // Không gán StatusMessage vội để ưu tiên thông báo lưu thành công ở dưới
                 }
                 catch
                 {
-                    StatusMessage = "Không thể lưu ảnh đại diện. Vui lòng thử lại.";
+                    StatusMessage = "Lỗi: Không thể lưu tệp ảnh lên server.";
                     await LoadAsync(user);
                     return Page();
                 }
@@ -238,19 +236,29 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (Input.PhoneNumber != phoneNumber)
+            try
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
-                {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
-                    return RedirectToPage();
-                }
+                // --- CẬP NHẬT DỮ LIỆU ---
+                user.PhoneNumber = Input.PhoneNumber;
+                user.Gender = Input.Gender;
+                user.DateOfBirth = Input.DateOfBirth;
+
+                // Đánh dấu là đã sửa và lưu
+                _db.Update(user);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "Lỗi Database: " + ex.Message;
+                await LoadAsync(user);
+                return Page();
             }
 
+            // Refresh Cookie
             await _signInManager.RefreshSignInAsync(user);
-            if (string.IsNullOrEmpty(StatusMessage)) StatusMessage = "Hồ sơ của bạn đã được cập nhật";
+
+            StatusMessage = "Hồ sơ của bạn đã được cập nhật thành công.";
+            // Redirect để load lại trang sạch sẽ và hiển thị ảnh mới
             return RedirectToPage();
         }
     }

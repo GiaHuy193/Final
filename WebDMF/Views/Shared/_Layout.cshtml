@@ -2,8 +2,9 @@
 @using System.IO
 @using Microsoft.AspNetCore.Identity
 @using WebDocumentManagement_FileSharing.Helpers
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@using WebDocumentManagement_FileSharing.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 @inject WebDocumentManagement_FileSharing.Data.ApplicationDbContext DbContext
 
 @{
@@ -40,24 +41,54 @@
 
     // Quota widget data
     long usedOnDisk = 0;
-    // Default to 15 GB
-    long quota = 15L * 1024 * 1024 * 1024; // 15 GB
+    // Default quotas
+    long standardQuota = 15L * 1024 * 1024 * 1024; // 15 GB
+    long premiumQuota = 100L * 1024 * 1024 * 1024; // 100 GB
+
     try
     {
-        // Try to read StandardQuota from SystemSettings
+        // Read StandardQuota from SystemSettings
         var s = DbContext?.SystemSettings?.FirstOrDefault(ss => ss.SettingKey == "StandardQuota");
         if (s != null && long.TryParse(s.SettingValue, out var q))
         {
-            quota = q;
+            standardQuota = q;
         }
     }
     catch { /* ignore DB read errors and fall back to default */ }
+
+    try
+    {
+        // Read PremiumQuota from SystemSettings
+        var p = DbContext?.SystemSettings?.FirstOrDefault(ss => ss.SettingKey == "PremiumQuota");
+        if (p != null && long.TryParse(p.SettingValue, out var qp))
+        {
+            premiumQuota = qp;
+        }
+    }
+    catch { }
+
+    // Default to standard
+    long quota = standardQuota;
+    string tierLabel = "Standard";
 
     if (isAuthenticated)
     {
         var u = UserManager.GetUserAsync(User).GetAwaiter().GetResult();
         if (u != null)
         {
+            // if user is premium, use premium quota
+            var userIsPremium = u.IsPremium;
+            if (userIsPremium)
+            {
+                quota = premiumQuota;
+                tierLabel = "Premium";
+            }
+            else
+            {
+                quota = standardQuota;
+                tierLabel = "Standard";
+            }
+
             var email = !string.IsNullOrEmpty(u.Email) ? u.Email : u.UserName ?? u.Id;
             var invalid = System.IO.Path.GetInvalidFileNameChars();
             var cleaned = new string(email.Select(c => invalid.Contains(c) ? '_' : c).ToArray());
@@ -564,9 +595,9 @@
         @* LOGO DOCNEST (SỬA ĐỔI) *@
         <a class="brand me- d-flex align-items-center gap-2" href="@logoRedirectUrl"><i class="bi bi-cloud-check-fill fs-3"></i> DocNest</a>
 
-        <form class="d-none d-md-flex ms-2 me-auto header-search-offset" asp-page="/Document/Search" method="get" role="search">
+        <form class="d-none d-md-flex ms-2 me-auto header-search-offset" asp-controller="Documents" asp-action="Search" method="get" role="search">
             <div class="input-group" style="min-width:360px; max-width:600px;">
-                <input type="search" name="q" class="form-control rounded-pill" placeholder="Tìm kiếm tài liệu..." aria-label="Tìm kiếm tài liệu">
+                <input type="search" name="query" class="form-control rounded-pill" placeholder="Tìm kiếm tài liệu..." aria-label="Tìm kiếm tài liệu">
                 <button class="btn btn-outline-secondary rounded-pill ms-2" type="submit">Tìm</button>
             </div>
         </form>

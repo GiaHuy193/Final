@@ -17,9 +17,9 @@ namespace WebDocumentManagement_FileSharing.Areas.Admin.Controllers
     public class FilesController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public FilesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public FilesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;

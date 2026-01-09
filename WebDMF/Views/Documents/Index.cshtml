@@ -216,6 +216,45 @@
         <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center"><i class="bi bi-exclamation-circle-fill me-2"></i> @TempData["Error"]</div>
     }
 
+    @* Search heading and no-results / suggestions *@
+    @if (ViewBag.SearchQuery != null)
+    {
+        <div class="mb-4">
+            <h5 class="fw-bold">Kết quả tìm kiếm cho "@ViewBag.SearchQuery"</h5>
+        </div>
+
+        @if ((Model?.Folders == null || !Model.Folders.Any()) && (Model?.Documents == null || !Model.Documents.Any()))
+        {
+            <div class="alert alert-warning">Không tìm thấy kết quả cho "<strong>@ViewBag.SearchQuery</strong>".</div>
+
+            @if (ViewBag.SuggestFolders != null)
+            {
+                <div class="mb-3">
+                    <div class="small text-muted mb-1">Gợi ý thư mục gần giống</div>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var s in (IEnumerable<dynamic>)ViewBag.SuggestFolders)
+                        {
+                            <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("Index", "Documents", new { folderId = (int)s.Id })">@s.Name</a>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (ViewBag.SuggestDocs != null)
+            {
+                <div class="mb-3">
+                    <div class="small text-muted mb-1">Gợi ý tệp gần giống</div>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var s in (IEnumerable<dynamic>)ViewBag.SuggestDocs)
+                        {
+                            <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("Details", "Documents", new { id = (int)s.Id })">@s.Name</a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    }
+
     <div class="mb-5">
         <h6 class="fw-bold text-uppercase text-secondary small mb-3">Thư mục</h6>
         <div class="row g-3">
@@ -328,18 +367,18 @@
 
                         <a asp-controller="Documents" asp-action="Open" asp-route-id="@d.Id" target="_blank" class="text-decoration-none h-100">
                             <div class="file-preview-area">
-                                @{
+                                @{ 
                                     var previewType = FilePreviewHelper.GetPreviewType(d.FileName, d.ContentType);
                                     if (previewType == FilePreviewType.Image) {
                                         <img src="@Url.Action("Open", "Documents", new { id = d.Id })" class="h-100 w-100 object-fit-cover" loading="lazy" />
-                                    } else if (previewType == FilePreviewType.Office) {
-                                        // embed preview page into an iframe for office documents
-                                        <iframe class="office-preview-iframe" src="@Url.Action("Preview", "Documents", new { id = d.Id })" loading="lazy"></iframe>
-                                    } else if (previewType == FilePreviewType.Pdf) {
-                                        <i class="bi bi-file-earmark-pdf text-danger" style="font-size:3.5rem"></i>
                                     } else {
-                                        var iconClass = d.FileName.EndsWith(".docx") ? "bi-file-earmark-word text-primary" : 
-                                                        d.FileName.EndsWith(".xlsx") ? "bi-file-earmark-excel text-success" : "bi-file-earmark-text text-secondary";
+                                        var ext = System.IO.Path.GetExtension(d.FileName)?.ToLower();
+                                        var iconClass = "bi-file-earmark-text text-secondary";
+                                        if (ext == ".pdf") iconClass = "bi-file-earmark-pdf text-danger";
+                                        else if (ext == ".docx" || ext == ".doc") iconClass = "bi-file-earmark-word text-primary";
+                                        else if (ext == ".xlsx" || ext == ".xls") iconClass = "bi-file-earmark-excel text-success";
+                                        else if (ext == ".pptx" || ext == ".ppt") iconClass = "bi-file-earmark-play text-warning";
+                                        else if (ext == ".mp4" || ext == ".mov" || ext == ".avi") iconClass = "bi-file-earmark-play text-secondary";
                                         <i class="bi @iconClass" style="font-size: 3.5rem;"></i>
                                     }
                                 }
@@ -495,7 +534,7 @@
                     if (!confirm('Chuyển "' + this.getAttribute('data-name') + '" vào thùng rác?')) return;
                     fetch('@Url.Action("Delete", "Documents")', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value },
                         body: new URLSearchParams({ id: this.getAttribute('data-id'), confirmAction: 'trash' })
                     }).then(r => { if(r.ok) location.reload(); else alert('Lỗi xóa file'); });
                 });
@@ -507,9 +546,37 @@
                     if (!confirm('Xóa thư mục này?')) return;
                     fetch('@Url.Action("Delete", "Folders")', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value },
                         body: new URLSearchParams({ id: this.getAttribute('data-id') })
                     }).then(r => { if(r.ok) location.reload(); else alert('Lỗi xóa thư mục'); });
+                });
+            });
+
+            // --- STAR TOGGLE (documents & folders) ---
+            document.querySelectorAll('.document-star-toggle, .folder-star-toggle').forEach(function(el){
+                el.addEventListener('click', function(e){
+                    e.preventDefault();
+                    var id = this.getAttribute('data-id');
+                    var isFolder = this.classList.contains('folder-star-toggle');
+                    var url = isFolder ? '@Url.Action("ToggleFolder", "Star")' : '@Url.Action("ToggleDocument", "Star")';
+                    if (!id) return;
+                    var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                    var token = tokenInput ? tokenInput.value : '';
+                    fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token },
+                        body: new URLSearchParams({ id: id })
+                    }).then(function(response){
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    }).then(function(j){
+                        if (j && j.success) {
+                            // Option: update UI without reload in future. For now reload to reflect change
+                            location.reload();
+                        } else {
+                            alert('Lỗi khi gắn sao');
+                        }
+                    }).catch(function(){ alert('Lỗi kết nối'); });
                 });
             });
 

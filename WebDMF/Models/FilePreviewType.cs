@@ -5,6 +5,7 @@ namespace WebDocumentManagement_FileSharing.Models
         Docx,
         Image,
         Pdf,
+        Video,
         Office,
         NotSupported
     }

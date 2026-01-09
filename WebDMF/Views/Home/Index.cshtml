@@ -302,7 +302,6 @@
             <h2 class="fw-bold mb-1 text-dark">Trang chủ</h2>
         </div>
     </div>
-    <
     @if (TempData["Message"] != null)
     {
         <div class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4 fade show" role="alert">
@@ -620,7 +619,7 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                         body: new URLSearchParams({ id: id })
-                    }).then(r => { if(r.ok) location.reload(); else alert('Lỗi xóa thư mục'); });
+                    }).then(function(r) { if(r.ok) location.reload(); else alert('Lỗi xóa thư mục'); });
                 });
             });
 
