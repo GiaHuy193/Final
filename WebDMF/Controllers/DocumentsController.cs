@@ -279,14 +279,22 @@ namespace WebDocumentManagement_FileSharing.Controllers
             var owner = await _userManager.FindByIdAsync(document.OwnerId);
             ViewBag.OwnerName = owner != null ? owner.UserName : "Không xác định";
 
+            // Set IsPremium flag for the current viewer (if authenticated)
+            ViewBag.IsPremium = false;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var currentUser = await _userManager.FindByIdAsync(userId);
+                if (currentUser != null) ViewBag.IsPremium = currentUser.IsPremium;
+            }
+
             return View(document);
         }
 
         // ==========================================
-        // CREATE (GET) - Hiển thị trang chọn tệp tải lên
+        // UPLOAD (GET) - Hiển thị trang chọn tệp tải lên
         // ==========================================
         [HttpGet]
-        public IActionResult Create(int? folderId, string? returnUrl = null)
+        public IActionResult Upload(int? folderId, string? returnUrl = null)
         {
             // Chuẩn bị danh sách thư mục để người dùng chọn (nếu muốn đổi thư mục khi upload)
             ViewData["FolderId"] = new SelectList(_context.Folders.OrderBy(f => f.Name), "Id", "Name", folderId);
@@ -298,15 +306,25 @@ namespace WebDocumentManagement_FileSharing.Controllers
         }
 
         // ==========================================
-        // CREATE (POST) - Tải lên tệp lần đầu (v1)
+        // UPLOAD (POST) - Tải lên tệp lần đầu (v1)
         // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Document document, IFormFile fileUpload, string? returnUrl = null)
+        public async Task<IActionResult> Upload(Document document, IFormFile fileUpload, string? returnUrl = null)
         {
             if (fileUpload == null || fileUpload.Length == 0)
             {
                 TempData["Error"] = "Vui lòng chọn tệp hợp lệ.";
+                return RedirectToAction(nameof(Index), new { folderId = document.FolderId });
+            }
+
+            // --- [BẮT ĐẦU ĐOẠN KIỂM TRA MỚI] ---
+            var userFileExt = Path.GetExtension(fileUpload.FileName).ToLower();
+            var allowedExtensions = await GetAllowedExtensions();
+
+            if (!allowedExtensions.Contains(userFileExt))
+            {
+                TempData["Error"] = $"Định dạng tệp '{userFileExt}' bị chặn. Admin chỉ cho phép: {string.Join(", ", allowedExtensions)}";
                 return RedirectToAction(nameof(Index), new { folderId = document.FolderId });
             }
 
@@ -426,6 +444,14 @@ namespace WebDocumentManagement_FileSharing.Controllers
                 .FirstOrDefaultAsync(d => d.Id == documentId);
 
             if (document == null || fileUpload == null) return NotFound();
+
+            var userFileExt = Path.GetExtension(fileUpload.FileName).ToLower();
+            var allowedExtensions = await GetAllowedExtensions();
+            if (!allowedExtensions.Contains(userFileExt))
+            {
+                TempData["Error"] = $"Không thể cập nhật phiên bản mới. Định dạng '{userFileExt}' bị chặn bởi Admin.";
+                return RedirectToAction(nameof(Details), new { id = documentId });
+            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var access = await GetEffectiveAccessForUserOnDocumentAsync(documentId, userId);
@@ -1256,6 +1282,34 @@ namespace WebDocumentManagement_FileSharing.Controllers
 
             // Trả về View Local Preview 
             return View("Preview");
+        }
+
+        // Backwards-compatibility: keep /Documents/Create route and redirect to /Documents/Upload
+        [HttpGet]
+        public IActionResult Create(int? folderId, string? returnUrl = null)
+        {
+            return RedirectToAction(nameof(Upload), new { folderId = folderId, returnUrl = returnUrl });
+        }
+
+        // Hàm phụ trợ: Lấy danh sách đuôi file cho phép từ Database
+        private async Task<List<string>> GetAllowedExtensions()
+        {
+            // 1. Tìm setting trong bảng SystemSettings
+            var setting = await _context.SystemSettings
+                                        .FirstOrDefaultAsync(s => s.SettingKey == "AllowedExtensions");
+
+            // 2. Nếu chưa có hoặc trống -> Dùng danh sách mặc định an toàn
+            if (setting == null || string.IsNullOrWhiteSpace(setting.SettingValue))
+            {
+                return new List<string> { ".pdf", ".docx", ".xlsx", ".jpg", ".png" };
+            }
+
+            // 3. Tách chuỗi từ DB (ví dụ: ".pdf,.docx") thành danh sách
+            return setting.SettingValue
+                          .Split(',')
+                          .Select(x => x.Trim().ToLower()) // Xóa khoảng trắng, chuyển về chữ thường
+                          .Where(x => !string.IsNullOrEmpty(x))
+                          .ToList();
         }
     }
 }

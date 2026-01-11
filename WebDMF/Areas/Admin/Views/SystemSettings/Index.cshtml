@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
 <style>
-    /* Bo góc và đổ bóng nhẹ chuẩn hiện đại */
+    /* Card Style */
     .card-settings {
         border: 1px solid #dbdfe6;
         border-radius: 12px;
@@ -15,6 +15,7 @@
         background-color: #fff;
     }
 
+    /* Tabs */
     .nav-tabs-settings .nav-link {
         border: none;
         border-bottom: 3px solid transparent;
@@ -30,24 +31,43 @@
             background: transparent;
         }
 
+    /* Forms */
     .form-label-bold {
         font-weight: 600;
         font-size: 0.875rem;
         color: #111318;
     }
 
-    .badge-pill-custom {
-        background-color: rgba(19, 91, 236, 0.1);
-        color: #135bec;
-        border: 1px solid rgba(19, 91, 236, 0.2);
-        padding: 0.4rem 0.8rem;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: 0.8rem;
+    .quota-select {
+        min-width: 200px;
     }
 
-    .quota-select { min-width: 200px; }
-    .ext-checkbox { margin-right: 8px; }
+    /* Extension Tags Style */
+    .ext-tag {
+        display: inline-flex;
+        align-items: center;
+        background-color: #eef2ff;
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+        border-radius: 6px;
+        padding: 4px 10px;
+        margin: 0 6px 6px 0;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+        .ext-tag .remove-tag {
+            margin-left: 6px;
+            cursor: pointer;
+            color: #6366f1;
+            font-weight: bold;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+            .ext-tag .remove-tag:hover {
+                color: #dc2626;
+            }
 </style>
 
 <div class="container-fluid px-4 py-4">
@@ -74,6 +94,7 @@
     </ul>
 
     <form id="settingsForm" asp-area="Admin" asp-controller="SystemSettings" asp-action="SaveSettings" method="post">
+        @Html.AntiForgeryToken()
 
         <div class="d-flex align-items-center gap-2 mb-3 mt-4">
             <span class="material-symbols-outlined text-primary">tune</span>
@@ -84,7 +105,6 @@
                 <div class="col-md-6">
                     <label class="form-label form-label-bold">Tên ứng dụng</label>
                     <input type="text" class="form-control" name="appName" value="DocNest" />
-                    <div class="form-text small">Tên hiển thị trên thanh tiêu đề và email.</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label form-label-bold">Email hỗ trợ</label>
@@ -107,8 +127,8 @@
             <span class="material-symbols-outlined text-primary">cloud_upload</span>
             <h5 class="mb-0 fw-bold">Quản lý tệp & Lưu trữ</h5>
         </div>
+
         <div class="card card-settings p-4 mb-4">
-            @* Render settings list but enhance specific keys *@
             @for (int i = 0; i < Model.Count; i++)
             {
                 var key = Model[i].SettingKey ?? string.Empty;
@@ -120,7 +140,6 @@
 
                 if (key == "StandardQuota" || key == "PremiumQuota")
                 {
-                    // interpret value as bytes -> MB
                     long bytes = 0;
                     long.TryParse(val, out bytes);
                     var mb = bytes / (1024 * 1024);
@@ -132,7 +151,7 @@
                             <div class="text-muted small">@desc</div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <select class="form-select quota-select" data-setting-index="@i" aria-label="Quota select">
+                            <select class="form-select quota-select" data-setting-index="@i">
                                 <option value="1024">1 GB</option>
                                 <option value="5120">5 GB</option>
                                 <option value="15360">15 GB</option>
@@ -146,32 +165,25 @@
                 }
                 else if (key == "AllowedExtensions")
                 {
-                    // show checkboxes for common extensions + custom input
-                    var currentCsv = val ?? string.Empty;
-                    var currentList = currentCsv.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim().ToLower()).ToList();
-                    var common = new[] { ".pdf", ".docx", ".png", ".jpg", ".jpeg", ".zip", ".rar", ".xlsx" };
-
-                    <div class="d-flex justify-content-between align-items-center @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
-                        <div style="max-width: 70%;">
+                    <div class="d-flex justify-content-between align-items-start @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
+                        <div style="max-width: 40%;">
                             <div class="fw-bold mb-1">Định dạng cho phép</div>
                             <div class="text-muted small">@desc</div>
                         </div>
-                        <div class="d-flex flex-column align-items-end">
-                            <div class="mb-2">
-                                @foreach (var ext in common)
-                                {
-                                    var chkId = $"ext_{i}_{ext.Replace('.', '_')}";
-                                    var isChecked = currentList.Contains(ext);
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input ext-checkbox" type="checkbox" id="@chkId" value="@ext" data-setting-index="@i" @(isChecked ? "checked" : "") />
-                                        <label class="form-check-label" for="@chkId">@ext</label>
-                                    </div>
-                                }
+                        <div class="d-flex flex-column align-items-end flex-grow-1" style="max-width: 500px;">
+
+                            <div id="ext-tags-container-@i" class="w-100 mb-3 p-2 bg-light border rounded" style="min-height: 40px;">
                             </div>
-                            <div class="d-flex align-items-center">
-                                <input type="text" class="form-control form-control-sm me-2" id="ext-custom-@i" placeholder="Thêm .ext, phân tách bằng dấu phẩy" style="min-width:240px;" value="@(currentList.Except(common).Any() ? string.Join(',', currentList.Except(common)) : String.Empty)" />
-                                <input type="hidden" id="setting-val-@i" name="[@i].SettingValue" value="@val" />
+
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="ext-input-@i" placeholder="Nhập đuôi file (ví dụ: mp4)" />
+                                <button type="button" class="btn btn-outline-primary" onclick="addExtension(@i)">
+                                    <span class="material-symbols-outlined fs-6 align-middle">add</span> Thêm
+                                </button>
                             </div>
+                            <div class="form-text text-end">Nhập đuôi và nhấn Enter hoặc nút Thêm.</div>
+
+                            <input type="hidden" id="setting-val-@i" name="[@i].SettingValue" value="@val" />
                         </div>
                     </div>
                 }
@@ -209,69 +221,127 @@
                 <textarea class="form-control" rows="3" placeholder="Thông báo cho người dùng..."></textarea>
             </div>
         </div>
-
     </form>
-
 </div>
 
 <script>
-    (function(){
-        // helper to convert MB -> bytes
+    // --- Global Helper Functions for Extensions ---
+
+    // Lưu trữ danh sách extensions tạm thời cho từng setting index
+    var extData = {};
+
+    function renderTags(idx) {
+        var container = document.getElementById('ext-tags-container-' + idx);
+        var hiddenInput = document.getElementById('setting-val-' + idx);
+
+        if (!container || !hiddenInput) return;
+
+        // Xóa cũ
+        container.innerHTML = '';
+
+        // Render tags
+        extData[idx].forEach(function(ext) {
+            var tag = document.createElement('span');
+            tag.className = 'ext-tag';
+            tag.innerHTML = `${ext} <span class="remove-tag" onclick="removeExtension(${idx}, '${ext}')">&times;</span>`;
+            container.appendChild(tag);
+        });
+
+        // Cập nhật giá trị vào hidden input (CSV)
+        hiddenInput.value = extData[idx].join(',');
+    }
+
+    function addExtension(idx) {
+        var input = document.getElementById('ext-input-' + idx);
+        if (!input) return;
+
+        var val = input.value.trim().toLowerCase();
+        if (!val) return;
+
+        // Tự thêm dấu chấm nếu thiếu
+        if (!val.startsWith('.')) val = '.' + val;
+
+        // Kiểm tra trùng
+        if (!extData[idx].includes(val)) {
+            extData[idx].push(val);
+            renderTags(idx);
+        }
+
+        // Clear input
+        input.value = '';
+        input.focus();
+    }
+
+    function removeExtension(idx, ext) {
+        extData[idx] = extData[idx].filter(e => e !== ext);
+        renderTags(idx);
+    }
+
+    // --- Main Init ---
+    document.addEventListener("DOMContentLoaded", function() {
+
+        // 1. Init Extensions Data
+        document.querySelectorAll('input[type="hidden"][id^="setting-val-"]').forEach(function(hidden) {
+            var idx = hidden.id.replace('setting-val-', '');
+            // Kiểm tra xem dòng này có phải là Extensions không (có container tags không)
+            var container = document.getElementById('ext-tags-container-' + idx);
+            if (container) {
+                var initialVal = hidden.value || '';
+                // Tách chuỗi CSV thành mảng
+                extData[idx] = initialVal.split(',').map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
+                renderTags(idx);
+
+                // Add event listener cho nút Enter trên ô input
+                var input = document.getElementById('ext-input-' + idx);
+                if(input){
+                    input.addEventListener("keypress", function(event) {
+                        if (event.key === "Enter") {
+                            event.preventDefault(); // Chặn submit form
+                            addExtension(idx);
+                        }
+                    });
+                }
+            }
+        });
+
+        // 2. Init Quota Logic (MB <-> Bytes)
         function mbToBytes(mb){ return (parseInt(mb) || 0) * 1024 * 1024; }
 
-        // initialize quota selects
         document.querySelectorAll('.quota-select').forEach(function(sel){
             var idx = sel.getAttribute('data-setting-index');
             var hidden = document.getElementById('setting-val-' + idx);
-            var currentBytes = hidden ? parseInt(hidden.value || '0') : 0;
+            var customInput = document.querySelector('.custom-quota-input[data-setting-index="' + idx + '"]');
+
+            if(!hidden) return; // Skip if extension row
+
+            var currentBytes = parseInt(hidden.value || '0');
             var currentMB = Math.round(currentBytes / (1024*1024)) || 0;
 
-            // find matching option
             var matched = false;
-            for(var i=0;i<sel.options.length;i++){
-                var val = sel.options[i].value;
-                if(val !== 'custom' && parseInt(val) === currentMB){ sel.selectedIndex = i; matched = true; break; }
+            for(var i=0; i<sel.options.length; i++){
+                if(sel.options[i].value !== 'custom' && parseInt(sel.options[i].value) === currentMB){
+                    sel.selectedIndex = i; matched = true; break;
+                }
             }
-            var customInput = document.querySelector('.custom-quota-input[data-setting-index="' + idx + '"]');
-            if(!matched){ sel.value = 'custom'; if(customInput){ customInput.style.display=''; customInput.value = currentMB>0?currentMB:''; } }
+            if(!matched && customInput){
+                sel.value = 'custom'; customInput.style.display=''; customInput.value = currentMB > 0 ? currentMB : '';
+            }
 
             sel.addEventListener('change', function(){
-                var v = sel.value;
-                if(v === 'custom'){
-                    if(customInput){ customInput.style.display=''; customInput.focus(); }
+                if(sel.value === 'custom'){
+                    if(customInput) { customInput.style.display=''; customInput.focus(); }
                     if(hidden) hidden.value = mbToBytes(customInput.value || 0);
                 } else {
-                    if(customInput){ customInput.style.display='none'; }
-                    if(hidden) hidden.value = mbToBytes(v);
+                    if(customInput) customInput.style.display='none';
+                    if(hidden) hidden.value = mbToBytes(sel.value);
                 }
             });
 
             if(customInput){
-                customInput.addEventListener('input', function(){ if(hidden) hidden.value = mbToBytes(customInput.value || 0); });
+                customInput.addEventListener('input', function(){
+                    if(hidden) hidden.value = mbToBytes(this.value);
+                });
             }
         });
-
-        // initialize extension checkboxes -> update hidden on submit
-        var settingsForm = document.getElementById('settingsForm');
-        if(settingsForm){
-            settingsForm.addEventListener('submit', function(){
-                // for each AllowedExtensions setting, collect checked and custom
-                document.querySelectorAll('[id^="setting-val-"]').forEach(function(hidden){
-                    var idx = hidden.id.replace('setting-val-','');
-                    // find ext-custom for this idx
-                    var customInput = document.getElementById('ext-custom-' + idx);
-                    if(customInput){
-                        var parts = [];
-                        document.querySelectorAll('input.ext-checkbox[data-setting-index="' + idx + '"]:checked').forEach(function(ch){ parts.push(ch.value); });
-                        var custom = (customInput.value || '').split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s.length>0; });
-                        parts = parts.concat(custom);
-                        // normalize and unique
-                        parts = parts.map(function(s){ return s.trim().toLowerCase(); }).filter(function(s,i,a){ return s && a.indexOf(s) === i; });
-                        hidden.value = parts.join(',');
-                    }
-                    // quotas already updated on change
-                });
-            });
-        }
-    })();
-</script></script>
+    });
+</script>

@@ -1,42 +1,241 @@
 ﻿@model WebDocumentManagement_FileSharing.Models.Folder
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Chi tiết thư mục";
+    // Tính toán số lượng (xử lý null nếu cần)
+    var subFolderCount = Model.SubFolders?.Count ?? 0;
+    var docCount = Model.Documents?.Count ?? 0;
+    var totalItems = subFolderCount + docCount;
 }
 
-<h1>Details</h1>
+<style>
+    /* Sử dụng lại bộ màu chuẩn từ trang Create để đồng bộ */
+    :root {
+        --bg-body: #f3f4f6;
+        --surface: #ffffff;
+        --text-main: #111827;
+        --text-sub: #6b7280;
+        --primary: #3b82f6;
+    }
 
-<div>
-    <h4>Folder</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ParentFolder)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ParentFolder.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OwnerId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OwnerId)
-        </dd>
-    </dl>
+    body {
+        background-color: var(--bg-body);
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    .detail-card {
+        background: var(--surface);
+        border-radius: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        border: 1px solid white;
+        overflow: hidden;
+    }
+
+    /* Icon Folder to đùng ở trên */
+    .folder-avatar {
+        width: 100px;
+        height: 100px;
+        background-color: #eff6ff;
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin: 0 auto 1.5rem auto;
+    }
+
+    /* Các dòng thuộc tính */
+    .prop-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+        .prop-row:last-child {
+            border-bottom: none;
+        }
+
+    .prop-label {
+        color: var(--text-sub);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .prop-value {
+        color: var(--text-main);
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .btn-action {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-block;
+    }
+
+    .btn-primary-soft {
+        background-color: #eff6ff;
+        color: var(--primary);
+    }
+
+        .btn-primary-soft:hover {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+
+            <div class="mb-3">
+                <a asp-action="Index" class="text-decoration-none text-muted small d-flex align-items-center gap-1">
+                    <i class="bi bi-arrow-left"></i> Quay lại
+                </a>
+            </div>
+
+            <div class="detail-card p-4">
+
+                <div class="text-center mb-4">
+                    <div class="folder-avatar">
+                        <i class="bi bi-folder2-open"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">@Model.Name</h3>
+                    <p class="text-muted small">Chi tiết thuộc tính</p>
+                </div>
+
+                <div class="px-2">
+                    <div class="prop-row">
+                        <span class="prop-label"><i class="bi bi-calendar3"></i> Ngày tạo</span>
+                        <span class="prop-value">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+
+                    <div class="prop-row">
+                        <span class="prop-label"><i class="bi bi-person-circle"></i> Người sở hữu</span>
+                        <span class="prop-value">
+                            @((ViewBag.OwnerEmail as string) ?? Model.OwnerId)
+                        </span>
+                    </div>
+
+                    <div class="prop-row">
+                        <span class="prop-label"><i class="bi bi-diagram-2"></i> Vị trí</span>
+                        <span class="prop-value text-truncate" style="max-width: 150px;">
+                            @if (Model.ParentFolder != null)
+                            {
+                                @Model.ParentFolder.Name
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-secondary border">Thư mục gốc</span>
+                            }
+                        </span>
+                    </div>
+
+                    <div class="prop-row">
+                        <span class="prop-label"><i class="bi bi-hdd-stack"></i> Tổng mục chứa</span>
+                        <span class="prop-value">
+                            <span class="badge bg-blue-soft text-primary">@docCount tệp</span>
+                            <span class="badge bg-gray-soft text-secondary">@subFolderCount thư mục</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 d-grid gap-2">
+                    <a asp-controller="Home" asp-action="Index" asp-route-folderId="@Model.Id" class="btn btn-primary btn-primary-modern text-white shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Mở thư mục này
+                    </a>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button type="button" data-bs-toggle="modal" data-bs-target="#folderRenameModal" data-id="@Model.Id" data-name="@Model.Name" class="btn btn-primary-soft w-100 border-0">
+                                <i class="bi bi-pencil-square me-1"></i> Đổi tên
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-light w-100 text-danger border-0">
+                                <i class="bi bi-trash me-1"></i> Xóa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<!-- Rename Modal -->
+<div class="modal fade" id="folderRenameModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold">Đổi tên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="folderRenameForm">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="folder-rename-id" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">Tên mới</label>
+                        <input type="text" name="newName" id="folder-rename-newName" class="form-control form-control-lg bg-light border-0" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        (function(){
+            var renameModal = document.getElementById('folderRenameModal');
+            if (renameModal) {
+                renameModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var id = button.getAttribute('data-id');
+                    var name = button.getAttribute('data-name');
+                    document.getElementById('folder-rename-id').value = id;
+                    document.getElementById('folder-rename-newName').value = name;
+                });
+
+                var form = document.getElementById('folderRenameForm');
+                form.addEventListener('submit', function(e){
+                    e.preventDefault();
+                    var id = document.getElementById('folder-rename-id').value;
+                    var newName = document.getElementById('folder-rename-newName').value;
+                    var tokenInput = form.querySelector('input[name="__RequestVerificationToken"]');
+                    var token = tokenInput ? tokenInput.value : '';
+
+                    if (!newName || !id) return;
+
+                    fetch('@Url.Action("Rename", "Folders")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token },
+                        body: new URLSearchParams({ id: id, newName: newName })
+                    }).then(function(response){
+                        if (response.ok) {
+                            // close modal and reload to reflect changes
+                            var modal = bootstrap.Modal.getInstance(renameModal);
+                            modal.hide();
+                            location.reload();
+                        } else {
+                            response.text().then(function(t){ alert('Rename failed'); });
+                        }
+                    }).catch(function(){ alert('Network error'); });
+                });
+            }
+        })();
+    </script>
+}

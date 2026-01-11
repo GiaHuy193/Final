@@ -16,11 +16,33 @@ namespace WebDocumentManagement_FileSharing.Data
         public DbSet<SystemSetting> SystemSettings { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<ShareLink> ShareLinks { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<GroupMember> GroupMembers { get; set; }
+        public DbSet<GroupShare> GroupShares { get; set; }
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
             base.OnModelCreating(modelBuilder);
+
+            // Group & GroupMember
+            modelBuilder.Entity<Group>()
+                .HasMany(g => g.Members)
+                .WithOne(m => m.Group)
+                .HasForeignKey(m => m.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<GroupMember>()
+                .HasIndex(gm => new { gm.GroupId, gm.UserId })
+                .IsUnique();
+            
+            // GroupShare: record resources shared to group
+            modelBuilder.Entity<GroupShare>(b =>
+            {
+                b.HasKey(gs => gs.Id);
+                b.HasIndex(gs => new { gs.GroupId, gs.DocumentId, gs.FolderId }).IsUnique(false);
+                b.HasOne<Group>().WithMany().HasForeignKey(gs => gs.GroupId).OnDelete(DeleteBehavior.Cascade);
+            });
 
             // Seed system settings: AllowedExtensions, StandardQuota (15GB), PremiumQuota (100GB)
             modelBuilder.Entity<SystemSetting>().HasData(

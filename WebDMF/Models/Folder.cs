@@ -1,5 +1,6 @@
 ﻿namespace WebDocumentManagement_FileSharing.Models;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
     public class Folder
     {
@@ -12,6 +13,12 @@ using System.Collections.Generic;
 
         public virtual ICollection<Folder> SubFolders { get; set; } = new List<Folder>();
         public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
+
+        // Liên kết tới Nhóm 
+        public int? GroupId { get; set; } // Nếu null là folder cá nhân
+
+        [ForeignKey("GroupId")]
+        public virtual Group? Group { get; set; }
 
         // Standardize owner property name
         public string OwnerId { get; set; } = string.Empty; // ID của người sở hữu thư mục

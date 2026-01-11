@@ -1,154 +1,228 @@
-﻿@model IEnumerable<WebDocumentManagement_FileSharing.Models.Document>
+﻿@using WebDocumentManagement_FileSharing.Models
+@model IEnumerable<Document>
 
 @{
-    ViewData["Title"] = "Quản trị tệp tin";
+    ViewData["Title"] = "Quản lý Tệp tin hệ thống";
     var userEmails = ViewBag.UserEmails as IDictionary<string, string> ?? new Dictionary<string, string>();
 
-    // Cấu hình quy tắc kiểm soát
-    long WarningSizeLimit = 50 * 1024 * 1024; // Cảnh báo nếu file > 50MB
-    string[] SafeExtensions = { ".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip", ".rar" };
+    // Helper: Lấy màu và icon dựa trên đuôi file
+    (string icon, string color, string bg) GetFileStyle(string fileName)
+    {
+        var ext = System.IO.Path.GetExtension(fileName).ToLower();
+        return ext switch
+        {
+            ".pdf" => ("bi-file-earmark-pdf-fill", "text-danger", "bg-danger-subtle"),
+            ".doc" or ".docx" => ("bi-file-earmark-word-fill", "text-primary", "bg-primary-subtle"),
+            ".xls" or ".xlsx" => ("bi-file-earmark-excel-fill", "text-success", "bg-success-subtle"),
+            ".ppt" or ".pptx" => ("bi-file-earmark-slides-fill", "text-warning", "bg-warning-subtle"),
+            ".zip" or ".rar" => ("bi-file-earmark-zip-fill", "text-dark", "bg-secondary-subtle"),
+            ".jpg" or ".jpeg" or ".png" => ("bi-file-earmark-image-fill", "text-info", "bg-info-subtle"),
+            _ => ("bi-file-earmark-fill", "text-secondary", "bg-light")
+        };
+    }
+
+    // Helper: Lấy ký tự đầu cho Avatar
+    string GetInitials(string email) => string.IsNullOrEmpty(email) ? "?" : email.Substring(0, 1).ToUpper();
 }
 
 <style>
-    /* Style cho Email bo tròn */
-    .owner-badge {
-        font-size: 0.85rem;
-        color: #64748b;
-        background: #f1f5f9;
-        padding: 5px 15px;
-        border-radius: 50px;
-        border: 1px solid #e2e8f0;
-        display: inline-flex;
-        align-items: center;
-        max-width: 220px;
+    :root {
+        --bg-body: #f8fafc;
+        --card-bg: #ffffff;
     }
 
-        .owner-badge i {
-            font-size: 1rem;
-            margin-right: 8px;
-            color: #94a3b8;
-        }
+    body {
+        background-color: var(--bg-body);
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-    /* Box Icon File */
-    .file-icon-box {
-        width: 42px;
-        height: 42px;
+    /* File Icon Box */
+    .file-thumb {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
-        font-size: 1.25rem;
+        font-size: 1.5rem;
+        transition: transform 0.2s;
     }
 
-    /* Tên file gọn gàng */
-    .file-name-text {
-        max-width: 250px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: block;
+    .table-hover tr:hover .file-thumb {
+        transform: scale(1.1);
+    }
+
+    /* User Avatar nhỏ gọn */
+    .user-mini-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+        margin-right: 8px;
+    }
+
+    /* Table Styles */
+    .modern-table thead th {
+        background-color: #f1f5f9;
+        color: #64748b;
         font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
     }
 
-    .table-modern tr:hover {
-        background-color: #f8fafc;
-        transition: 0.2s;
+    .modern-table tbody td {
+        padding: 0.75rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
     }
+
+    /* Button Action */
+    .btn-icon-action {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+        border: 1px solid transparent;
+        background: white;
+        color: #64748b;
+    }
+
+        .btn-icon-action:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .btn-icon-action.danger:hover {
+            background-color: #fef2f2;
+            border-color: #fca5a5;
+            color: #ef4444;
+        }
+
+    /* Search Input */
+    .search-box {
+        position: relative;
+    }
+
+        .search-box input {
+            padding-left: 2.5rem;
+            border-radius: 20px;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
 </style>
 
-<div class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid py-5 px-lg-5">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Hệ thống tệp tin</h2>
-            <p class="text-muted small">Quản lý dung lượng và an ninh dữ liệu hệ thống</p>
+            <h3 class="fw-bold mb-1 text-slate-800">Hệ thống Tệp tin</h3>
+            <p class="text-muted small mb-0">
+                Tổng cộng: <span class="fw-bold text-dark">@Model.Count()</span> tệp tin đang được lưu trữ
+            </p>
         </div>
 
-        <form asp-action="Index" method="get" class="d-flex gap-2">
-            <div class="input-group" style="width: 320px;">
-                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                <input type="text" name="search" class="form-control border-start-0 ps-0 shadow-none"
-                       placeholder="Tìm tên hoặc email..." value="@ViewBag.CurrentSearch">
-                <button type="submit" class="btn btn-primary px-4">Lọc</button>
+        <form asp-action="Index" method="get" class="mt-3 mt-md-0">
+            <div class="search-box shadow-sm">
+                <i class="bi bi-search"></i>
+                <input type="text" name="search" class="form-control"
+                       placeholder="Tìm kiếm tệp..."
+                       value="@ViewBag.CurrentSearch"
+                       style="width: 300px;">
             </div>
         </form>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
         <div class="table-responsive">
-            <table class="table table-hover table-modern align-middle mb-0">
-                <thead class="bg-light text-muted small uppercase">
+            <table class="table modern-table mb-0">
+                <thead>
                     <tr>
-                        <th class="ps-4 py-3 border-0">TÊN TỆP TIN</th>
-                        <th class="border-0">NGƯỜI SỞ HỮU</th>
-                        <th class="border-0">DUNG LƯỢNG</th>
-                        <th class="border-0">NGÀY TẢI LÊN</th> @* Cột Ngày tải đây Huy *@
-                        <th class="border-0 text-center">TRẠNG THÁI</th>
-                        <th class="text-end pe-4 border-0">THAO TÁC</th>
+                        <th class="ps-4">Tên tệp tin</th>
+                        <th>Người sở hữu</th>
+                        <th>Kích thước</th>
+                        <th>Ngày tải lên</th>
+                        <th class="text-end pe-4">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="border-top-0">
+                <tbody>
                     @foreach (var item in Model)
                     {
-                        var ext = System.IO.Path.GetExtension(item.FileName).ToLower();
-                        bool isLarge = item.FileSize > WarningSizeLimit;
-                        bool isUnsafe = !SafeExtensions.Contains(ext);
+                        var style = GetFileStyle(item.FileName);
+                        var email = userEmails.ContainsKey(item.OwnerId) ? userEmails[item.OwnerId] : "Unknown";
+                        var sizeMB = item.FileSize / 1024.0 / 1024.0;
 
-                        var iconClass = "bi-file-earmark-text text-primary bg-primary-subtle";
-                        if (ext == ".jpg" || ext == ".png" || ext == ".jpeg") iconClass = "bi-file-earmark-image text-warning bg-warning-subtle";
-                        else if (ext == ".pdf") iconClass = "bi-file-earmark-pdf text-danger bg-danger-subtle";
-                        else if (ext == ".zip" || ext == ".rar") iconClass = "bi-file-earmark-zip text-info bg-info-subtle";
-
-                        <tr class="@(isUnsafe ? "bg-danger bg-opacity-10" : "")">
+                        <tr>
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                    <div class="file-icon-box @iconClass.Split(' ')[2] me-3">
-                                        <i class="bi @iconClass.Split(' ')[0] @iconClass.Split(' ')[1]"></i>
+                                    <div class="file-thumb @style.bg @style.color me-3">
+                                        <i class="bi @style.icon"></i>
                                     </div>
-                                    <div>
-                                        <span class="file-name-text @(isLarge ? "text-danger" : "")" title="@item.FileName">@item.FileName</span>
-                                        <span class="text-muted" style="font-size: 0.7rem;">@item.ContentType.ToUpper()</span>
+                                    <div style="max-width: 300px;">
+                                        <div class="fw-bold text-dark text-truncate" title="@item.FileName">
+                                            @item.FileName
+                                        </div>
+                                        <div class="text-muted small text-uppercase" style="font-size: 0.7rem;">
+                                            @System.IO.Path.GetExtension(item.FileName).Replace(".", "") FILE
+                                        </div>
                                     </div>
                                 </div>
                             </td>
+
                             <td>
-                                <div class="owner-badge">
-                                    <i class="bi bi-person-circle"></i>
-                                    <span class="text-truncate">
-                                        @(userEmails.ContainsKey(item.OwnerId) ? userEmails[item.OwnerId] : item.OwnerId)
+                                <div class="d-flex align-items-center">
+                                    <div class="user-mini-avatar">
+                                        @GetInitials(email)
+                                    </div>
+                                    <span class="text-truncate text-secondary" style="max-width: 150px;" title="@email">
+                                        @email
                                     </span>
                                 </div>
                             </td>
-                            <td class="fw-bold @(isLarge ? "text-danger" : "text-dark")">
-                                @((item.FileSize / 1024.0 / 1024.0).ToString("0.##")) MB
+
+                            <td>
+                                <span class="fw-medium text-dark">@sizeMB.ToString("0.##") MB</span>
                             </td>
 
-                            @* HIỂN THỊ NGÀY TẢI LÊN *@
-                            <td class="text-muted small">
-                                <i class="bi bi-clock-history me-1"></i>
-                                @item.UploadedDate.ToString("dd/MM/yyyy HH:mm")
+                            <td>
+                                <span class="text-secondary small">
+                                    @item.UploadedDate.ToString("dd/MM/yyyy")
+                                </span>
+                                <div class="text-muted" style="font-size: 0.7rem;">
+                                    @item.UploadedDate.ToString("HH:mm")
+                                </div>
                             </td>
 
-                            <td class="text-center">
-                                @if (isUnsafe)
-                                {
-                                    <span class="badge bg-danger rounded-pill">Nghi vấn</span>
-                                }
-                                else if (isLarge)
-                                {
-
-                                    <span class="badge bg-warning text-dark rounded-pill">Nặng</span>
-                                }
-                                else
-                                {
-
-                                    <span class="badge bg-success-subtle text-success rounded-pill">An toàn</span>
-                                }
-                            </td>
                             <td class="text-end pe-4">
-                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Xác nhận xóa vĩnh viễn tệp này?')">
+                                <a asp-action="Download" asp-controller="Document" asp-route-id="@item.Id" class="btn-icon-action me-1" title="Tải xuống kiểm tra" target="_blank">
+                                    <i class="bi bi-download"></i>
+                                </a>
+
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline-block" onsubmit="return confirm('CẢNH BÁO: Hành động này sẽ xóa vĩnh viễn tệp tin khỏi hệ thống và không thể khôi phục. Bạn chắc chắn chứ?')">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-circle" style="width: 35px; height: 35px;">
-                                        <i class="bi bi-trash3 fs-5"></i>
+                                    <button type="submit" class="btn-icon-action danger" title="Xóa vĩnh viễn">
+                                        <i class="bi bi-trash3"></i>
                                     </button>
                                 </form>
                             </td>
@@ -157,5 +231,13 @@
                 </tbody>
             </table>
         </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <div class="text-muted mb-2"><i class="bi bi-folder-x display-4"></i></div>
+                <p class="text-muted">Không tìm thấy tệp tin nào.</p>
+            </div>
+        }
     </div>
 </div>

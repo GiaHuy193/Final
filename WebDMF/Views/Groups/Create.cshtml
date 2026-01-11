@@ -1,0 +1,133 @@
+﻿@model WebDocumentManagement_FileSharing.Models.Group
+@{
+    ViewData["Title"] = "T?o nhóm m?i";
+}
+
+<style>
+    :root {
+        --bg-body: #f3f4f6;
+        --surface: #ffffff;
+        --text-main: #111827;
+        --text-sub: #6b7280;
+        --primary: #3b82f6;
+        --border: #e5e7eb;
+    }
+
+    body {
+        background-color: var(--bg-body);
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    .create-card {
+        background: var(--surface);
+        border-radius: 20px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        border: 1px solid white;
+        overflow: hidden;
+    }
+
+    .icon-header {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        color: var(--primary);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin: 0 auto 1.5rem auto;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-control-modern {
+        background-color: #f9fafb;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+
+        .form-control-modern:focus {
+            background-color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+    .btn-primary-modern {
+        background-color: var(--primary);
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 600;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        transition: 0.2s;
+    }
+
+        .btn-primary-modern:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+    .btn-cancel {
+        color: var(--text-sub);
+        font-weight: 500;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+        .btn-cancel:hover {
+            color: var(--text-main);
+        }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+
+            <div class="mb-3">
+                <a asp-action="Index" class="text-decoration-none text-muted small d-flex align-items-center gap-1">
+                    <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                </a>
+            </div>
+
+            <div class="create-card p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="icon-header">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">Tạo nhóm mới</h3>
+                    <p class="text-muted small">Tạo không gian làm việc và chia sẻ tài liệu với nhóm.</p>
+                </div>
+
+                <form method="post" asp-action="Create">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label fw-bold text-dark small text-uppercase" style="letter-spacing: 0.5px;">Tên nhóm</label>
+                        <input asp-for="Name" class="form-control form-control-modern" placeholder="Ví dụ: Team DMF, Dự án A..." autofocus />
+                        <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-primary btn-primary-modern text-white">
+                            <i class="bi bi-plus-lg me-1"></i> Tạo nhóm ngay
+                        </button>
+
+                        <div class="text-center">
+                            <a asp-action="Index" class="btn-cancel small">Hủy bỏ</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

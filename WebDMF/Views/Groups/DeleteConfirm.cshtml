@@ -1,0 +1,30 @@
+@model WebDocumentManagement_FileSharing.Models.Group
+
+@{
+    ViewData["Title"] = "Xác nh?n xóa nhóm";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card p-4">
+                <h4 class="fw-bold">Xác nh?n xóa nhóm</h4>
+                <p class="text-muted">B?n s?p xóa nhóm <strong>@Model.Name</strong>. Hành ??ng này s? xóa toàn b? chia s?, quy?n và danh sách thành viên. Hãy ch?c ch?n tr??c khi ti?p t?c.</p>
+
+                <div class="mb-3">
+                    <p><strong>S? thành viên:</strong> @Model.Members.Count</p>
+                    <p><strong>Ngày t?o:</strong> @Model.CreatedDate.ToString("dd/MM/yyyy")</p>
+                </div>
+
+                <form asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">H?y</a>
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Xác nh?n xóa nhóm này?');">Xóa v?nh vi?n</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

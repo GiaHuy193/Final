@@ -31,6 +31,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <style>
+    /* Page-local overrides: logo and primary button color */
+    .brand, .brand * { color: #3b82f6 !important; }
+    .btn-primary { background-color: #3b82f6 !important; border-color: #3b82f6 !important; color: #fff !important; }
+    .btn-primary:hover, .btn-primary:focus { background-color: #2563eb !important; border-color: #2563eb !important; }
+</style>
+
+<style>
     :root {
         --card-hover-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         --text-primary: #1e293b;
@@ -186,7 +193,7 @@
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5">
         <div>
-            <h3 class="fw-bold mb-1" style="color: #0f172a;">Quản lý tệp tin</h3>
+            <h2 class="fw-bold mb-1" style="color: #0f172a;">Quản lý tệp tin</h2>
             <p class="text-muted small mb-0">Tổ chức và quản lý tài liệu của bạn</p>
         </div>
 
@@ -256,63 +263,75 @@
     }
 
     <div class="mb-5">
-        <h6 class="fw-bold text-uppercase text-secondary small mb-3">Thư mục</h6>
-        <div class="row g-3">
-            @if (Model?.Folders != null && Model.Folders.Any())
-            {
-                foreach (var f in Model.Folders)
-                {
-                    <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-                        <div class="folder-card">
-                            <div class="dropdown position-absolute" style="top: 10px; right: 10px; z-index: 20;">
-                                <button class="action-btn-glass" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
-                                    <i class="bi bi-three-dots"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
-                                    <li>
-                                        <a class="dropdown-item" href="@Url.Action("Download", "Folders", new { id = f.Id })">
-                                            <i class="bi bi-download me-2"></i> Tải xuống
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item rename-folder-trigger" href="#" data-id="@f.Id" data-name="@f.Name" data-bs-toggle="modal" data-bs-target="#renameModal">
-                                            <i class="bi bi-pencil me-2"></i> Đổi tên
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item folder-star-toggle" href="#" data-id="@f.Id">
-                                            <i class="bi bi-star me-2"></i> Gắn sao
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item share-trigger" href="#" data-id="@f.Id" data-title="@f.Name" data-type="folder">
-                                            <i class="bi bi-share me-2"></i> Chia sẻ
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item text-danger folder-delete-btn" href="#" data-id="@f.Id">
-                                            <i class="bi bi-trash me-2"></i> Xóa
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+        <h6 class="fw-bold text-uppercase text-secondary small mb-3 d-flex align-items-center justify-content-between">
+            <span class="d-flex align-items-center" style="gap:6px;">
+                <span style="letter-spacing:0.2px;">Thư mục</span>
+            </span>
+            <button class="btn btn-sm btn-light section-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#foldersContent" aria-expanded="true" aria-controls="foldersContent" title="Thu gọn/Hiện">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+        </h6>
 
-                            <a asp-action="Index" asp-route-folderId="@f.Id" class="text-decoration-none h-100">
-                                <div class="folder-cover" style="background: @GetFolderGradient(f.Id);"></div>
-                                <div class="folder-body">
-                                    <span class="folder-name" title="@f.Name">@f.Name</span>
-                                    <span class="folder-meta">@f.CreatedDate.ToString("dd/MM/yyyy")</span>
+        <div id="foldersContent" class="collapse show">
+            <div class="row g-3">
+                @if (Model?.Folders != null && Model.Folders.Any())
+                {
+                    foreach (var f in Model.Folders)
+                    {
+                        <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                            <div class="folder-card">
+                                <div class="dropdown position-absolute" style="top: 10px; right: 10px; z-index: 20;">
+                                    <button class="action-btn-glass" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
+                                        <li>
+                                            <a class="dropdown-item" href="@Url.Action("Download", "Folders", new { id = f.Id })">
+                                                <i class="bi bi-download me-2"></i> Tải xuống
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item rename-folder-trigger" href="#" data-id="@f.Id" data-name="@f.Name" data-bs-toggle="modal" data-bs-target="#renameModal">
+                                                <i class="bi bi-pencil me-2"></i> Đổi tên
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item folder-star-toggle" href="#" data-id="@f.Id">
+                                                <i class="bi bi-star me-2"></i> Gắn sao
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item share-trigger" href="#" data-id="@f.Id" data-title="@f.Name" data-type="folder">
+                                                <i class="bi bi-share me-2"></i> Chia sẻ
+                                            </a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="@Url.Action("Details", "Folders", new { id = f.Id })"><i class="bi bi-info-circle me-2"></i>Chi tiết</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger folder-delete-btn" href="#" data-id="@f.Id">
+                                                <i class="bi bi-trash me-2"></i> Xóa
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
-                            </a>
+
+                                <a asp-action="Index" asp-route-folderId="@f.Id" class="text-decoration-none h-100">
+                                    <div class="folder-cover" style="background: @GetFolderGradient(f.Id);"></div>
+                                    <div class="folder-body">
+                                        <span class="folder-name" title="@f.Name">@f.Name</span>
+                                        <span class="folder-meta">@f.CreatedDate.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    }
                 }
-            }
-            else
-            {
-                <div class="col-12"><div class="p-4 text-center text-muted bg-light rounded-4 border border-dashed">Chưa có thư mục nào</div></div>
-            }
+                else
+                {
+                    <div class="col-12"><div class="p-4 text-center text-muted bg-light rounded-4 border border-dashed">Chưa có thư mục nào</div></div>
+                }
+            </div>
         </div>
     </div>
 
@@ -321,289 +340,311 @@
         <div class="btn-group" role="group">
             <button type="button" class="btn btn-sm view-toggle-btn rounded-start-pill active" id="listFilesBtn"><i class="bi bi-list-ul"></i></button>
             <button type="button" class="btn btn-sm view-toggle-btn rounded-end-pill" id="gridFilesBtn"><i class="bi bi-grid-fill"></i></button>
+            <button class="btn btn-sm btn-light section-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#recentContent" aria-expanded="true" aria-controls="recentContent" title="Thu gọn/Hiện">
+                <i class="bi bi-chevron-down"></i>
+            </button>
         </div>
     </div>
 
-    <div id="filesGrid" class="row g-3 mb-4" style="display:none">
-        @if (Model?.Documents != null && Model.Documents.Any())
-        {
-            foreach (var d in Model.Documents)
+    <div id="recentContent" class="collapse show">
+        <div id="filesGrid" class="row g-3 mb-4" style="display:none">
+            @if (Model?.Documents != null && Model.Documents.Any())
             {
-                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                    <div class="file-card">
-                        <div class="dropdown position-absolute" style="top: 8px; right: 8px; z-index: 10;">
-                            <button class="action-btn-glass" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
-                                <i class="bi bi-three-dots-vertical"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Documents" asp-action="Download" asp-route-id="@d.Id">
-                                        <i class="bi bi-download me-2"></i> Tải xuống
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item rename-doc-trigger" href="#" data-id="@d.Id" data-name="@d.FileName" data-bs-toggle="modal" data-bs-target="#renameModal">
-                                        <i class="bi bi-pencil me-2"></i> Đổi tên
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item document-star-toggle" href="#" data-id="@d.Id">
-                                        <i class="bi bi-star me-2"></i> Gắn sao
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item share-trigger" href="#" data-id="@d.Id" data-title="@d.FileName" data-type="document">
-                                        <i class="bi bi-share me-2"></i> Chia sẻ
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger document-delete-btn" href="#" data-id="@d.Id" data-name="@d.FileName">
-                                        <i class="bi bi-trash me-2"></i> Xóa
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                foreach (var d in Model.Documents)
+                {
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <div class="file-card">
+                            <div class="dropdown position-absolute" style="top: 8px; right: 8px; z-index: 10;">
+                                <button class="action-btn-glass" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Documents" asp-action="Download" asp-route-id="@d.Id">
+                                            <i class="bi bi-download me-2"></i> Tải xuống
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item rename-doc-trigger" href="#" data-id="@d.Id" data-name="@d.FileName" data-bs-toggle="modal" data-bs-target="#renameModal">
+                                            <i class="bi bi-pencil me-2"></i> Đổi tên
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item document-star-toggle" href="#" data-id="@d.Id">
+                                            <i class="bi bi-star me-2"></i> Gắn sao
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item share-trigger" href="#" data-id="@d.Id" data-title="@d.FileName" data-type="document">
+                                            <i class="bi bi-share me-2"></i> Chia sẻ
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id">
+                                            <i class="bi bi-info-circle me-2"></i>Chi tiết
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger document-delete-btn" href="#" data-id="@d.Id" data-name="@d.FileName">
+                                            <i class="bi bi-trash me-2"></i> Xóa
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
 
-                        <a asp-controller="Documents" asp-action="Open" asp-route-id="@d.Id" target="_blank" class="text-decoration-none h-100">
-                            <div class="file-preview-area">
-                                @{ 
-                                    var previewType = FilePreviewHelper.GetPreviewType(d.FileName, d.ContentType);
-                                    if (previewType == FilePreviewType.Image) {
-                                        <img src="@Url.Action("Open", "Documents", new { id = d.Id })" class="h-100 w-100 object-fit-cover" loading="lazy" />
-                                    } else {
-                                        var ext = System.IO.Path.GetExtension(d.FileName)?.ToLower();
+                            <a asp-controller="Documents" asp-action="Open" asp-route-id="@d.Id" target="_blank" class="text-decoration-none h-100">
+                                <div class="file-preview-area">
+                                    @{
+                                        var previewType = FilePreviewHelper.GetPreviewType(d.FileName, d.ContentType);
+                                        var ext = System.IO.Path.GetExtension(d.FileName)?.ToLower() ?? string.Empty;
                                         var iconClass = "bi-file-earmark-text text-secondary";
-                                        if (ext == ".pdf") iconClass = "bi-file-earmark-pdf text-danger";
-                                        else if (ext == ".docx" || ext == ".doc") iconClass = "bi-file-earmark-word text-primary";
-                                        else if (ext == ".xlsx" || ext == ".xls") iconClass = "bi-file-earmark-excel text-success";
-                                        else if (ext == ".pptx" || ext == ".ppt") iconClass = "bi-file-earmark-play text-warning";
-                                        else if (ext == ".mp4" || ext == ".mov" || ext == ".avi") iconClass = "bi-file-earmark-play text-secondary";
+                                        if (ext == ".pdf") { iconClass = "bi-file-earmark-pdf text-danger"; }
+                                        else if (ext == ".docx" || ext == ".doc") { iconClass = "bi-file-earmark-word text-primary"; }
+                                        else if (ext == ".xlsx" || ext == ".xls") { iconClass = "bi-file-earmark-excel text-success"; }
+                                        else if (ext == ".pptx" || ext == ".ppt") { iconClass = "bi-file-earmark-play text-warning"; }
+                                        else if (new[]{ ".mp4", ".mov", ".avi", ".webm", ".ogg" }.Contains(ext)) { iconClass = "bi-file-earmark-play text-secondary"; }
+                                    }
+
+                                    @if (previewType == FilePreviewType.Image) {
+                                        <img src="@Url.Action("Open", "Documents", new { id = d.Id })" class="h-100 w-100 object-fit-cover" loading="lazy" />
+                                    }
+                                    else if (previewType == FilePreviewType.Video) {
+                                        <video muted playsinline loop class="object-fit-cover h-100 w-100" preload="metadata">
+                                            <source src="@Url.Action("Open", "Documents", new { id = d.Id })" type="@d.ContentType" />
+                                            Your browser does not support the video preview.
+                                        </video>
+                                    }
+                                    else {
                                         <i class="bi @iconClass" style="font-size: 3.5rem;"></i>
                                     }
-                                }
-                            </div>
-                            <div class="file-card-body">
-                                <div class="file-name-link" title="@d.FileName">@d.FileName</div>
-                                <div class="d-flex justify-content-between mt-2 small text-muted">
-                                    <span>@d.UploadedDate.ToString("dd/MM")</span>
-                                    <span class="badge bg-light text-secondary border fw-normal">@(Math.Round(d.FileSize / 1024.0, 1)) KB</span>
                                 </div>
-                            </div>
-                        </a>
+                                <div class="file-card-body">
+                                    <div class="file-name-link" title="@d.FileName">@d.FileName</div>
+                                    <div class="d-flex justify-content-between mt-2 small text-muted">
+                                        <span>@d.UploadedDate.ToString("dd/MM")</span>
+                                        <span class="badge bg-light text-secondary border fw-normal">@(Math.Round(d.FileSize / 1024.0, 1)) KB</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
                     </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="col-12">
-                <div class="p-4 text-center text-muted bg-light rounded-4">Không có tệp nào</div>
-            </div>
-        }
-    </div>
-
-    <div id="filesArea" class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table custom-table mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th style="padding-left: 1.5rem">Tên tệp</th>
-                        <th>Ngày tải</th>
-                        <th>Kích thước</th>
-                        <th class="text-end" style="padding-right: 1.5rem">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model?.Documents != null && Model.Documents.Any())
-                    {
-                        foreach (var d in Model.Documents)
-                        {
-                            <tr>
-                                <td style="padding-left: 1.5rem">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-file-earmark-text-fill text-primary fs-4 me-3"></i>
-                                        @{
-                                            var previewType = FilePreviewHelper.GetPreviewType(d.FileName, d.ContentType);
-                                            if (previewType == FilePreviewType.Image || previewType == FilePreviewType.Pdf || previewType == FilePreviewType.Office)
-                                            {
-                                                <a href="@Url.Action("Open", "Documents", new { id = d.Id })" target="_blank" class="fw-medium text-decoration-none text-dark">@d.FileName</a>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">@d.FileName</span>
-                                                <span class="badge text-bg-secondary ms-2">Không hỗ trợ</span>
-                                            }
-                                        }
-                                    </div>
-                                </td>
-                                <td class="text-muted">@d.UploadedDate.ToString("dd/MM/yyyy")</td>
-                                <td class="text-secondary">@(Math.Round(d.FileSize / 1024.0, 1)) KB</td>
-                                <td class="text-end" style="padding-right: 1.5rem">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
-                                            <li>
-                                                <a class="dropdown-item" asp-controller="Documents" asp-action="Download" asp-route-id="@d.Id"><i class="bi bi-download me-2"></i>Tải xuống</a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item rename-doc-trigger" href="#" data-id="@d.Id" data-name="@d.FileName" data-bs-toggle="modal" data-bs-target="#renameModal"><i class="bi bi-pencil me-2"></i>Đổi tên</a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item document-star-toggle" href="#" data-id="@d.Id"><i class="bi bi-star me-2"></i>Gắn sao</a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item share-trigger" href="#" data-id="@d.Id" data-title="@d.FileName" data-type="document"><i class="bi bi-share me-2"></i>Chia sẻ</a>
-                                            </li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <a class="dropdown-item text-danger document-delete-btn" href="#" data-id="@d.Id" data-name="@d.FileName"><i class="bi bi-trash me-2"></i>Xóa</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr><td colspan="4" class="text-center py-5 text-muted">Thư mục trống</td></tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="renameModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow rounded-4">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">Đổi tên</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="renameForm" method="post">
-                @Html.AntiForgeryToken()
-                <div class="modal-body pt-3">
-                    <input type="hidden" name="id" id="rename-id" />
-                    <input type="hidden" id="rename-type" /> 
-                    <input type="text" name="newName" id="rename-newName" class="form-control form-control-lg bg-light border-0" placeholder="Nhập tên mới..." required />
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<partial name="_ShareModal" />
-
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            'use strict';
-
-            // 1. Rename Logic
-            var renameForm = document.getElementById('renameForm');
-            var renameType = document.getElementById('rename-type');
-
-            document.querySelectorAll('.rename-folder-trigger').forEach(el => {
-                el.addEventListener('click', function() {
-                    document.getElementById('rename-id').value = this.getAttribute('data-id');
-                    document.getElementById('rename-newName').value = this.getAttribute('data-name');
-                    renameType.value = 'folder';
-                    renameForm.action = '@Url.Action("Rename", "Folders")';
-                });
-            });
-
-            document.querySelectorAll('.rename-doc-trigger').forEach(el => {
-                el.addEventListener('click', function() {
-                    document.getElementById('rename-id').value = this.getAttribute('data-id');
-                    document.getElementById('rename-newName').value = this.getAttribute('data-name');
-                    renameType.value = 'document';
-                    renameForm.action = '@Url.Action("Rename", "Documents")';
-                });
-            });
-
-            // 2. Delete Logic
-            document.querySelectorAll('.document-delete-btn').forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    if (!confirm('Chuyển "' + this.getAttribute('data-name') + '" vào thùng rác?')) return;
-                    fetch('@Url.Action("Delete", "Documents")', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value },
-                        body: new URLSearchParams({ id: this.getAttribute('data-id'), confirmAction: 'trash' })
-                    }).then(r => { if(r.ok) location.reload(); else alert('Lỗi xóa file'); });
-                });
-            });
-
-            document.querySelectorAll('.folder-delete-btn').forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    if (!confirm('Xóa thư mục này?')) return;
-                    fetch('@Url.Action("Delete", "Folders")', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value },
-                        body: new URLSearchParams({ id: this.getAttribute('data-id') })
-                    }).then(r => { if(r.ok) location.reload(); else alert('Lỗi xóa thư mục'); });
-                });
-            });
-
-            // --- STAR TOGGLE (documents & folders) ---
-            document.querySelectorAll('.document-star-toggle, .folder-star-toggle').forEach(function(el){
-                el.addEventListener('click', function(e){
-                    e.preventDefault();
-                    var id = this.getAttribute('data-id');
-                    var isFolder = this.classList.contains('folder-star-toggle');
-                    var url = isFolder ? '@Url.Action("ToggleFolder", "Star")' : '@Url.Action("ToggleDocument", "Star")';
-                    if (!id) return;
-                    var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
-                    var token = tokenInput ? tokenInput.value : '';
-                    fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token },
-                        body: new URLSearchParams({ id: id })
-                    }).then(function(response){
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.json();
-                    }).then(function(j){
-                        if (j && j.success) {
-                            // Option: update UI without reload in future. For now reload to reflect change
-                            location.reload();
-                        } else {
-                            alert('Lỗi khi gắn sao');
-                        }
-                    }).catch(function(){ alert('Lỗi kết nối'); });
-                });
-            });
-
-            // 3. View Mode Toggle
-            const filesArea = document.getElementById('filesArea');
-            const filesGrid = document.getElementById('filesGrid');
-            const gridBtn = document.getElementById('gridFilesBtn');
-            const listBtn = document.getElementById('listFilesBtn');
-
-            function setMode(mode) {
-                if (mode === 'grid') {
-                    filesGrid.style.display = 'flex';
-                    filesArea.style.display = 'none';
-                    gridBtn.classList.add('active'); listBtn.classList.remove('active');
-                } else {
-                    filesGrid.style.display = 'none';
-                    filesArea.style.display = 'block';
-                    listBtn.classList.add('active'); gridBtn.classList.remove('active');
                 }
-                try { localStorage.setItem('files_view_mode', mode); } catch(e) {}
             }
+            else
+            {
+                <div class="col-12">
+                    <div class="p-4 text-center text-muted bg-light rounded-4">Không có tệp nào</div>
+                </div>
+            }
+        </div>
 
-            if (gridBtn && listBtn) {
-                gridBtn.addEventListener('click', () => setMode('grid'));
-                listBtn.addEventListener('click', () => setMode('list'));
-                setMode(localStorage.getItem('files_view_mode') || 'list');
-            }
-        });
-    </script>
-}
+        <div id="filesArea" class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table custom-table mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th style="padding-left: 1.5rem">Tên tệp</th>
+                            <th>Ngày tải</th>
+                            <th>Kích thước</th>
+                            <th class="text-end" style="padding-right: 1.5rem">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model?.Documents != null && Model.Documents.Any())
+                        {
+                            foreach (var d in Model.Documents)
+                            {
+                                <tr>
+                                    <td style="padding-left: 1.5rem">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark-text-fill text-primary fs-4 me-3"></i>
+                                            @{
+                                                var previewType = FilePreviewHelper.GetPreviewType(d.FileName, d.ContentType);
+                                                if (previewType == FilePreviewType.Image || previewType == FilePreviewType.Pdf || previewType == FilePreviewType.Office || previewType == FilePreviewType.Video)
+                                                {
+                                                    <a href="@Url.Action("Open", "Documents", new { id = d.Id })" target="_blank" class="fw-medium text-decoration-none text-dark">@d.FileName</a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">@d.FileName</span>
+                                                    <span class="badge text-bg-secondary ms-2">Không hỗ trợ</span>
+                                                }
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">@d.UploadedDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-secondary">@(Math.Round(d.FileSize / 1024.0, 1)) KB</td>
+                                    <td class="text-end" style="padding-right: 1.5rem">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                                <li>
+                                                    <a class="dropdown-item" asp-controller="Documents" asp-action="Download" asp-route-id="@d.Id"><i class="bi bi-download me-2"></i>Tải xuống</a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item rename-doc-trigger" href="#" data-id="@d.Id" data-name="@d.FileName" data-bs-toggle="modal" data-bs-target="#renameModal"><i class="bi bi-pencil me-2"></i>Đổi tên</a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item document-star-toggle" href="#" data-id="@d.Id"><i class="bi bi-star me-2"></i>Gắn sao</a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item share-trigger" href="#" data-id="@d.Id" data-title="@d.FileName" data-type="document"><i class="bi bi-share me-2"></i>Chia sẻ</a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id"> <i class="bi bi-info-circle me-2"></i>Chi tiết </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger document-delete-btn" href="#" data-id="@d.Id" data-name="@d.FileName"><i class="bi bi-trash me-2"></i>Xóa</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4" class="text-center py-5 text-muted">Thư mục trống</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="renameModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Đổi tên</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="renameForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body pt-3">
+                        <input type="hidden" name="id" id="rename-id" />
+                        <input type="hidden" id="rename-type" /> 
+                        <input type="text" name="newName" id="rename-newName" class="form-control form-control-lg bg-light border-0" placeholder="Nhập tên mới..." required />
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <partial name="_ShareModal" />
+
+    @section Scripts {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                'use strict';
+
+                // 1. Rename Logic
+                var renameForm = document.getElementById('renameForm');
+                var renameType = document.getElementById('rename-type');
+
+                document.querySelectorAll('.rename-folder-trigger').forEach(el => {
+                    el.addEventListener('click', function() {
+                        document.getElementById('rename-id').value = this.getAttribute('data-id');
+                        document.getElementById('rename-newName').value = this.getAttribute('data-name');
+                        renameType.value = 'folder';
+                        renameForm.action = '@Url.Action("Rename", "Folders")';
+                    });
+                });
+
+                document.querySelectorAll('.rename-doc-trigger').forEach(el => {
+                    el.addEventListener('click', function() {
+                        document.getElementById('rename-id').value = this.getAttribute('data-id');
+                        document.getElementById('rename-newName').value = this.getAttribute('data-name');
+                        renameType.value = 'document';
+                        renameForm.action = '@Url.Action("Rename", "Documents")';
+                    });
+                });
+
+                // 2. Delete Logic
+                document.querySelectorAll('.document-delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        if (!confirm('Chuyển "' + this.getAttribute('data-name') + '" vào thùng rác?')) return;
+                        fetch('@Url.Action("Delete", "Documents")', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value },
+                            body: new URLSearchParams({ id: this.getAttribute('data-id'), confirmAction: 'trash' })
+                        }).then(r => { if(r.ok) location.reload(); else alert('Lỗi xóa file'); });
+                    });
+                });
+
+                document.querySelectorAll('.folder-delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        if (!confirm('Xóa thư mục này?')) return;
+                        fetch('@Url.Action("Delete", "Folders")', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value },
+                            body: new URLSearchParams({ id: this.getAttribute('data-id') })
+                        }).then(r => { if(r.ok) location.reload(); else alert('Lỗi xóa thư mục'); });
+                    });
+                });
+
+                // --- STAR TOGGLE (documents & folders) ---
+                document.querySelectorAll('.document-star-toggle, .folder-star-toggle').forEach(function(el){
+                    el.addEventListener('click', function(e){
+                        e.preventDefault();
+                        var id = this.getAttribute('data-id');
+                        var isFolder = this.classList.contains('folder-star-toggle');
+                        var url = isFolder ? '@Url.Action("ToggleFolder", "Star")' : '@Url.Action("ToggleDocument", "Star")';
+                        if (!id) return;
+                        var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                        var token = tokenInput ? tokenInput.value : '';
+                        fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token },
+                            body: new URLSearchParams({ id: id })
+                        }).then(function(response){
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.json();
+                        }).then(function(j){
+                            if (j && j.success) {
+                                // Option: update UI without reload in future. For now reload to reflect change
+                                location.reload();
+                            } else {
+                                alert('Lỗi khi gắn sao');
+                            }
+                        }).catch(function(){ alert('Lỗi kết nối'); });
+                    });
+                });
+
+                // 3. View Mode Toggle
+                const filesArea = document.getElementById('filesArea');
+                const filesGrid = document.getElementById('filesGrid');
+                const gridBtn = document.getElementById('gridFilesBtn');
+                const listBtn = document.getElementById('listFilesBtn');
+
+                function setMode(mode) {
+                    if (mode === 'grid') {
+                        filesGrid.style.display = 'flex';
+                        filesArea.style.display = 'none';
+                        gridBtn.classList.add('active'); listBtn.classList.remove('active');
+                    } else {
+                        filesGrid.style.display = 'none';
+                        filesArea.style.display = 'block';
+                        listBtn.classList.add('active'); gridBtn.classList.remove('active');
+                    }
+                    try { localStorage.setItem('files_view_mode', mode); } catch(e) {}
+                }
+
+                if (gridBtn && listBtn) {
+                    gridBtn.addEventListener('click', () => setMode('grid'));
+                    listBtn.addEventListener('click', () => setMode('list'));
+                    setMode(localStorage.getItem('files_view_mode') || 'list');
+                }
+            });
+        </script>
+    }

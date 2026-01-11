@@ -54,6 +54,10 @@
               "target": "Package",
               "version": "[5.0.0, )"
             },
+            "DocumentFormat.OpenXml": {
+              "target": "Package",
+              "version": "[3.4.1, )"
+            },
             "ExcelDataReader": {
               "target": "Package",
               "version": "[3.8.0, )"
@@ -95,6 +99,10 @@
             "PayPalCheckoutSdk": {
               "target": "Package",
               "version": "[1.0.4, )"
+            },
+            "PdfPig": {
+              "target": "Package",
+              "version": "[0.1.13, )"
             }
           },
           "imports": [

@@ -1,0 +1,674 @@
+﻿@model WebDocumentManagement_FileSharing.Models.Group
+@using WebDocumentManagement_FileSharing.Models
+@using Microsoft.AspNetCore.Mvc.Rendering
+@inject WebDocumentManagement_FileSharing.Data.ApplicationDbContext Db
+@{
+    ViewData["Title"] = "Chi tiết nhóm: " + Model.Name;
+    var memberInfos = ViewBag.MemberInfos as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var isOwner = ViewBag.IsOwner as bool? ?? false;
+    var groupShares = ViewBag.GroupShares as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+
+    // Load owner's documents and folders
+    var ownerId = Model.OwnerId;
+    var ownedDocs = Db.Documents.Where(d => d.OwnerId == ownerId && !d.IsDeleted).OrderByDescending(d => d.UploadedDate).ToList();
+    var ownedFolders = Db.Folders.Where(f => f.OwnerId == ownerId && !f.IsDeleted).OrderBy(f => f.Name).ToList();
+
+    // Current user and membership check
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isMember = !string.IsNullOrEmpty(currentUserId) && Model.Members.Any(m => m.UserId == currentUserId);
+}
+
+<style>
+    :root {
+        --bg-body: #f3f4f6;
+        --surface: #ffffff;
+        --primary: #4f46e5; /* Indigo đậm hơn chút cho hiện đại */
+        --primary-soft: #eef2ff;
+        --text-main: #111827;
+        --text-sub: #6b7280;
+        --border: #e5e7eb;
+    }
+
+    body {
+        background-color: var(--bg-body);
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    /* --- 1. HERO HEADER --- */
+    .group-hero {
+        background: var(--surface);
+        border-radius: 0 0 24px 24px;
+        padding: 2rem 0 3rem 0;
+        margin-bottom: -2rem; /* Để nội dung đè lên nhẹ */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .group-avatar-large {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+    }
+
+    /* --- 2. CARDS --- */
+    .content-card {
+        background: var(--surface);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-header-modern {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border);
+        background-color: #f9fafb;
+        font-weight: 700;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    /* --- 3. SHARE PANEL (Khu vực chia sẻ) --- */
+    .share-panel {
+        background: #f8fafc;
+        border-radius: 16px;
+        border: 1px dashed #cbd5e1;
+        padding: 1.5rem;
+        transition: all 0.2s;
+    }
+
+        .share-panel:hover {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+    .custom-select-wrapper {
+        position: relative;
+    }
+
+    .form-control-simple {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+
+        .form-control-simple:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+    /* --- 4. RESOURCE ITEM --- */
+    .resource-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.2s;
+    }
+
+        .resource-row:last-child {
+            border-bottom: none;
+        }
+
+        .resource-row:hover {
+            background-color: #f8fafc;
+        }
+
+    .file-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .icon-doc {
+        background-color: #e0f2fe;
+        color: #0ea5e9;
+    }
+
+    .icon-folder {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    .permission-badge {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .perm-read {
+        background-color: #ecfdf5;
+        color: #059669;
+        border: 1px solid #d1fae5;
+    }
+
+    .perm-edit {
+        background-color: #fff7ed;
+        color: #ea580c;
+        border: 1px solid #ffedd5;
+    }
+
+    .perm-download {
+        background-color: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #dbeafe;
+    }
+
+    /* --- 5. MEMBER LIST --- */
+    .member-avatar-small {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-soft);
+        color: var(--primary);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-member-btn {
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .resource-row:hover .delete-member-btn,
+    .member-row:hover .delete-member-btn {
+        opacity: 1;
+    }
+
+    /* --- UTILS --- */
+    .btn-glass {
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(0,0,0,0.1);
+        color: var(--text-main);
+        font-weight: 600;
+    }
+
+        .btn-glass:hover {
+            background: #fff;
+            transform: translateY(-2px);
+        }
+</style>
+
+<div class="group-hero">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-4">
+
+            <div class="group-avatar-large">
+                <i class="bi bi-people-fill"></i>
+            </div>
+
+            <div class="flex-grow-1 text-center text-md-start">
+                <div class="d-flex flex-column flex-md-row align-items-center gap-3 mb-2">
+                    <h2 class="fw-bold mb-0 text-dark">@Model.Name</h2>
+                    @{ 
+                        // Resolve owner display name from Db; fall back to OwnerId
+                        var ownerDisplay = Model.OwnerId ?? "";
+                        try {
+                            var ownerUser = Db.Users.FirstOrDefault(u => u.Id == Model.OwnerId);
+                            if (ownerUser != null) ownerDisplay = string.IsNullOrEmpty(ownerUser.UserName) ? ownerUser.Email ?? ownerUser.Id : ownerUser.UserName;
+                        } catch { }
+
+                        var ownerLabel = string.Equals(currentUserId, Model.OwnerId, StringComparison.OrdinalIgnoreCase) ? "Bạn" : ownerDisplay;
+                    }
+
+                    @if (isOwner)
+                    {
+                        <span class="badge bg-primary rounded-pill px-3 py-2">Chủ nhóm: @ownerLabel</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary rounded-pill px-3 py-2">Chủ nhóm: @ownerLabel</span>
+                    }
+                </div>
+                <div class="text-muted d-flex align-items-center justify-content-center justify-content-md-start gap-3">
+                    <span><i class="bi bi-calendar3 me-1"></i> Tạo: @Model.CreatedDate.ToString("dd/MM/yyyy")</span>
+                    <span><i class="bi bi-people me-1"></i> @Model.Members.Count thành viên</span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3 mt-md-0">
+                <a asp-action="Index" class="btn btn-glass rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại
+                </a>
+
+                @if (!isOwner)
+                {
+                    if (!isMember)
+                    {
+                        <form method="post" asp-action="Join">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="groupId" value="@Model.Id" />
+                            <button class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                <i class="bi bi-person-plus-fill me-1"></i> Tham gia
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" asp-action="RemoveMember" onsubmit="return confirm('Bạn chắc chắn muốn rời nhóm?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="groupId" value="@Model.Id" />
+                            <input type="hidden" name="userId" value="@currentUserId" />
+                            <button class="btn btn-outline-secondary rounded-pill px-4">Rời nhóm</button>
+                        </form>
+                    }
+                }
+                else
+                {
+                    <form method="post" asp-action="Delete" onsubmit="return confirm('Xác nhận xóa toàn bộ nhóm này? Dữ liệu chia sẻ sẽ bị mất.');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button class="btn btn-outline-danger rounded-pill px-4 bg-white">
+                            <i class="bi bi-trash me-1"></i> Xóa nhóm
+                        </button>
+                    </form>
+
+                    <!-- Invite by link button (owner only) -->
+                    <div class="ms-2 d-flex align-items-center">
+                        <button id="createInviteBtn" type="button" class="btn btn-outline-primary rounded-pill px-3">
+                            <i class="bi bi-link-45deg me-1"></i> Tạo link mời
+                        </button>
+                        <div id="inviteBox" class="ms-2 d-none" style="min-width: 320px;">
+                            <form id="inviteTokenForm">@Html.AntiForgeryToken()</form>
+                            <div class="input-group">
+                                <input id="inviteLinkInput" type="text" class="form-control form-control-sm" readonly placeholder="Liên kết mời sẽ hiển thị ở đây" />
+                                <button id="copyInviteBtn" type="button" class="btn btn-sm btn-outline-secondary" title="Sao chép">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5 mt-3">
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-3 d-flex align-items-center gap-2 mb-4">
+            <i class="bi bi-check-circle-fill fs-5"></i> @TempData["Message"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm rounded-3 d-flex align-items-center gap-2 mb-4">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i> @TempData["Error"]
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <div class="col-lg-8 order-2 order-lg-1">
+
+            @if (isOwner)
+            {
+                <div class="mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-share-fill text-primary me-2"></i>Chia sẻ tài liệu</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="share-panel h-100">
+                                <form method="post" asp-action="ShareDocumentToGroup">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="groupId" value="@Model.Id" />
+                                    <label class="fw-bold small text-muted text-uppercase mb-2">Chia sẻ Tệp tin</label>
+
+                                    <div class="d-flex flex-column gap-2">
+                                        <select name="documentId" class="form-select form-control-simple bg-white">
+                                            @if (ownedDocs.Any())
+                                            {
+                                                foreach (var d in ownedDocs)
+                                                {
+                                                    <option value="@d.Id">📄 @d.FileName</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <option disabled selected>Không có tệp</option>
+                                            }
+                                        </select>
+
+                                        <div class="d-flex gap-2">
+                                            <select name="accessType" class="form-select form-control-simple bg-white flex-grow-1">
+                                                <option value="Read">Chỉ xem</option>
+                                                <option value="Download">Tải về</option>
+                                                <option value="Edit">Chỉnh sửa</option>
+                                            </select>
+                                            <button class="btn btn-primary px-3 rounded-3"><i class="bi bi-send-plus-fill"></i></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="share-panel h-100">
+                                <form method="post" asp-action="ShareFolderToGroup">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="groupId" value="@Model.Id" />
+                                    <label class="fw-bold small text-muted text-uppercase mb-2">Chia sẻ Thư mục</label>
+
+                                    <div class="d-flex flex-column gap-2">
+                                        <select name="folderId" class="form-select form-control-simple bg-white">
+                                            @if (ownedFolders.Any())
+                                            {
+                                                foreach (var f in ownedFolders)
+                                                {
+                                                    <option value="@f.Id">📁 @f.Name</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <option disabled selected>Trống</option>
+                                            }
+                                        </select>
+
+                                        <div class="d-flex gap-2">
+                                            <select name="accessType" class="form-select form-control-simple bg-white flex-grow-1">
+                                                <option value="Read">Chỉ xem</option>
+                                                <option value="Download">Tải về</option>
+                                                <option value="Edit">Chỉnh sửa</option>
+                                            </select>
+                                            <button class="btn btn-warning text-white px-3 rounded-3"><i class="bi bi-send-plus-fill"></i></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="content-card">
+                <div class="card-header-modern">
+                    <i class="bi bi-collection-play-fill text-primary"></i> Tài liệu trong nhóm
+                </div>
+
+                @if (groupShares.Any())
+                {
+                    <div class="d-flex flex-column">
+                        @foreach (var s in groupShares)
+                        {
+                            <div class="resource-row">
+                                <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                    @if (s.Document != null)
+                                    {
+                                        <div class="file-icon-box icon-doc"><i class="bi bi-file-earmark-text-fill"></i></div>
+                                    }
+                                    else
+                                    {
+                                        <div class="file-icon-box icon-folder"><i class="bi bi-folder-fill"></i></div>
+                                    }
+
+                                    <div class="d-flex flex-column">
+                                        @if (s.Document != null)
+                                        {
+                                            <a asp-controller="Documents" asp-action="Preview" asp-route-id="@s.Document.Id" target="_blank" class="fw-bold text-dark text-truncate" style="max-width: 300px; text-decoration:none;">@s.Document.FileName</a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Documents" asp-action="Index" asp-route-folderId="@s.Folder?.Id" class="fw-bold text-dark text-truncate" style="max-width: 300px; text-decoration:none;">@s.Folder?.Name</a>
+                                        }
+                                         <div class="d-flex gap-2 mt-1 align-items-center">
+                                             @{
+                                                 string badgeClass = "perm-read";
+                                                 string label = "Chỉ xem";
+                                                 string type = s.Share.AccessType.ToString();
+                                                 if (type == "Edit") { badgeClass = "perm-edit"; label = "Chỉnh sửa"; }
+                                                 else if (type == "Download") { badgeClass = "perm-download"; label = "Tải xuống"; }
+                                             }
+                                             <span class="permission-badge @badgeClass">@label</span>
+                                             <small class="text-muted" style="font-size: 0.75rem;">
+                                                 @s.Share.SharedDate.ToString("dd/MM/yyyy")
+                                             </small>
+                                         </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center">
+                                        @* Download button for documents when group's share access allows download/edit or if user is owner *@
+                                        @if (s.Document != null && (s.Share.AccessType == WebDocumentManagement_FileSharing.Models.AccessLevel.Download || s.Share.AccessType == WebDocumentManagement_FileSharing.Models.AccessLevel.Edit || s.Document.OwnerId == currentUserId))
+                                        {
+                                            <a asp-controller="Documents" asp-action="Download" asp-route-id="@s.Document.Id" class="btn btn-sm btn-outline-primary me-2" title="Tải xuống">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        }
+
+                                        <div class="d-flex align-items-center">
+                                            @{ 
+                                                var share = s.Share as WebDocumentManagement_FileSharing.Models.GroupShare;
+                                                var doc = s.Document as WebDocumentManagement_FileSharing.Models.Document;
+                                                var fol = s.Folder as WebDocumentManagement_FileSharing.Models.Folder;
+                                                var shareAccess = share?.AccessType ?? WebDocumentManagement_FileSharing.Models.AccessLevel.Read;
+                                                var isDocOwner = doc != null && string.Equals(doc.OwnerId ?? "", currentUserId ?? "", StringComparison.OrdinalIgnoreCase);
+                                                var isFolOwner = fol != null && string.Equals(fol.OwnerId ?? "", currentUserId ?? "", StringComparison.OrdinalIgnoreCase);
+                                                var canManage = isOwner || isDocOwner || isFolOwner || shareAccess == WebDocumentManagement_FileSharing.Models.AccessLevel.Edit;
+                                            }
+
+                                           
+
+                                            @* If user can manage (group owner / target owner / Edit access), show Unshare and Delete actions *@
+                                            @if (canManage)
+                                            {
+                                                <div class="d-flex gap-1">
+                                                    <form method="post" asp-action="UpdateShareAccess" class="d-flex align-items-center m-0 me-1">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="shareId" value="@s.Share.Id" />
+                                                        <select name="accessType" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                            @if (s.Share.AccessType == WebDocumentManagement_FileSharing.Models.AccessLevel.Read) {
+                                                                <option value="Read" selected>Chỉ xem</option>
+                                                            } else {
+                                                                <option value="Read">Chỉ xem</option>
+                                                            }
+
+                                                            @if (s.Share.AccessType == WebDocumentManagement_FileSharing.Models.AccessLevel.Download) {
+                                                                <option value="Download" selected>Tải xuống</option>
+                                                            } else {
+                                                                <option value="Download">Tải xuống</option>
+                                                            }
+
+                                                            @if (s.Share.AccessType == WebDocumentManagement_FileSharing.Models.AccessLevel.Edit) {
+                                                                <option value="Edit" selected>Chỉnh sửa</option>
+                                                            } else {
+                                                                <option value="Edit">Chỉnh sửa</option>
+                                                            }
+                                                        </select>
+                                                    </form>
+
+                                                    <form method="post" asp-action="UnshareFromGroup" class="m-0">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="groupId" value="@Model.Id" />
+                                                        <input type="hidden" name="shareId" value="@s.Share.Id" />
+                                                        <button type="submit" class="btn btn-light text-danger btn-sm border delete-member-btn" title="Gỡ bỏ" onclick="return confirm('Bạn muốn gỡ chia sẻ mục này khỏi nhóm?');">
+                                                            <i class="bi bi-x-lg"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-box-seam text-muted opacity-25" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2">Chưa có tài liệu nào được chia sẻ.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-4 order-1 order-lg-2">
+            <div class="content-card">
+                <div class="card-header-modern justify-content-between">
+                    <span><i class="bi bi-people-fill text-success"></i> Thành viên</span>
+                    <span class="badge bg-light text-dark border">@Model.Members.Count</span>
+                </div>
+
+                @if (isOwner)
+                {
+                    <div class="p-3 border-bottom bg-light">
+                        <form method="post" asp-action="AddMemberByEmail">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="groupId" value="@Model.Id" />
+                            <div class="input-group">
+                                <input type="email" name="email" class="form-control form-control-sm border-end-0 rounded-start-3 ps-3" placeholder="Email thành viên..." required />
+                                <button class="btn btn-primary btn-sm rounded-end-3 px-3"><i class="bi bi-plus-lg"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                }
+
+                <div class="overflow-auto" style="max-height: 600px;">
+                    @if (memberInfos.Any())
+                    {
+                        var orderedMembers = memberInfos.OrderByDescending(info => ((info.Id ?? "") == (Model.OwnerId ?? "")));
+                        foreach (var info in orderedMembers)
+                        {
+                            var name = (string)(info.Email ?? info.UserName);
+                            var initial = !string.IsNullOrEmpty(name) ? name.Substring(0, 1).ToUpper() : "?";
+
+                            <div class="d-flex align-items-center justify-content-between p-3 border-bottom member-row">
+                                <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                    <div class="member-avatar-small">@initial</div>
+                                    <div class="d-flex flex-column" style="min-width: 0;">
+                                        <span class="fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@name</span>
+                                        @if ((info.Id ?? "") == (Model.OwnerId ?? ""))
+                                        {
+                                            <span class="small text-muted fw-bold">Chủ nhóm</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="small text-muted">Thành viên</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                @if (isOwner)
+                                {
+                                    <form method="post" asp-action="RemoveMember" class="m-0" onsubmit="return confirm('Xóa thành viên này?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="groupId" value="@Model.Id" />
+                                        <input type="hidden" name="userId" value="@info.Id" />
+                                        <button class="btn btn-sm text-secondary hover-danger delete-member-btn px-2" title="Xóa thành viên">
+                                            <i class="bi bi-person-dash-fill"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else if ((info.Id ?? "") == (currentUserId ?? ""))
+                                {
+                                    <form method="post" asp-action="RemoveMember" class="m-0" onsubmit="return confirm('Bạn có chắc muốn rời nhóm?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="groupId" value="@Model.Id" />
+                                        <input type="hidden" name="userId" value="@info.Id" />
+                                        <button class="btn btn-sm btn-outline-secondary delete-member-btn px-2" title="Rời nhóm">
+                                            <i class="bi bi-box-arrow-right"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        @foreach (var m in Model.Members)
+                        {
+                            <div class="p-3 border-bottom d-flex align-items-center gap-3">
+                                <div class="member-avatar-small bg-secondary text-white"><i class="bi bi-person"></i></div>
+                                <span class="small text-truncate">@m.UserId</span>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function(){
+            var btn = document.getElementById('createInviteBtn');
+            var box = document.getElementById('inviteBox');
+            var input = document.getElementById('inviteLinkInput');
+            var copyBtn = document.getElementById('copyInviteBtn');
+
+            if (btn) btn.addEventListener('click', function(){
+                var tokenEl = document.querySelector('#inviteTokenForm input[name="__RequestVerificationToken"]');
+                var token = tokenEl ? tokenEl.value : '';
+
+                var orig = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Đang tạo';
+
+                fetch('@Url.Action("CreateInvite","Groups")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({ groupId: '@Model.Id', scope: 'restricted' }).toString()
+                }).then(function(resp){
+                    if (!resp.ok) return resp.text().then(t => { throw new Error(t || 'Error'); });
+                    return resp.json();
+                }).then(function(j){
+                    if (j && j.url) {
+                        if (input) input.value = j.url;
+                        if (box) box.classList.remove('d-none');
+                    } else {
+                        alert('Không thể tạo liên kết mời.');
+                    }
+                }).catch(function(err){
+                    console.error(err);
+                    alert('Lỗi: ' + (err.message || ''));
+                }).finally(function(){
+                    btn.disabled = false;
+                    btn.innerHTML = orig;
+                });
+            });
+
+            if (copyBtn) copyBtn.addEventListener('click', function(){
+                if (!input || !input.value) return;
+                navigator.clipboard.writeText(input.value).then(function(){
+                    var ico = copyBtn.querySelector('i');
+                    var old = ico.className;
+                    ico.className = 'bi bi-check-lg text-success';
+                    setTimeout(function(){ ico.className = old; }, 2000);
+                }).catch(function(){ alert('Không thể sao chép'); });
+            });
+        })();
+    </script>
+}

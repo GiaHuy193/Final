@@ -1,135 +1,418 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using WebDocumentManagement_FileSharing.Models
 @model IEnumerable<ApplicationUser>
+@inject UserManager<ApplicationUser> UserManager
 
 @{
-    ViewData["Title"] = "Quản trị hệ thống DocNest";
+    ViewData["Title"] = "Tổng quan hệ thống";
+
+    // Compute total users excluding Admin accounts (ViewBag.TotalUsers provided by controller includes admins)
+    int totalUsersAll = 0;
+    try { totalUsersAll = (ViewBag.TotalUsers != null) ? Convert.ToInt32(ViewBag.TotalUsers) : 0; } catch { totalUsersAll = 0; }
+    int adminCount = 0;
+    try { adminCount = UserManager.GetUsersInRoleAsync("Admin").GetAwaiter().GetResult()?.Count ?? 0; } catch { adminCount = 0; }
+    int totalUsersExcludingAdmins = Math.Max(0, totalUsersAll - adminCount);
+
+    // --- 1. LOGIC TÍNH TOÁN DUNG LƯỢNG (700GB LIMIT) ---
+    long limitGB = 700;
+    // Chuyển 700GB sang Bytes (700 * 1024^3)
+    long limitBytes = limitGB * 1024L * 1024L * 1024L;
+
+    // Lấy số byte thực tế từ Controller (ViewBag.TotalStorageBytes)
+    long currentBytes = 0;
+    if (ViewBag.TotalStorageBytes != null)
+    {
+        currentBytes = (long)ViewBag.TotalStorageBytes;
+    }
+
+    // Tính phần trăm
+    double percent = 0;
+    if (limitBytes > 0)
+    {
+        percent = ((double)currentBytes / limitBytes) * 100;
+    }
+
+    // Prepare display text and CSS width. For tiny non-zero values show "<0.01%" while the bar shows a minimal width.
+    string percentText;
+    string barWidth;
+    if (percent > 0 && percent < 0.01)
+    {
+        percentText = "<0.01"; // display with less-than
+        // CSS requires a numeric width; show a minimal visible width of 0.01%
+        barWidth = 0.01.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+    }
+    else
+    {
+        percentText = percent.ToString("0.00", System.Globalization.CultureInfo.CurrentCulture);
+        barWidth = percent.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    // Chọn màu thanh tiến trình
+    string progressColor = "bg-primary"; // Mặc định xanh dương
+    string statusText = "Ổn định";
+    if (percent > 75)
+    {
+        progressColor = "bg-warning";
+        statusText = "Cảnh báo";
+    }
+    if (percent > 90)
+    {
+        progressColor = "bg-danger";
+        statusText = "Sắp đầy";
+    }
+
+    // Helper: Lấy ký tự đầu của tên để làm Avatar
+    Func<string, string> GetInitials = (name) =>
+    {
+        if (string.IsNullOrEmpty(name)) return "U";
+        return name.Substring(0, 1).ToUpper();
+    };
 }
 
 <style>
-    .admin-card {
-        border: none;
-        border-radius: 15px;
-        transition: 0.3s;
+    :root {
+        --bg-body: #f1f5f9;
+        --card-bg: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
     }
 
-        .admin-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    body {
+        background-color: var(--bg-body);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* CARD STATS */
+    .stat-card {
+        background: var(--card-bg);
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        padding: 1.5rem;
+        height: 100%;
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
 
-    .stat-icon {
-        width: 50px;
-        height: 50px;
+    .icon-box {
+        width: 48px;
+        height: 48px;
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+    /* Gradient Icons */
+    .icon-users {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .icon-files {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .icon-folders {
+        background: #f3e8ff;
+        color: #9333ea;
+    }
+
+    .icon-storage {
+        background: #ffedd5;
+        color: #ea580c;
+    }
+
+    /* STORAGE BAR */
+    .storage-track {
+        height: 8px;
+        background-color: #f1f5f9;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 12px;
+    }
+
+    .storage-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 1s ease-in-out;
+    }
+
+    /* TABLE */
+    .modern-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .modern-table thead th {
+            background: #f8fafc;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modern-table tbody td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .modern-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-verified {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-pending {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+
+    .status-locked {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
+
+        .btn-action:hover {
+            background: #f1f5f9;
+            color: var(--text-primary);
+        }
+
+    .btn-action-danger:hover {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    .btn-action-success:hover {
+        background: #dcfce7;
+        color: #16a34a;
     }
 </style>
 
-<div class="container-fluid px-4 py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Bảng điều khiển Admin</h2>
-        <span class="badge bg-primary-subtle text-primary p-2 px-3 rounded-pill">
-            <i class="bi bi-calendar3 me-2"></i> @DateTime.Now.ToString("dd/MM/yyyy")
-        </span>
+<div class="container-fluid py-5 px-lg-4">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5">
+        <div>
+            <h4 class="fw-bold mb-1 text-dark">Dashboard Hệ Thống</h4>
+            <p class="text-muted mb-0 small">Xin chào Admin! Dưới đây là tình hình hoạt động hôm nay.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <span class="bg-white border shadow-sm px-3 py-2 rounded-3 text-secondary fw-medium small d-flex align-items-center">
+                <i class="bi bi-calendar3 me-2 text-primary"></i> @DateTime.Now.ToString("dd/MM/yyyy")
+            </span>
+        </div>
     </div>
 
     <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card admin-card shadow-sm p-4">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon bg-primary text-white me-3">
-                        <i class="bi bi-people-fill fs-4"></i>
-                    </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between">
                     <div>
-                        <h6 class="text-muted mb-0">Tổng người dùng</h6>
-                        <h3 class="fw-bold mb-0">@ViewBag.TotalUsers</h3>
+                        <p class="text-secondary small fw-bold text-uppercase mb-1">Người dùng</p>
+                        <h2 class="fw-bold mb-0 text-dark">@totalUsersExcludingAdmins</h2>
                     </div>
+                    <div class="icon-box icon-users"><i class="bi bi-people-fill"></i></div>
+                </div>
+                <div class="mt-3">
+                    <span class="badge bg-success-subtle text-success rounded-pill px-2">
+                        <i class="bi bi-arrow-up-short"></i> Hoạt động
+                    </span>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card admin-card shadow-sm p-4">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon bg-success text-white me-3">
-                        <i class="bi bi-file-earmark-text-fill fs-4"></i>
-                    </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between">
                     <div>
-                        <h6 class="text-muted mb-0">Tệp tin hệ thống</h6>
-                        <h3 class="fw-bold mb-0">@ViewBag.TotalFiles</h3>
+                        <p class="text-secondary small fw-bold text-uppercase mb-1">Tài liệu</p>
+                        <h2 class="fw-bold mb-0 text-dark">@ViewBag.TotalFiles</h2>
                     </div>
+                    <div class="icon-box icon-files"><i class="bi bi-file-earmark-richtext-fill"></i></div>
+                </div>
+                <div class="mt-3 text-muted small">
+                    Tổng số tệp tin toàn hệ thống
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card admin-card shadow-sm p-4">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon bg-info text-white me-3">
-                        <i class="bi bi-folder-fill fs-4"></i>
-                    </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between">
                     <div>
-                        <h6 class="text-muted mb-0">Tổng thư mục</h6>
-                        <h3 class="fw-bold mb-0">@ViewBag.TotalFolders</h3>
+                        <p class="text-secondary small fw-bold text-uppercase mb-1">Thư mục</p>
+                        <h2 class="fw-bold mb-0 text-dark">@ViewBag.TotalFolders</h2>
                     </div>
+                    <div class="icon-box icon-folders"><i class="bi bi-folder-fill"></i></div>
+                </div>
+                <div class="mt-3 text-muted small">
+                    Đang được quản lý
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card admin-card shadow-sm p-4">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon bg-warning text-white me-3">
-                        <i class="bi bi-cloud-fill fs-4"></i>
-                    </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card border-0" style="background: linear-gradient(145deg, #ffffff, #fff7ed);">
+                <div class="d-flex justify-content-between align-items-start mb-1">
                     <div>
-                        <h6 class="text-muted mb-0">Dung lượng sử dụng</h6>
-                        <h3 class="fw-bold mb-0">@((ViewBag.TotalStorage ?? "0 B"))</h3>
+                        <p class="text-secondary small fw-bold text-uppercase mb-1">Dung lượng</p>
+                        <h3 class="fw-bold mb-0 text-dark">
+                            @ViewBag.TotalStorage
+                            <span class="fs-6 text-muted fw-normal">/ 700GB</span>
+                        </h3>
+                    </div>
+                    <div class="icon-box icon-storage shadow-sm" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                        <i class="bi bi-hdd-fill"></i>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="fw-bold text-dark">Đã dùng @percentText%</span>
+                        <span class="@(percent > 90 ? "text-danger fw-bold" : "text-muted")">@statusText</span>
+                    </div>
+                    <div class="storage-track">
+                        <div class="storage-fill @progressColor" style="width: @(barWidth)%"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-white py-3 border-bottom">
-            <h5 class="fw-bold mb-0">Người dùng mới đăng ký</h5>
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark">Người dùng mới đăng ký</h5>
+            <a asp-action="ManageUsers" class="btn btn-sm btn-light text-primary fw-bold border">Quản lý tất cả</a>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+            <table class="modern-table">
+                <thead>
                     <tr>
-                        <th class="ps-4">Email</th>
-                        <th>Username</th>
-                        <th>Trạng thái Email</th>
-                        <th class="text-end pe-4">Thao tác</th>
+                        <th class="ps-4">Thành viên</th>
+                        <th>Email</th>
+                        <th>Trạng thái</th>
+                        <th>Dung lượng</th>
+                        <th class="text-end pe-4">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var user in Model)
                     {
+                        // Kiểm tra xem user có bị khóa không
+                        bool isLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow;
+
+                        // Lấy dung lượng của user từ ViewBag (được tính trong Controller)
+                        var userStorage = ViewBag.UserStorage as Dictionary<string, string>;
+                        string storageUsed = userStorage != null && userStorage.ContainsKey(user.Id) ? userStorage[user.Id] : "0 B";
+
                         <tr>
                             <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-secondary bg-opacity-10 rounded-circle p-2 me-3">
-                                        <i class="bi bi-person text-secondary"></i>
-                                    </div>
-                                    @user.Email
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="user-avatar shadow-sm">@GetInitials(user.UserName)</div>
+                                    <span class="fw-bold text-dark">@user.UserName</span>
                                 </div>
                             </td>
-                            <td>@user.UserName</td>
+                            <td class="text-muted">@user.Email</td>
                             <td>
-                                @if (user.EmailConfirmed)
+                                @if (isLocked)
                                 {
-                                    <span class="badge bg-success-subtle text-success">Đã xác thực</span>
+                                    <span class="status-badge status-locked">
+                                        <i class="bi bi-lock-fill"></i> Đã khóa
+                                    </span>
+                                }
+                                else if (user.EmailConfirmed)
+                                {
+                                    <span class="status-badge status-verified">
+                                        <i class="bi bi-check-circle-fill"></i> Xác thực
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger-subtle text-danger">Chưa xác thực</span>
+                                    <span class="status-badge status-pending">
+                                        <i class="bi bi-clock-fill"></i> Chờ duyệt
+                                    </span>
                                 }
                             </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">@storageUsed</span>
+                            </td>
                             <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-outline-primary me-2">Chi tiết</button>
-                                <button class="btn btn-sm btn-outline-danger">Khóa</button>
+                                <div class="d-flex justify-content-end gap-1">
+                                    @if (isLocked)
+                                    {
+                                        <form asp-action="UnlockUser" method="post" onsubmit="return confirm('Mở khóa cho tài khoản này?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn-action btn-action-success" title="Mở khóa">
+                                                <i class="bi bi-unlock-fill"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="LockUser" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn khóa tài khoản này?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn-action btn-action-danger" title="Khóa tài khoản">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }

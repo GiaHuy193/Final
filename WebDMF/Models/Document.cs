@@ -1,5 +1,6 @@
 ﻿namespace WebDocumentManagement_FileSharing.Models;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class Document
 {
@@ -17,8 +18,14 @@ public class Document
     public int? FolderId { get; set; }
      public virtual Folder? Folder { get; set; }
 
-     // Versions navigation for DocumentVersion
-     public virtual ICollection<DocumentVersion> Versions { get; set; } = new List<DocumentVersion>();
+
+    // Liên kết tới Nhóm (Group) ---
+    public int? GroupId { get; set; } // Để null nếu là file cá nhân
+    [ForeignKey("GroupId")]
+    public virtual Group? Group { get; set; }
+
+    // Versions navigation for DocumentVersion
+    public virtual ICollection<DocumentVersion> Versions { get; set; } = new List<DocumentVersion>();
 
 
      public string OwnerId { get; set; } = string.Empty;

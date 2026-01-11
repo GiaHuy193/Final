@@ -142,10 +142,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZhbGlkYXRpb25TY3JpcHRzUGFydGlhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Documents/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXENyZWF0ZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Documents/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -164,6 +160,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Documents/Trash.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXFRyYXNoLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Documents/Upload.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXFVwbG9hZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Folders/Create.cshtml]
@@ -188,6 +188,26 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Folders/Rename.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRm9sZGVyc1xSZW5hbWUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Groups/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3JvdXBzXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Groups/DeleteConfirm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3JvdXBzXERlbGV0ZUNvbmZpcm0uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Groups/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3JvdXBzXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Groups/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3JvdXBzXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Groups/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3JvdXBzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/HUY/Desktop/WebDMF/WebDMF/WebDMF/WebDMF/Views/Home/Delete.cshtml]

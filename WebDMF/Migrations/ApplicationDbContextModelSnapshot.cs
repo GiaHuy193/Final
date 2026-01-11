@@ -311,6 +311,9 @@ namespace WebDocumentManagement_FileSharing.Migrations
                     b.Property<int?>("FolderId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -334,6 +337,8 @@ namespace WebDocumentManagement_FileSharing.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FolderId");
+
+                    b.HasIndex("GroupId");
 
                     b.ToTable("Documents");
                 });
@@ -388,6 +393,9 @@ namespace WebDocumentManagement_FileSharing.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -407,9 +415,91 @@ namespace WebDocumentManagement_FileSharing.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GroupId");
+
                     b.HasIndex("ParentId");
 
                     b.ToTable("Folders");
+                });
+
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.Group", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.GroupMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("GroupMembers");
+                });
+
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.GroupShare", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccessType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FolderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SharedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId", "DocumentId", "FolderId");
+
+                    b.ToTable("GroupShares");
                 });
 
             modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.PaymentTransaction", b =>
@@ -633,7 +723,13 @@ namespace WebDocumentManagement_FileSharing.Migrations
                         .HasForeignKey("FolderId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("WebDocumentManagement_FileSharing.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId");
+
                     b.Navigation("Folder");
+
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.DocumentVersion", b =>
@@ -649,12 +745,38 @@ namespace WebDocumentManagement_FileSharing.Migrations
 
             modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.Folder", b =>
                 {
+                    b.HasOne("WebDocumentManagement_FileSharing.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId");
+
                     b.HasOne("WebDocumentManagement_FileSharing.Models.Folder", "ParentFolder")
                         .WithMany("SubFolders")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.Navigation("Group");
+
                     b.Navigation("ParentFolder");
+                });
+
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.GroupMember", b =>
+                {
+                    b.HasOne("WebDocumentManagement_FileSharing.Models.Group", "Group")
+                        .WithMany("Members")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.GroupShare", b =>
+                {
+                    b.HasOne("WebDocumentManagement_FileSharing.Models.Group", null)
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.PaymentTransaction", b =>
@@ -695,6 +817,11 @@ namespace WebDocumentManagement_FileSharing.Migrations
                     b.Navigation("Documents");
 
                     b.Navigation("SubFolders");
+                });
+
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.Group", b =>
+                {
+                    b.Navigation("Members");
                 });
 #pragma warning restore 612, 618
         }

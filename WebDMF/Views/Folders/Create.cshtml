@@ -1,31 +1,150 @@
 ﻿@model WebDocumentManagement_FileSharing.Models.Folder
 
 @{
-    ViewData["Title"] = "Tạo thư mục";
+    ViewData["Title"] = "Tạo thư mục mới";
 }
 
-<h1>Tạo thư mục</h1>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<style>
+    :root {
+        --bg-body: #f3f4f6;
+        --surface: #ffffff;
+        --text-main: #111827;
+        --text-sub: #6b7280;
+        --primary: #3b82f6; /* Màu xanh chuẩn giống ảnh */
+        --border: #e5e7eb;
+    }
+
+    body {
+        background-color: var(--bg-body);
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    /* Card bao ngoài */
+    .create-card {
+        background: var(--surface);
+        border-radius: 20px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        border: 1px solid white; /* Tạo hiệu ứng viền mỏng sáng */
+        overflow: hidden;
+    }
+
+    /* Icon ở giữa */
+    .icon-header {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); /* Nền xanh nhạt */
+        color: var(--primary);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin: 0 auto 1.5rem auto;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Ô nhập liệu (Input) */
+    .form-control-modern {
+        background-color: #ffffff;
+        border: 1px solid #d1d5db; /* Viền xám mặc định */
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        color: var(--text-main);
+        transition: all 0.2s ease-in-out;
+    }
+
+        /* Hiệu ứng khi bấm vào input (Focus) -> Ra màu xanh */
+        .form-control-modern:focus {
+            background-color: #fff;
+            border-color: var(--primary); /* Đổi màu viền thành xanh */
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* Thêm bóng xanh nhạt bao quanh */
+        }
+
+    /* Nút Tạo */
+    .btn-primary-modern {
+        background-color: var(--primary);
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.25);
+        transition: all 0.2s;
+    }
+
+        .btn-primary-modern:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.3);
+        }
+
+    /* Nút Hủy */
+    .btn-cancel {
+        color: var(--text-sub);
+        font-weight: 500;
+        text-decoration: none;
+        transition: 0.2s;
+        display: inline-block;
+        margin-top: 1rem;
+    }
+
+        .btn-cancel:hover {
+            color: var(--text-main);
+        }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
 
             <div class="mb-3">
-                <label asp-for="Name" class="form-label">Tên thư mục</label>
-                <input asp-for="Name" class="form-control" required />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <a asp-action="Index" class="text-decoration-none text-muted small d-flex align-items-center gap-1">
+                    <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                </a>
             </div>
 
-            <div>
-                <button type="submit" class="btn btn-primary">Tạo</button>
-                <a asp-controller="Home" asp-action="Index" class="btn btn-secondary ms-2">Hủy</a>
+            <div class="create-card p-4">
+                <div class="text-center pt-2 pb-2">
+
+                    <div class="icon-header">
+                        <i class="bi bi-folder-plus"></i>
+                    </div>
+
+                    <h3 class="fw-bold text-dark mb-2">Tạo thư mục mới</h3>
+                    <p class="text-muted small mb-4">Tạo không gian lưu trữ để quản lý tài liệu của bạn.</p>
+
+                    <form asp-action="Create" method="post" class="text-start">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-4">
+                            <label asp-for="Name" class="form-label fw-bold text-dark small text-uppercase" style="letter-spacing: 0.5px; font-size: 0.75rem;">TÊN THƯ MỤC</label>
+
+                            <input asp-for="Name" class="form-control form-control-modern" placeholder="Ví dụ: Tài liệu dự án, Báo cáo..." autocomplete="off" autofocus required />
+                            <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-primary-modern text-white">
+                                <i class="bi bi-plus-lg me-1"></i> Tạo thư mục ngay
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <a asp-action="Index" class="btn-cancel">Hủy bỏ</a>
+                        </div>
+
+                    </form>
+                </div>
             </div>
-        </form>
+
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

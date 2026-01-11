@@ -355,7 +355,7 @@
         .dropdown-menu {
             background-color: var(--bg-header);
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 12px var(--shadow-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
 
         .dropdown-item {
@@ -629,7 +629,7 @@
                         <ul class="dropdown-menu w-100" aria-labelledby="createDropdownMobile">
                             <li><a class="dropdown-item" asp-controller="Folders" asp-action="Create"><i class="bi bi-folder-plus me-2 text-warning"></i> Thư mục mới</a></li>
                             <li><hr class="dropdown-divider" /></li>
-                            <li><a class="dropdown-item" asp-controller="Documents" asp-action="Create"><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i> Tải tệp lên</a></li>
+                            <li><a class="dropdown-item" asp-controller="Documents" asp-action="Upload"><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i> Tải tệp lên</a></li>
                             <li>
                                 <form asp-controller="Folders" asp-action="UploadFolder" method="post" enctype="multipart/form-data" class="m-0">
                                     @Html.AntiForgeryToken()
@@ -647,6 +647,7 @@
                 <nav class="nav flex-column px-2" aria-label="Sidebar Mobile">
                     <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house-fill me-2"></i> Trang chủ</a>
                     <a class="nav-link" asp-controller="Documents" asp-action="Index"><i class="bi bi-folder-fill me-2"></i> Tài liệu của tôi</a>
+                    <a class="nav-link" asp-controller="Groups" asp-action="Index"><i class="bi bi-people-fill me-2"></i> Nhóm của tôi</a>
                     <a class="nav-link" asp-controller="Documents" asp-action="Shared"><i class="bi bi-share-fill me-2"></i> Chia sẻ với tôi</a>
                     <a class="nav-link" asp-controller="Documents" asp-action="Star"><i class="bi bi-star-fill me-2"></i> Gắn sao</a>
                     <a class="nav-link" asp-controller="Documents" asp-action="Trash"><i class="bi bi-trash-fill me-2"></i> Thùng rác</a>
@@ -693,7 +694,7 @@
                         <ul class="dropdown-menu w-100" aria-labelledby="createDropdown">
                             <li><a class="dropdown-item" asp-controller="Folders" asp-action="Create"><i class="bi bi-folder-plus me-2 text-warning"></i> Thư mục mới</a></li>
                             <li><hr class="dropdown-divider" /></li>
-                            <li><a class="dropdown-item" asp-controller="Documents" asp-action="Create"><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i> Tải tệp lên</a></li>
+                            <li><a class="dropdown-item" asp-controller="Documents" asp-action="Upload"><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i> Tải tệp lên</a></li>
                             <li>
                                 <form asp-controller="Folders" asp-action="UploadFolder" method="post" enctype="multipart/form-data" class="m-0">
                                     @Html.AntiForgeryToken()
@@ -711,6 +712,7 @@
                 <nav class="nav flex-column px-2" aria-label="Sidebar">
                     <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house-fill me-2"></i> Trang chủ</a>
                     <a class="nav-link" asp-controller="Documents" asp-action="Index"><i class="bi bi-folder-fill me-2"></i> Tài liệu của tôi</a>
+                    <a class="nav-link" asp-controller="Groups" asp-action="Index"><i class="bi bi-people-fill me-2"></i> Nhóm của tôi</a>
                     <a class="nav-link" asp-controller="Documents" asp-action="Shared"><i class="bi bi-share-fill me-2"></i> Chia sẻ với tôi</a>
                     <a class="nav-link" asp-controller="Documents" asp-action="Star"><i class="bi bi-star-fill me-2"></i> Gắn sao</a>
                     <a class="nav-link" asp-controller="Documents" asp-action="Trash"><i class="bi bi-trash-fill me-2"></i> Thùng rác</a>

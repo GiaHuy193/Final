@@ -33,6 +33,13 @@
 
 <style>
     :root {
+        --primary-color: #3b82f6;
+        --primary-hover-color: #2563eb; 
+    }
+</style>
+
+<style>
+    :root {
         --card-hover-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
@@ -319,16 +326,12 @@
         </div>
     }
 
-    <div class="mb-5">
-        <h5 class="fw-bold mb-3 d-flex align-items-center justify-content-between text-dark">
-            <span class="d-flex align-items-center">
-                <i></i> Thư mục
-            </span>
+    <div class="d-flex justify-content-between align-items-end mb-3">
+        <h6 class="fw-bold text-uppercase text-secondary small mb-0">Thư mục</h6>
             <button class="btn btn-sm btn-light section-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#foldersContent" aria-expanded="true" aria-controls="foldersContent" title="Thu gọn/Hiện">
                 <i class="bi bi-chevron-down"></i>
             </button>
-        </h5>
-        </div>
+          </div>
 
         <div id="foldersContent" class="collapse show">
             <div class="row g-3">
@@ -340,7 +343,7 @@
                             <div class="folder-card position-relative">
                                 <div class="dropdown position-absolute" style="top: 10px; right: 10px; z-index: 20;">
                                     <button class="folder-option-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-three-dots"></i>
+                                        <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
                                         <li><a class="dropdown-item" href="@Url.Action("Download", "Folders", new { id = f.Id })"><i class="bi bi-download me-2"></i>Tải xuống</a></li>
@@ -348,6 +351,8 @@
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item folder-star-toggle" href="#" data-id="@f.Id"><i class="bi bi-star me-2"></i>Gắn sao</a></li>
                                         <li><a class="dropdown-item share-trigger" href="#" data-id="@f.Id" data-title="@f.Name" data-type="folder"><i class="bi bi-share me-2"></i>Chia sẻ</a></li>
+                                        <li><a class="dropdown-item" href="@Url.Action("Details", "Folders", new { id = f.Id })"><i class="bi bi-info-circle me-2"></i>Chi tiết</a></li>
+                                        <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item text-danger folder-delete-btn" href="#" data-id="@f.Id"><i class="bi bi-trash me-2"></i>Xóa</a></li>
                                     </ul>
                                 </div>
@@ -414,6 +419,7 @@
                                     <li><a class="dropdown-item document-star-toggle" href="#" data-id="@d.Id"><i class="bi bi-star me-2"></i>Gắn sao</a></li>
                                     <li><a class="dropdown-item share-trigger" href="#" data-id="@d.Id" data-title="@d.FileName" data-type="document"><i class="bi bi-share me-2"></i>Chia sẻ</a></li>
                                     <li><a class="dropdown-item" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id"><i class="bi bi-info-circle me-2"></i>Chi tiết</a></li>
+                                    <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-danger document-delete-btn" href="#" data-id="@d.Id" data-name="@d.FileName"><i class="bi bi-trash me-2"></i>Xóa</a></li>
                                 </ul>
                             </div>
@@ -510,7 +516,7 @@
                                 <td class="text-end" style="padding-right: 1.5rem">
                                     <div class="dropdown">
                                         <button class="table-action-btn ms-auto" data-bs-toggle="dropdown">
-                                            <i class="bi bi-three-dots"></i>
+                                            <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                                             <li><a class="dropdown-item" asp-controller="Documents" asp-action="Download" asp-route-id="@d.Id"><i class="bi bi-download me-2"></i>Tải xuống</a></li>
@@ -519,6 +525,7 @@
                                             <li><a class="dropdown-item document-star-toggle" href="#" data-id="@d.Id"><i class="bi bi-star me-2"></i>Gắn sao</a></li>
                                             <li><a class="dropdown-item share-trigger" href="#" data-id="@d.Id" data-title="@d.FileName" data-type="document"><i class="bi bi-share me-2"></i>Chia sẻ</a></li>
                                             <li><a class="dropdown-item" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id"><i class="bi bi-info-circle me-2"></i>Chi tiết</a></li>
+                                            <li><hr class="dropdown-divider"></li>
                                             <li><a class="dropdown-item text-danger document-delete-btn" href="#" data-id="@d.Id" data-name="@d.FileName"><i class="bi bi-trash me-2"></i>Xóa</a></li>
                                         </ul>
                                     </div>

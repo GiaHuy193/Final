@@ -1,12 +1,19 @@
 ﻿@using WebDocumentManagement_FileSharing.Models
 @{
-    var accessOptions = new[] { "Read", "Download", "Edit" };
+    // Lấy danh sách nhóm từ Controller
+    var userGroups = ViewBag.UserGroups as IEnumerable<SelectListItem>;
+
+    var accessOptions = new[] {
+        new { Val = "Read", Txt = "Chỉ xem" },
+        new { Val = "Download", Txt = "Tải về" },
+        new { Val = "Edit", Txt = "Chỉnh sửa" }
+    };
 }
 
 <style>
     /* --- MODERN LIGHT THEME --- */
     :root {
-        --share-primary: #6366f1; /* Indigo */
+        --share-primary: #6366f1;
         --share-bg: #ffffff;
         --share-input-bg: #f8fafc;
         --share-border: #e2e8f0;
@@ -14,9 +21,9 @@
         --share-text-muted: #64748b;
     }
 
-    /* Thiết kế Modal */
+    /* Modal Styling */
     .custom-share-modal .modal-content {
-        border-radius: 24px; /* Bo góc lớn hiện đại */
+        border-radius: 24px;
         border: none;
         overflow: hidden;
         background-color: var(--share-bg);
@@ -31,10 +38,10 @@
     .custom-share-modal .modal-footer {
         border-top: none;
         padding: 1rem 1.5rem 1.5rem;
-        background-color: #f8fafc; /* Nền footer hơi xám nhẹ */
+        background-color: #f8fafc;
     }
 
-    /* Card thông tin file */
+    /* File Info Card */
     .share-file-card {
         background-color: #f1f5f9;
         border-radius: 16px;
@@ -57,7 +64,7 @@
         font-size: 1.5rem;
     }
 
-    /* Inputs & Selects */
+    /* Forms */
     .custom-share-modal .form-control,
     .custom-share-modal .form-select {
         border-radius: 12px;
@@ -76,7 +83,6 @@
             background-color: white;
         }
 
-    /* Labels */
     .form-label-modern {
         font-size: 0.75rem;
         text-transform: uppercase;
@@ -119,7 +125,7 @@
             border-color: #cbd5e1;
         }
 
-    /* Input Group đẹp hơn */
+    /* Input Group */
     .modern-input-group {
         position: relative;
     }
@@ -133,8 +139,24 @@
             z-index: 5;
         }
 
-        .modern-input-group input {
+        .modern-input-group input,
+        .modern-input-group select {
             padding-left: 40px !important;
+        }
+
+    /* Tabs Styling */
+    .share-tabs .nav-link {
+        color: var(--share-text-muted);
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s;
+    }
+
+        .share-tabs .nav-link.active {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--share-primary);
         }
 </style>
 
@@ -147,7 +169,7 @@
                 <div class="modal-header">
                     <div>
                         <h5 class="modal-title fw-bold text-dark" style="font-size: 1.25rem;">Chia sẻ tài liệu</h5>
-                        <p class="text-muted small mb-0">Cấp quyền truy cập cho người khác</p>
+                        <p class="text-muted small mb-0">Cấp quyền truy cập cho cá nhân hoặc nhóm</p>
                     </div>
                     <button type="button" class="btn-close bg-light rounded-circle p-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -155,6 +177,7 @@
                 <div class="modal-body px-4 pt-3">
                     <input type="hidden" id="shareTargetType" name="targetType" value="document" />
                     <input type="hidden" id="shareTargetId" name="targetId" value="" />
+                    <input type="hidden" id="shareMethod" name="shareMethod" value="email" />
 
                     <div class="share-file-card">
                         <div class="share-icon-box text-primary">
@@ -166,18 +189,63 @@
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label for="receiverEmail" class="form-label-modern">Gửi lời mời qua Email</label>
-                        <div class="d-flex gap-2">
-                            <div class="modern-input-group flex-grow-1">
-                                <i class="bi bi-envelope"></i>
-                                <input type="email" class="form-control" id="receiverEmail" name="receiverEmail" placeholder="Nhập email người nhận..." />
+                    <ul class="nav nav-pills share-tabs mb-3 gap-2" id="shareTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="email-tab" data-bs-toggle="pill" data-bs-target="#pills-email" type="button" role="tab" onclick="setShareMethod('email')">
+                                <i class="bi bi-envelope me-1"></i> Gửi Email
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="group-tab" data-bs-toggle="pill" data-bs-target="#pills-group" type="button" role="tab" onclick="setShareMethod('group')">
+                                <i class="bi bi-people me-1"></i> Chọn Nhóm
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mb-4" id="pills-tabContent">
+
+                        <div class="tab-pane fade show active" id="pills-email" role="tabpanel">
+                            <label class="form-label-modern">Địa chỉ Email người nhận</label>
+                            <div class="d-flex gap-2">
+                                <div class="modern-input-group flex-grow-1">
+                                    <i class="bi bi-envelope"></i>
+                                    <input type="email" class="form-control" id="receiverEmail" name="receiverEmail" placeholder="Nhập email..." />
+                                </div>
+                                <select class="form-select w-auto" name="emailAccessType" style="min-width: 130px;">
+                                    @foreach (var opt in accessOptions)
+                                    {
+                                        <option value="@opt.Val">@opt.Txt</option>
+                                    }
+                                </select>
                             </div>
-                            <select class="form-select w-auto" id="accessType" name="accessType" style="min-width: 130px;">
-                                <option value="Read">Chỉ xem</option>
-                                <option value="Download">Tải về</option>
-                                <option value="Edit">Chỉnh sửa</option>
-                            </select>
+                        </div>
+
+                        <div class="tab-pane fade" id="pills-group" role="tabpanel">
+                            <label class="form-label-modern">Chọn nhóm người dùng</label>
+                            <div class="d-flex gap-2">
+                                <div class="modern-input-group flex-grow-1">
+                                    <i class="bi bi-people-fill"></i>
+                                    <select class="form-select" id="targetGroupId" name="targetGroupId">
+                                        <option value="">-- Chọn nhóm --</option>
+                                        @if (userGroups != null)
+                                        {
+                                            foreach (var group in userGroups)
+                                            {
+                                                <option value="@group.Value">@group.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <select class="form-select w-auto" name="groupAccessType" style="min-width: 130px;">
+                                    @foreach (var opt in accessOptions)
+                                    {
+                                        <option value="@opt.Val">@opt.Txt</option>
+                                    }
+                                </select>
+                            </div>
+                            <div id="noGroupsMsg" class="text-danger small mt-2" style="display:@(userGroups != null && !userGroups.Any() ? "block" : "none")">
+                                <i class="bi bi-info-circle"></i> Không tìm thấy nhóm nào.
+                            </div>
                         </div>
                     </div>
 
@@ -201,13 +269,13 @@
                         <div class="collapse" id="generatedLinkBox">
                             <div class="bg-light p-3 rounded-3 border border-dashed d-flex align-items-center gap-2 mt-2">
                                 <i class="bi bi-globe2 text-success fs-5"></i>
-                                <input type="text" id="generatedLink" class="form-control bg-white border-0 shadow-none" readonly value="https://docnest.com/s/..." />
+                                <input type="text" id="generatedLink" class="form-control bg-white border-0 shadow-none" readonly />
                                 <button type="button" id="copyLinkBtn" class="btn btn-sm btn-white border shadow-sm rounded-circle p-2" title="Sao chép">
                                     <i class="bi bi-clipboard"></i>
                                 </button>
                             </div>
                             <div class="text-success small mt-2 fw-medium ms-1">
-                                <i class="bi bi-check-circle-fill me-1"></i> Link đã sẵn sàng để chia sẻ.
+                                <i class="bi bi-check-circle-fill me-1"></i> Link đã sẵn sàng.
                             </div>
                         </div>
                     </div>
@@ -226,6 +294,11 @@
 </div>
 
 <script>
+    function setShareMethod(method) {
+        var input = document.getElementById('shareMethod');
+        if(input) input.value = method;
+    }
+
     (function(){
         // --- LOGIC MỞ MODAL ---
         document.addEventListener('click', function(e){
@@ -248,7 +321,7 @@
             if (inputType) inputType.value = type || 'document';
             if (titleEl) titleEl.textContent = title || 'Không có tên';
 
-            // Đổi icon theo loại file
+            // Đổi icon theo extension
             if (iconEl) {
                 if (type === 'folder') {
                     iconEl.className = 'bi bi-folder-fill text-warning';
@@ -261,7 +334,36 @@
                 }
             }
 
-            // Reset trạng thái link cũ
+            // Reset Tabs
+            var emailTabBtn = document.getElementById('email-tab');
+            if(emailTabBtn) {
+                var tabTrigger = new bootstrap.Tab(emailTabBtn);
+                tabTrigger.show();
+                setShareMethod('email');
+            }
+
+            // If server did not provide userGroups, fetch them dynamically
+            var targetGroupSelect = document.getElementById('targetGroupId');
+            if (targetGroupSelect && targetGroupSelect.options.length <= 1) {
+                // call Groups/UserGroups to populate options
+                fetch('@Url.Action("UserGroups", "Groups")')
+                    .then(function(r){ if(!r.ok) throw new Error('Không thể tải nhóm'); return r.json(); })
+                    .then(function(list){
+                        var noGroupsMsg = modalEl.querySelector('#noGroupsMsg');
+                        if(!list || !list.length) {
+                            if(noGroupsMsg) noGroupsMsg.style.display = 'block';
+                            return;
+                        }
+                        if(noGroupsMsg) noGroupsMsg.style.display = 'none';
+                        // remove placeholder options
+                        targetGroupSelect.innerHTML = '<option value="">-- Chọn nhóm --</option>';
+                        list.forEach(function(g){
+                            var opt = document.createElement('option'); opt.value = g.id; opt.text = g.name; targetGroupSelect.appendChild(opt);
+                        });
+                    }).catch(function(){ var noGroupsMsg = modalEl.querySelector('#noGroupsMsg'); if(noGroupsMsg) noGroupsMsg.style.display = 'block'; /* ignore */ });
+            }
+
+            // Reset link
             var box = document.getElementById('generatedLinkBox');
             if (box) box.classList.remove('show');
             var gen = modalEl.querySelector('#generatedLink'); if (gen) gen.value = '';
@@ -276,7 +378,7 @@
             var modalEl = document.getElementById('shareModal');
             var targetType = modalEl.querySelector('#shareTargetType').value;
             var targetId = modalEl.querySelector('#shareTargetId').value;
-            var accessType = modalEl.querySelector('#accessType').value;
+            var accessType = modalEl.querySelector('select[name="emailAccessType"]').value;
             var scope = modalEl.querySelector('#shareScope').value;
 
             if (!targetId) return alert('Lỗi: Không tìm thấy ID mục cần chia sẻ.');
@@ -284,7 +386,6 @@
             var tokenEl = modalEl.querySelector('input[name="__RequestVerificationToken"]');
             var token = tokenEl ? tokenEl.value : '';
 
-            // Hiệu ứng Loading
             var originalText = createBtn.innerHTML;
             createBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
             createBtn.disabled = true;
@@ -305,7 +406,6 @@
                     var box = document.getElementById('generatedLinkBox');
                     var gen = document.getElementById('generatedLink');
                     if (gen) gen.value = j.url;
-                    // Mở collapse chứa link
                     new bootstrap.Collapse(box, { show: true });
                 } else {
                     alert('Không thể tạo liên kết.');
@@ -319,7 +419,7 @@
             });
         });
 
-        // --- LOGIC SAO CHÉP LINK ---
+        // --- LOGIC COPY LINK ---
         var copyBtn = document.getElementById('copyLinkBtn');
         if (copyBtn) copyBtn.addEventListener('click', function(){
             var gen = document.getElementById('generatedLink');
@@ -328,16 +428,77 @@
             navigator.clipboard.writeText(gen.value).then(function(){
                 var icon = copyBtn.querySelector('i');
                 var originalClass = icon.className;
-
-                // Đổi icon thành dấu tích xanh
                 icon.className = 'bi bi-check-lg text-success';
                 copyBtn.classList.add('border-success');
-
                 setTimeout(function(){
                     icon.className = originalClass;
                     copyBtn.classList.remove('border-success');
                 }, 2000);
             });
         });
+
+        // --- HANDLE FORM SUBMIT: use shared save button for Email OR Group ---
+        var shareForm = document.getElementById('shareForm');
+        if (shareForm) {
+            shareForm.addEventListener('submit', function(e){
+                var modalEl = document.getElementById('shareModal');
+                var method = (modalEl.querySelector('#shareMethod') || {}).value || 'email';
+                if (method !== 'group') {
+                    // allow default submit to ShareController for email flow
+                    return;
+                }
+
+                e.preventDefault();
+                var tokenEl = modalEl.querySelector('input[name="__RequestVerificationToken"]');
+                var token = tokenEl ? tokenEl.value : '';
+                var targetType = modalEl.querySelector('#shareTargetType').value;
+                var targetId = modalEl.querySelector('#shareTargetId').value;
+                var groupId = modalEl.querySelector('#targetGroupId').value;
+                var accessSelect = modalEl.querySelector('select[name="groupAccessType"]');
+                var access = accessSelect ? accessSelect.value : 'Read';
+
+                if (!groupId) { alert('Vui lòng chọn nhóm.'); return; }
+                if (!targetId) { alert('Không tìm thấy mục để chia sẻ.'); return; }
+
+                var url = '';
+                var bodyParams = new URLSearchParams();
+                bodyParams.append('groupId', groupId);
+                bodyParams.append('accessType', access);
+                if (targetType === 'folder') {
+                    url = '@Url.Action("ShareFolderToGroup", "Groups")';
+                    bodyParams.append('folderId', targetId);
+                } else {
+                    url = '@Url.Action("ShareDocumentToGroup", "Groups")';
+                    bodyParams.append('documentId', targetId);
+                }
+
+                // show loading state on submit button
+                var submitBtn = modalEl.querySelector('button[type="submit"]');
+                var origHtml = submitBtn ? submitBtn.innerHTML : null;
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang gửi'; }
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: bodyParams.toString()
+                }).then(function(resp){
+                    if (!resp.ok) return resp.text().then(t => { throw new Error(t || 'Lỗi server'); });
+                    return resp.text();
+                }).then(function(){
+                    // close modal and reload to reflect new group shares
+                    var bsModal = bootstrap.Modal.getInstance(modalEl);
+                    if (bsModal) bsModal.hide();
+                    try { location.reload(); } catch (err) { /* ignore */ }
+                }).catch(function(err){
+                    console.error(err);
+                    alert('Lỗi khi chia sẻ vào nhóm: ' + (err.message || ''));
+                }).finally(function(){
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = origHtml; }
+                });
+            });
+        }
     })();
 </script>

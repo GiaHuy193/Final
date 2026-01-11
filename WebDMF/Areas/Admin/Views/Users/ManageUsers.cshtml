@@ -3,106 +3,224 @@
 @model IEnumerable<ApplicationUser>
 
 @{
-    ViewData["Title"] = "Quản lý User";
+    ViewData["Title"] = "Quản lý Người dùng";
     var tierMap = ViewBag.UserTier as IDictionary<string, string> ?? new Dictionary<string, string>();
     var storageMap = ViewBag.UserStorageBytes as IDictionary<string, long> ?? new Dictionary<string, long>();
+
+    // Helper: Lấy màu cho Badge Gói cước (Chỉ còn Standard & Premium)
+    Func<string, string> GetTierClass = (tier) => {
+        return tier == "Premium" 
+            ? "bg-warning text-dark border-warning" // Premium màu vàng/cam
+            : "bg-white text-secondary border-secondary-subtle"; // Standard màu trắng/xám
+    };
+
+    // Helper: Lấy ký tự đầu
+    Func<string, string> GetInitials = (name) => {
+        if (string.IsNullOrEmpty(name)) return "U";
+        return name.Substring(0, 1).ToUpper();
+    };
 }
 
 <style>
-    /* Allow dropdowns inside this table to overflow the scroll container */
-    .table-responsive.dropdown-escape {
-        overflow: visible !important;
+    :root {
+        --bg-body: #f8fafc;
+        --card-bg: #ffffff;
     }
-    /* Ensure dropdown appears above other elements */
-    .table-responsive.dropdown-escape .dropdown-menu {
-        z-index: 2000;
+    body { background-color: var(--bg-body); font-family: 'Segoe UI', sans-serif; }
+
+    .user-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .modern-table thead th {
+        background-color: #f1f5f9;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .modern-table tbody td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .user-avatar {
+        width: 42px; height: 42px;
+        border-radius: 10px;
+        /* Gradient xanh hiện đại */
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 1.1rem;
+        box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Badge gói cước */
+    .tier-badge {
+        padding: 6px 14px; 
+        border-radius: 30px;
+        font-size: 0.75rem; font-weight: 700;
+        border: 1px solid transparent;
+        display: inline-flex; align-items: center; gap: 6px;
+        letter-spacing: 0.3px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* Badge trạng thái */
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    /* Nút hành động (Lock/Unlock) */
+    .btn-action {
+        width: 36px; height: 36px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        transition: 0.2s;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+    }
+    .btn-action:hover {
+        border-color: #cbd5e1;
+        background-color: #f8fafc;
+        transform: translateY(-1px);
+    }
+    .btn-action.danger:hover {
+        color: #ef4444;
+        border-color: #fca5a5;
+        background-color: #fef2f2;
+    }
+    .btn-action.success:hover {
+        color: #22c55e;
+        border-color: #86efac;
+        background-color: #f0fdf4;
     }
 </style>
 
-<div class="container-fluid px-4 py-4">
-    <h3 class="fw-bold">Quản lý người dùng</h3>
+<div class="container-fluid py-5 px-lg-5">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1 text-slate-800">Quản lý Người dùng</h3>
+            <p class="text-muted small mb-0">Danh sách thành viên (Standard & Premium)</p>
+        </div>
+    </div>
 
     <partial name="_StatusMessage" />
 
-    <div class="table-responsive mt-4 dropdown-escape">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Email</th>
-                    <th>Username</th>
-                    <th>Gói dung lượng</th>
-                    <th>Dung lượng đã upload</th>
-                    <th class="text-end">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model)
-                {
-                    var bytes = storageMap.ContainsKey(user.Id) ? storageMap[user.Id] : 0L;
-                    var formatted = StorageHelper.FormatSize(bytes);
-                    var tier = tierMap.ContainsKey(user.Id) ? tierMap[user.Id] : "Standard";
-                    var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow;
-
+    <div class="user-card mt-4">
+        <div class="table-responsive">
+            <table class="table modern-table mb-0">
+                <thead>
                     <tr>
-                        <td>@user.Email</td>
-                        <td>@user.UserName</td>
-                        <td>@tier</td>
-                        <td>@formatted</td>
-                        <td class="text-end">
-                            <div class="d-inline-block me-2">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="upgradeDropdown-@user.Id" data-bs-toggle="dropdown" data-bs-boundary="viewport" data-bs-display="static" aria-expanded="false">
-                                        Nâng cấp
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="upgradeDropdown-@user.Id">
-                                        <li>
-                                            <form method="post" asp-action="SetUserTier" class="m-0">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="userId" value="@user.Id" />
-                                                <input type="hidden" name="tier" value="Standard" />
-                                                <button type="submit" class="dropdown-item@(tier=="Standard"?" active":"")">Standard</button>
-                                            </form>
-                                        </li>
-                                        <li>
-                                            <form method="post" asp-action="SetUserTier" class="m-0">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="userId" value="@user.Id" />
-                                                <input type="hidden" name="tier" value="Pro" />
-                                                <button type="submit" class="dropdown-item@(tier=="Pro"?" active":"")">Pro</button>
-                                            </form>
-                                        </li>
-                                        <li>
-                                            <form method="post" asp-action="SetUserTier" class="m-0">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="userId" value="@user.Id" />
-                                                <input type="hidden" name="tier" value="Premium" />
-                                                <button type="submit" class="dropdown-item@(tier=="Premium"?" active":"")">Premium</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            @if (!isLocked)
-                            {
-                                <form method="post" asp-action="LockUser" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="userId" value="@user.Id" />
-                                    <button class="btn btn-sm btn-danger">Khóa</button>
-                                </form>
-                            }
-                            else
-                            {
-                                <form method="post" asp-action="UnlockUser" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="userId" value="@user.Id" />
-                                    <button class="btn btn-sm btn-outline-success">Mở khóa</button>
-                                </form>
-                            }
-                        </td>
+                        <th class="ps-4">Thành viên</th>
+                        <th>Gói hiện tại</th>
+                        <th>Dung lượng</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Hành động</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        var bytes = storageMap.ContainsKey(user.Id) ? storageMap[user.Id] : 0L;
+                        var formatted = StorageHelper.FormatSize(bytes);
+                        // Chỉ lấy Standard hoặc Premium
+                        var rawTier = tierMap.ContainsKey(user.Id) ? tierMap[user.Id] : "Standard"; 
+                        // Đảm bảo chỉ hiển thị Premium hoặc Standard (nếu lỡ có data cũ là Pro thì coi như Standard hoặc xử lý riêng)
+                        var displayTier = (rawTier == "Premium") ? "Premium" : "Standard";
+
+                        var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow;
+
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="user-avatar">
+                                        @GetInitials(user.UserName)
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">@user.UserName</div>
+                                        <div class="text-muted small" style="font-size: 0.8rem;">@user.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="tier-badge @GetTierClass(displayTier)">
+                                    @if(displayTier == "Premium") 
+                                    { 
+                                        <i class="bi bi-star-fill text-dark"></i> 
+                                    }
+                                    else 
+                                    { 
+                                        <i class="bi bi-person text-secondary"></i> 
+                                    }
+                                    @displayTier
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-hdd-network text-muted"></i>
+                                    <span class="fw-medium text-dark">@formatted</span>
+                                </div>
+                            </td>
+
+                            <td>
+                                @if (isLocked)
+                                {
+                                    <span class="status-badge bg-danger-subtle text-danger">
+                                        <i class="bi bi-lock-fill me-1"></i> Bị khóa
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge bg-success-subtle text-success">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Hoạt động
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-end pe-4">
+                                @if (!isLocked)
+                                {
+                                    <form method="post" asp-action="LockUser" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn khóa tài khoản này? Người dùng sẽ không thể đăng nhập.');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        <button class="btn-action danger" type="submit" title="Khóa tài khoản">
+                                            <i class="bi bi-lock"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-action="UnlockUser" class="d-inline-block" onsubmit="return confirm('Mở khóa tài khoản này?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        <button class="btn-action success" type="submit" title="Mở khóa">
+                                            <i class="bi bi-unlock"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

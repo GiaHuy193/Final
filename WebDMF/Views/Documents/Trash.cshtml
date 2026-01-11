@@ -4,7 +4,7 @@
 }
 
 <style>
-    /* --- CLEAN WHITE THEME --- */
+    /* --- THEME VARIABLES --- */
     :root {
         --bg-body: #f8f9fa;
         --bg-card: #ffffff;
@@ -15,31 +15,33 @@
         --danger-color: #ef4444;
     }
 
-    body {
-        background-color: var(--bg-body);
-        color: var(--text-primary);
-    }
-
     /* --- PAGE HEADER --- */
     .page-title {
         font-weight: 700;
         color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        /* display: flex; -> Không cần flex nữa vì hết icon */
+        /* align-items: center; */
+        /* gap: 10px; */
     }
 
-    /* --- TOOLBAR --- */
+    /* --- TOOLBAR (ĐÃ SỬA) --- */
     .trash-toolbar {
-        background-color: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1rem;
+        /* Đã bỏ background, border, shadow, radius */
+        background-color: transparent;
+        padding: 0;
         margin-bottom: 2rem;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    @@media (min-width: 768px) {
+        .trash-toolbar {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            /* Căn giữa theo chiều dọc */
+        }
     }
 
     /* --- SECTION CARD --- */
@@ -50,16 +52,6 @@
         margin-bottom: 2rem;
         overflow: hidden;
         box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-    }
-
-    .trash-header {
-        background-color: #f1f5f9;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        color: var(--text-secondary);
-        border-bottom: 1px solid var(--border-color);
     }
 
     /* --- LIST ITEM --- */
@@ -75,13 +67,13 @@
         }
 
         .list-group-flush .list-group-item:hover {
-            background-color: #f8fafc;
+            background-color: #f1f5f9;
         }
 
     /* Checkbox custom */
     .form-check-input {
-        width: 1.2em;
-        height: 1.2em;
+        width: 1.3em;
+        height: 1.3em;
         margin-top: 0;
         cursor: pointer;
         border-color: #cbd5e1;
@@ -92,53 +84,55 @@
             border-color: var(--primary-color);
         }
 
-    /* Item Name */
+    /* Item Info */
     .item-name {
-        font-weight: 500;
+        font-weight: 600;
         color: var(--text-primary);
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.25rem;
     }
 
     .item-meta {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    /* Icons */
+    /* Icons trong danh sách (Giữ lại) */
     .trash-icon-folder {
         color: #f59e0b;
-        font-size: 1.5rem;
-        margin-right: 15px;
+        font-size: 1.75rem;
     }
 
     .trash-icon-file {
         color: var(--text-secondary);
-        font-size: 1.5rem;
-        margin-right: 15px;
+        font-size: 1.75rem;
     }
 
     /* Empty state */
-    .empty-trash {
+    .empty-state-box {
+        padding: 3rem;
         text-align: center;
-        padding: 3rem 1rem;
         color: var(--text-secondary);
+        background-color: #fff;
     }
 </style>
 
-<div class="container mt-4">
+<div class="container-fluid py-4 px-4">
 
     <div class="trash-toolbar">
         <h3 class="page-title mb-0">
-            <i class="bi bi-trash3 text-danger"></i> Thùng rác
+            Thùng rác
         </h3>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <form method="post" asp-action="RestoreSelected" id="restoreForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="documentIds" id="restoreDocumentIds" />
                 <input type="hidden" name="folderIds" id="restoreFolderIds" />
-                <button type="submit" class="btn btn-outline-primary fw-medium" title="Khôi phục các mục đã chọn">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> Khôi phục
+                <button type="submit" class="btn btn-primary fw-medium shadow-sm" title="Khôi phục các mục đã chọn">
+                    Khôi phục
                 </button>
             </form>
 
@@ -146,72 +140,104 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="documentIds" id="delDocumentIds" />
                 <input type="hidden" name="folderIds" id="delFolderIds" />
-                <button type="submit" class="btn btn-outline-danger fw-medium" title="Xóa vĩnh viễn các mục đã chọn">
-                    <i class="bi bi-x-lg me-1"></i> Xóa vĩnh viễn
+                <button type="submit" class="btn btn-white border fw-medium text-danger hover-danger" title="Xóa vĩnh viễn các mục đã chọn">
+                    Xóa vĩnh viễn
                 </button>
             </form>
 
-            <div class="vr mx-2"></div>
+            <div class="vr mx-1 d-none d-md-block"></div>
 
-            <button id="deleteAllBtn" class="btn btn-danger fw-bold">
-                <i class="bi bi-trash-fill me-1"></i> Dọn sạch thùng rác
+            <button id="deleteAllBtn" class="btn btn-danger fw-bold shadow-sm">
+                Dọn sạch thùng rác
             </button>
         </div>
     </div>
 
     <form id="trashForm">
 
-        <div class="trash-section">
-            <div class="trash-header">Thư mục</div>
-            <div class="list-group list-group-flush">
-                @if (Model?.Folders != null && Model.Folders.Any())
-                {
-                    foreach (var f in Model.Folders)
+        <div class="mb-4">
+            <h6 class="fw-bold text-uppercase text-secondary small mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-folder2-open fs-5"></i> Thư mục
+            </h6>
+
+            <div class="trash-section">
+                <div class="list-group list-group-flush">
+                    @if (Model?.Folders != null && Model.Folders.Any())
                     {
-                        <label class="list-group-item d-flex align-items-center">
-                            <input class="form-check-input me-3 trash-checkbox" type="checkbox" data-type="folder" data-id="@f.Id" />
-                            <i class="bi bi-folder-fill trash-icon-folder"></i>
-                            <div class="flex-grow-1">
-                                <div class="item-name">@f.Name</div>
-                                <div class="item-meta">Đã xóa: @f.CreatedDate.ToString("dd/MM/yyyy")</div>
-                            </div>
-                            <a class="btn btn-sm btn-light text-secondary border" asp-controller="Folders" asp-action="Details" asp-route-id="@f.Id">
-                                <i class="bi bi-info-circle"></i>
-                            </a>
-                        </label>
+                        foreach (var f in Model.Folders)
+                        {
+                            <label class="list-group-item d-flex align-items-center">
+                                <input class="form-check-input me-4 trash-checkbox" type="checkbox" data-type="folder" data-id="@f.Id" />
+                                <i class="bi bi-folder-fill trash-icon-folder me-3"></i>
+                                <div class="flex-grow-1">
+                                    <div class="item-name">@f.Name</div>
+                                    <div class="item-meta">
+                                        <i class="bi bi-clock-history"></i> Đã xóa: @f.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                </div>
+                                <a class="btn btn-sm btn-light border text-secondary rounded-circle" asp-controller="Folders" asp-action="Details" asp-route-id="@f.Id" title="Chi tiết">
+                                    <i class="bi bi-info-circle"></i>
+                                </a>
+                            </label>
+                        }
                     }
-                }
-                else
-                {
-                    <div class="empty-trash">Không có thư mục nào trong thùng rác.</div>
-                }
+                    else
+                    {
+                        <div class="empty-state-box">
+                            <i class="bi bi-folder-x fs-1 opacity-25 mb-2 d-block"></i>
+                            <span>Không có thư mục nào trong thùng rác</span>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 
-        <div class="trash-section">
-            <div class="trash-header">Tệp tin</div>
-            <div class="list-group list-group-flush">
-                @if (Model?.Documents != null && Model.Documents.Any())
-                {
-                    foreach (var d in Model.Documents)
+        <div class="mb-4">
+            <h6 class="fw-bold text-uppercase text-secondary small mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-text fs-5"></i> Tệp tin
+            </h6>
+
+            <div class="trash-section">
+                <div class="list-group list-group-flush">
+                    @if (Model?.Documents != null && Model.Documents.Any())
                     {
-                        <label class="list-group-item d-flex align-items-center">
-                            <input class="form-check-input me-3 trash-checkbox" type="checkbox" data-type="doc" data-id="@d.Id" />
-                            <i class="bi bi-file-earmark-text trash-icon-file"></i>
-                            <div class="flex-grow-1">
-                                <div class="item-name">@d.FileName</div>
-                                <div class="item-meta">Đã xóa: @d.UploadedDate.ToString("dd/MM/yyyy")</div>
-                            </div>
-                            <a class="btn btn-sm btn-light text-secondary border" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id">
-                                <i class="bi bi-info-circle"></i>
-                            </a>
-                        </label>
+                        foreach (var d in Model.Documents)
+                        {
+                            <label class="list-group-item d-flex align-items-center">
+                                <input class="form-check-input me-4 trash-checkbox" type="checkbox" data-type="doc" data-id="@d.Id" />
+
+                                @{
+                                    var ext = System.IO.Path.GetExtension(d.FileName)?.ToLower();
+                                    var iconClass = "bi-file-earmark-text";
+                                    var iconColor = "text-secondary";
+                                    if (ext == ".pdf") { iconClass = "bi-file-earmark-pdf"; iconColor = "text-danger"; }
+                                    else if (ext == ".docx" || ext == ".doc") { iconClass = "bi-file-earmark-word"; iconColor = "text-primary"; }
+                                    else if (ext == ".xlsx" || ext == ".xls") { iconClass = "bi-file-earmark-excel"; iconColor = "text-success"; }
+                                    else if (new[] { ".jpg", ".png", ".jpeg" }.Contains(ext)) { iconClass = "bi-file-earmark-image"; iconColor = "text-info"; }
+                                }
+                                <i class="bi @iconClass trash-icon-file @iconColor me-3"></i>
+
+                                <div class="flex-grow-1">
+                                    <div class="item-name">@d.FileName</div>
+                                    <div class="item-meta">
+                                        <span class="me-3"><i class="bi bi-hdd"></i> @(Math.Round(d.FileSize / 1024.0, 1)) KB</span>
+                                        <span><i class="bi bi-clock-history"></i> Đã xóa: @d.UploadedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                </div>
+                                <a class="btn btn-sm btn-light border text-secondary rounded-circle" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id" title="Chi tiết">
+                                    <i class="bi bi-info-circle"></i>
+                                </a>
+                            </label>
+                        }
                     }
-                }
-                else
-                {
-                    <div class="empty-trash">Không có tệp tin nào trong thùng rác.</div>
-                }
+                    else
+                    {
+                        <div class="empty-state-box">
+                            <i class="bi bi-file-earmark-x fs-1 opacity-25 mb-2 d-block"></i>
+                            <span>Không có tệp tin nào trong thùng rác</span>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 

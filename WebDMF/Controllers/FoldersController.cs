@@ -106,6 +106,49 @@ namespace WebDocumentManagement_FileSharing.Controllers
             return View(folder);
         }
 
+        // ======================================================
+        // DETAILS - show folder detail page
+        // ======================================================
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var folder = await _context.Folders
+                .Include(f => f.ParentFolder)
+                .Include(f => f.SubFolders)
+                .Include(f => f.Documents)
+                .FirstOrDefaultAsync(f => f.Id == id && !f.IsDeleted);
+
+            if (folder == null) return NotFound();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // allow owner or explicit permission on folder
+            if (folder.OwnerId != userId)
+            {
+                var hasPerm = await _context.Permissions.AnyAsync(p => p.FolderId == id && p.UserId == userId);
+                if (!hasPerm)
+                {
+                    // if anonymous or no permission, challenge/login
+                    if (!(User?.Identity?.IsAuthenticated == true))
+                        return RedirectToPage("/Account/Login", new { area = "Identity", ReturnUrl = Url.Action("Details", "Folders", new { id }) });
+
+                    return Forbid();
+                }
+            }
+
+            // Resolve owner email for display
+            try
+            {
+                var owner = await _context.Users.FirstOrDefaultAsync(u => u.Id == folder.OwnerId);
+                ViewBag.OwnerEmail = owner?.Email ?? owner?.UserName ?? folder.OwnerId;
+            }
+            catch
+            {
+                ViewBag.OwnerEmail = folder.OwnerId;
+            }
+            
+            return View(folder);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Rename(int id, string newName)

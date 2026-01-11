@@ -1,0 +1,259 @@
+﻿@model WebDocumentManagement_FileSharing.Models.Document
+
+@{
+    ViewData["Title"] = "Tải lên tài liệu mới";
+}
+
+<style>
+    /* Custom Upload Styles */
+    :root {
+        --primary: #4f46e5;
+        --primary-soft: #eef2ff;
+        --border-color: #e2e8f0;
+        --text-main: #1e293b;
+    }
+
+    body {
+        background-color: #f8fafc;
+    }
+
+    .upload-card {
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+        border: 1px solid white;
+        overflow: hidden;
+    }
+
+    /* Vùng Dropzone đẹp mắt */
+    .file-drop-area {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        background-color: #f8fafc;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        text-align: center;
+    }
+
+        .file-drop-area:hover, .file-drop-area.drag-over {
+            background-color: var(--primary-soft);
+            border-color: var(--primary);
+        }
+
+    .file-icon {
+        font-size: 3rem;
+        color: #94a3b8;
+        transition: 0.2s;
+        margin-bottom: 1rem;
+    }
+
+    .file-drop-area:hover .file-icon {
+        color: var(--primary);
+        transform: scale(1.1);
+    }
+
+    /* Input ẩn nhưng phủ kín để click được */
+    .file-input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .file-msg {
+        font-weight: 500;
+        color: var(--text-main);
+    }
+
+    .file-sub-msg {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    /* Hiển thị tên file đã chọn */
+    .selected-file-display {
+        display: none; /* Ẩn mặc định */
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        background: var(--primary-soft);
+        color: var(--primary);
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Form Inputs */
+    .form-label-custom {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control-lg-custom {
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        font-size: 1rem;
+    }
+
+        .form-control-lg-custom:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+    .btn-upload {
+        background-color: var(--primary);
+        color: white;
+        font-weight: 600;
+        padding: 1rem;
+        border-radius: 12px;
+        border: none;
+        transition: 0.2s;
+    }
+
+        .btn-upload:hover {
+            background-color: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+
+            <div class="mb-3">
+                @if (ViewBag.ReturnUrl != null)
+                {
+                    <a href="@ViewBag.ReturnUrl" class="text-decoration-none text-muted small fw-bold">
+                        <i class="bi bi-arrow-left"></i> Quay lại thư mục
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Index" class="text-decoration-none text-muted small fw-bold">
+                        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                    </a>
+                }
+            </div>
+
+            <div class="upload-card p-4 p-md-5">
+
+                <div class="text-center mb-4">
+                    <div class="bg-light d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-cloud-arrow-up-fill text-primary fs-2"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark">Tải lên tài liệu</h2>
+                    <p class="text-muted small">Lưu trữ an toàn và chia sẻ dễ dàng</p>
+                </div>
+
+                <form asp-controller="Documents" asp-action="Upload" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Tệp tin</label>
+                        <div class="file-drop-area" id="dropArea">
+                            <i class="bi bi-file-earmark-plus file-icon"></i>
+                            <span class="file-msg">Kéo thả tệp vào đây hoặc nhấn để chọn</span>
+                            <span class="file-sub-msg">Hỗ trợ PDF, DOCX, XLSX, JPG... (Max 20MB)</span>
+                            <input type="file" name="fileUpload" id="fileUpload" class="file-input" required onchange="updateFileName(this)" />
+                        </div>
+
+                        <div id="fileNameDisplay" class="selected-file-display">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span id="fileNameText">filename.docx</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Title" class="form-label-custom">Tiêu đề hiển thị</label>
+                        <input asp-for="Title" class="form-control form-control-lg-custom" placeholder="Ví dụ: Báo cáo tài chính Q4..." autocomplete="off" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="FolderId" class="form-label-custom">Lưu vào thư mục</label>
+                        <div class="position-relative">
+                            <i class="bi bi-folder2-open position-absolute text-muted" style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
+                            <select asp-for="FolderId" class="form-select form-control-lg-custom ps-5" asp-items="ViewBag.FolderId" style="cursor: pointer;">
+                                <option value="0">Thư mục gốc (My Drive)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-upload">
+                            <i class="bi bi-cloud-upload me-2"></i> Bắt đầu tải lên
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Script nhỏ để hiển thị tên file sau khi chọn và hiệu ứng drag/drop
+        function updateFileName(input) {
+            const display = document.getElementById('fileNameDisplay');
+            const text = document.getElementById('fileNameText');
+            const dropArea = document.getElementById('dropArea');
+
+            if (input.files && input.files.length > 0) {
+                text.textContent = input.files[0].name;
+                display.style.display = 'flex';
+                dropArea.style.borderColor = 'var(--primary)';
+                dropArea.style.backgroundColor = 'var(--primary-soft)';
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
+        // Thêm hiệu ứng hover khi kéo file vào
+        const dropArea = document.getElementById('dropArea');
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropArea.classList.add('drag-over');
+            }, false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropArea.classList.remove('drag-over');
+            }, false);
+        });
+
+        // Xử lý drop file thủ công để cập nhật input
+        dropArea.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            const input = document.getElementById('fileUpload');
+            input.files = files; // Gán file vào input
+            updateFileName(input); // Cập nhật giao diện
+        });
+    </script>
+}

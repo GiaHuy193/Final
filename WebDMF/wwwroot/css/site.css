@@ -1,19 +1,25 @@
-﻿/* --- CẤU HÌNH BIẾN MÀU CHUNG --- */
+﻿/* ==========================================================================
+   1. CẤU HÌNH BIẾN & THEME
+   ========================================================================== */
 :root {
-    --focus-ring-color: white; /* Light mode dùng viền trắng */
-    --body-bg: #ffffff;
+    --focus-ring-color: white;
+    --body-bg: #f8f9fa;
+    --card-bg: #ffffff;
     --text-color: #212529;
+    --card-radius: 16px;
 }
 
-/* KHI Ở DARK MODE */
 [data-bs-theme="dark"] {
-    --focus-ring-color: #0f172a; /* Dark mode dùng viền xanh đen cho tiệp màu nền */
-    --body-bg: #020617;
-    --text-color: #ffffff;
+    --focus-ring-color: #0f172a;
+    --body-bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #f8fafc;
 }
 
 html {
     font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -22,69 +28,137 @@ html {
     }
 }
 
-/* SỬA LẠI ĐOẠN NÀY ĐỂ KHÔNG BỊ VIỀN TRẮNG LỆCH TÔNG */
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    /* Dùng biến --focus-ring-color thay vì cứng màu white */
-    box-shadow: 0 0 0 0.1rem var(--focus-ring-color), 0 0 0 0.25rem #258cfb;
-}
-
-html {
-    position: relative;
-    min-height: 100%;
-}
-
 body {
     margin-bottom: 60px;
-    /* Thêm dòng này để các trang khác cũng ăn theo màu nền Dark Mode */
     background-color: var(--body-bg);
     color: var(--text-color);
     transition: background-color 0.3s ease;
 }
 
-/* Ensure dropdowns aren't clipped by card containers */
-.folder-card, .file-card, .card, .table-responsive, .card-body {
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem var(--focus-ring-color), 0 0 0 0.25rem #3b82f6;
+}
+
+/* ==========================================================================
+   2. FIX LỖI MENU DROPDOWN BỊ CHE (CORE FIX)
+   ========================================================================== */
+
+/* QUY TẮC 1: MỞ KHÓA HIỂN THỊ */
+.folder-card, .file-card, .card,
+.card-body, .folder-body, .file-card-body,
+.folder-cover, .card-header, .file-preview-area {
     overflow: visible !important;
 }
 
-/* Ensure dropdown menus appear above other elements */
+/* QUY TẮC 2: CƠ CHẾ NỔI LÊN (Z-INDEX) */
+.folder-card, .file-card, .card {
+    position: relative !important;
+    background-color: var(--card-bg);
+    /* Chỉ transition transform và shadow, KHÔNG transition border-radius */
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease;
+    /* Tạo stacking context mới để fix lỗi render */
+    isolation: isolate;
+}
+
+    /* Hover hoặc đang mở menu -> Nổi lên */
+    .folder-card:hover, .file-card:hover, .card:hover,
+    .folder-card:focus-within, .file-card:focus-within, .card:focus-within,
+    .folder-card:has(.show), .file-card:has(.show), .card:has(.show) {
+        z-index: 1000 !important;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+/* Dropdown Menu */
 .dropdown-menu {
-    z-index: 5000 !important;
+    z-index: 9999 !important;
+    margin-top: 6px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18) !important;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
 }
 
-/* ------------------------------------------------------------------ */
-/* Round corners for folder and document cards globally */
-/* ------------------------------------------------------------------ */
-:root {
-    --card-radius: 16px;
+.table-responsive {
+    overflow-x: auto;
+    overflow-y: visible !important;
+    min-height: 250px;
 }
 
-/* Apply rounded corners to cards used for folders and files */
+/* ==========================================================================
+   3. FIX LỖI BO GÓC (BORDER RADIUS)
+   Ép các thẻ con tự bo góc vì thẻ cha overflow:visible
+   ========================================================================== */
+
+/* Khung cha */
 .folder-card, .file-card, .card {
     border-radius: var(--card-radius) !important;
+    border: 1px solid rgba(0,0,0,0.06);
+    /* Mẹo: Viền trong suốt giúp khử răng cưa ngay lập tức */
+    outline: 1px solid transparent;
 }
 
-/* Make sure the top cover and bottom body keep rounded corners */
-.folder-cover {
+/* --- BO GÓC TRÊN (QUAN TRỌNG) --- */
+.folder-cover,
+.file-preview-area,
+.card-header,
+.card-img-top {
     border-top-left-radius: var(--card-radius) !important;
     border-top-right-radius: var(--card-radius) !important;
-    overflow: hidden; /* clip content inside cover */
+    background-clip: padding-box;
+    /* Fix lỗi lem pixel trắng ở góc */
+    margin-top: -1px;
+    margin-left: -1px;
+    margin-right: -1px;
+    width: calc(100% + 2px);
 }
 
-.folder-body, .file-card-body, .card-body {
+    /* Bo ảnh bên trong */
+    .folder-cover img,
+    .file-preview-area img,
+    .file-preview-area .icon-box {
+        border-top-left-radius: var(--card-radius) !important;
+        border-top-right-radius: var(--card-radius) !important;
+    }
+
+/* --- BO GÓC DƯỚI --- */
+.folder-body,
+.file-card-body,
+.card-body:last-child,
+.card-footer:last-child {
     border-bottom-left-radius: var(--card-radius) !important;
     border-bottom-right-radius: var(--card-radius) !important;
+    background-color: var(--card-bg);
 }
 
-/* For preview areas inside file cards (images/iframes) ensure they respect rounded corners */
-.file-preview-area, .file-preview-area img, .office-preview-iframe {
-    border-top-left-radius: calc(var(--card-radius) - 2px) !important;
-    border-top-right-radius: calc(var(--card-radius) - 2px) !important;
-    overflow: hidden;
+.office-preview-iframe, .file-preview-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-/* Small adjustment for table rows or elements inside cards */
 .folder-card a, .file-card a {
     border-radius: inherit;
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
-/* End of rounding rules */
+/* ==========================================================================
+   4. FIX LỖI "NHẤP NHÁY" VUÔNG TRÒN (FLICKER FIX V2)
+   Đã loại bỏ mask nặng, dùng will-change và transform hack
+   ========================================================================== */
+
+/* Ép GPU render ngay lập tức, không đợi CPU tính toán */
+.folder-card, .file-card, .card {
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    will-change: transform, box-shadow; /* Báo trước cho trình duyệt */
+}
+
+/* Chống rung lắc và ép bo góc cứng cho nội dung bên trong */
+.folder-cover, .file-preview-area, .card-header, .card-img-top {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0); /* Hack kích hoạt hardware acceleration */
+    transform: translateZ(0);
+}
