@@ -82,15 +82,44 @@
             <h1 class="fw-bold h2 mb-0">Cấu hình hệ thống</h1>
             <p class="text-muted small">Quản lý các cài đặt toàn cục và tham số vận hành ứng dụng DocNest</p>
         </div>
-        <button type="submit" form="settingsForm" class="btn btn-primary d-flex align-items-center gap-2 px-4 fw-bold shadow-sm">
+        <button id="saveSettingsBtn" type="submit" form="settingsForm" class="btn btn-primary d-flex align-items-center gap-2 px-4 fw-bold shadow-sm">
             <span class="material-symbols-outlined fs-5">save</span> Lưu thay đổi
         </button>
     </header>
 
+    <!-- Status messages (TempData) shown in Vietnamese labels so admin dễ hiểu -->
+    @if (TempData["Success"] != null || TempData["Error"] != null || TempData["Message"] != null || TempData["Warning"] != null)
+    {
+        <div class="mb-3">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success" role="alert">
+                    <strong>Thành công:</strong> @TempData["Success"]
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <strong>Lỗi:</strong> @TempData["Error"]
+                </div>
+            }
+            @if (TempData["Warning"] != null)
+            {
+                <div class="alert alert-warning" role="alert">
+                    <strong>Cảnh báo:</strong> @TempData["Warning"]
+                </div>
+            }
+            @if (TempData["Message"] != null && TempData["Success"] == null && TempData["Error"] == null)
+            {
+                <div class="alert alert-info" role="alert">
+                    <strong>Thông tin:</strong> @TempData["Message"]
+                </div>
+            }
+        </div>
+    }
+
     <ul class="nav nav-tabs nav-tabs-settings mb-4 border-bottom">
         <li class="nav-item"><a class="nav-link active" href="#">Cài đặt chung</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Bảo mật</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Thông báo</a></li>
     </ul>
 
     <form id="settingsForm" asp-area="Admin" asp-controller="SystemSettings" asp-action="SaveSettings" method="post">
@@ -106,19 +135,25 @@
                     <label class="form-label form-label-bold">Tên ứng dụng</label>
                     <input type="text" class="form-control" name="appName" value="DocNest" />
                 </div>
+                @{ 
+                    // Find SupportEmail setting if exists
+                    var supportIdx = -1;
+                    for (int si = 0; si < Model.Count; si++) { if (string.Equals(Model[si].SettingKey, "SupportEmail", System.StringComparison.OrdinalIgnoreCase)) { supportIdx = si; break; } }
+                    var supportVal = supportIdx >= 0 ? Model[supportIdx].SettingValue ?? "" : "support@docnest.com";
+                }
                 <div class="col-md-6">
                     <label class="form-label form-label-bold">Email hỗ trợ</label>
                     <div class="input-group">
                         <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5">mail</span></span>
-                        <input type="email" class="form-control" name="supportEmail" value="support@docnest.com" />
+                        <input type="email" class="form-control" name="supportEmail" value="@supportVal" />
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label form-label-bold">Ngôn ngữ mặc định</label>
-                    <select class="form-select">
-                        <option selected value="vi">Tiếng Việt (Vietnamese)</option>
-                        <option value="en">English (US)</option>
-                    </select>
+                    @* Also include hidden fields if setting exists so SaveSettings can pick it up via posted list *@
+                    @if (supportIdx >= 0)
+                    {
+                        <input type="hidden" name="[@(supportIdx)].Id" value="@Model[supportIdx].Id" />
+                        <input type="hidden" name="[@(supportIdx)].SettingKey" value="@Model[supportIdx].SettingKey" />
+                        <input type="hidden" id="support-hidden-@(supportIdx)" name="[@(supportIdx)].SettingValue" value="@supportVal" />
+                    }
                 </div>
             </div>
         </div>
@@ -130,76 +165,86 @@
 
         <div class="card card-settings p-4 mb-4">
             @for (int i = 0; i < Model.Count; i++)
-            {
-                var key = Model[i].SettingKey ?? string.Empty;
-                var desc = Model[i].Description ?? string.Empty;
-                var val = Model[i].SettingValue ?? string.Empty;
+             {
+                 var key = Model[i].SettingKey ?? string.Empty;
+                 var desc = Model[i].Description ?? string.Empty;
+                 var val = Model[i].SettingValue ?? string.Empty;
 
-                <input type="hidden" name="[@i].Id" value="@Model[i].Id" />
-                <input type="hidden" name="[@i].SettingKey" value="@Model[i].SettingKey" />
+                 <input type="hidden" name="[@i].Id" value="@Model[i].Id" />
+                 <input type="hidden" name="[@i].SettingKey" value="@Model[i].SettingKey" />
 
-                if (key == "StandardQuota" || key == "PremiumQuota")
+                // Special-case: don't render a visible input for maintenance keys here
+                if (key == "MaintenanceMode" || key == "MaintenanceMessage")
                 {
-                    long bytes = 0;
-                    long.TryParse(val, out bytes);
-                    var mb = bytes / (1024 * 1024);
-                    var displayLabel = key == "StandardQuota" ? "Quota Standard" : "Quota Premium";
-
-                    <div class="d-flex justify-content-between align-items-center @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
-                        <div style="max-width: 70%;">
-                            <div class="fw-bold mb-1">@displayLabel</div>
-                            <div class="text-muted small">@desc</div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <select class="form-select quota-select" data-setting-index="@i">
-                                <option value="1024">1 GB</option>
-                                <option value="5120">5 GB</option>
-                                <option value="15360">15 GB</option>
-                                <option value="102400">100 GB</option>
-                                <option value="custom">Tùy chỉnh...</option>
-                            </select>
-                            <input type="number" class="form-control custom-quota-input" data-setting-index="@i" placeholder="MB" min="1" style="width:120px; display:none;" />
-                            <input type="hidden" id="setting-val-@i" name="[@i].SettingValue" value="@val" />
-                        </div>
-                    </div>
-                }
-                else if (key == "AllowedExtensions")
-                {
-                    <div class="d-flex justify-content-between align-items-start @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
-                        <div style="max-width: 40%;">
-                            <div class="fw-bold mb-1">Định dạng cho phép</div>
-                            <div class="text-muted small">@desc</div>
-                        </div>
-                        <div class="d-flex flex-column align-items-end flex-grow-1" style="max-width: 500px;">
-
-                            <div id="ext-tags-container-@i" class="w-100 mb-3 p-2 bg-light border rounded" style="min-height: 40px;">
-                            </div>
-
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="ext-input-@i" placeholder="Nhập đuôi file (ví dụ: mp4)" />
-                                <button type="button" class="btn btn-outline-primary" onclick="addExtension(@i)">
-                                    <span class="material-symbols-outlined fs-6 align-middle">add</span> Thêm
-                                </button>
-                            </div>
-                            <div class="form-text text-end">Nhập đuôi và nhấn Enter hoặc nút Thêm.</div>
-
-                            <input type="hidden" id="setting-val-@i" name="[@i].SettingValue" value="@val" />
-                        </div>
-                    </div>
+                    // Render hidden SettingValue input so SaveSettings receives the value
+                    <input type="hidden" id="setting-val-@i" name="[@i].SettingValue" value="@val" />
                 }
                 else
                 {
-                    <div class="d-flex justify-content-between align-items-center @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
-                        <div style="max-width: 70%;">
-                            <div class="fw-bold mb-1">@Model[i].SettingKey</div>
-                            <div class="text-muted small">@desc</div>
+                 
+                    if (key == "StandardQuota" || key == "PremiumQuota")
+                     {
+                        long bytes = 0;
+                        long.TryParse(val, out bytes);
+                        var mb = bytes / (1024 * 1024);
+                        var displayLabel = key == "StandardQuota" ? "Quota Standard" : "Quota Premium";
+
+                        <div class="d-flex justify-content-between align-items-center @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
+                            <div style="max-width: 70%;">
+                                <div class="fw-bold mb-1">@displayLabel</div>
+                                <div class="text-muted small">@desc</div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <select class="form-select quota-select" data-setting-index="@i">
+                                    <option value="1024">1 GB</option>
+                                    <option value="5120">5 GB</option>
+                                    <option value="15360">15 GB</option>
+                                    <option value="102400">100 GB</option>
+                                    <option value="custom">Tùy chỉnh...</option>
+                                </select>
+                                <input type="number" class="form-control custom-quota-input" data-setting-index="@i" placeholder="MB" min="1" style="width:120px; display:none;" />
+                                <input type="hidden" id="setting-val-@i" name="[@i].SettingValue" value="@val" />
+                            </div>
                         </div>
-                        <div class="input-group w-auto">
-                            <input type="text" name="[@i].SettingValue" class="form-control text-end fw-bold" value="@val" style="width: 240px;">
+                    }
+                    else if (key == "AllowedExtensions")
+                     {
+                        <div class="d-flex justify-content-between align-items-start @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
+                            <div style="max-width: 40%;">
+                                <div class="fw-bold mb-1">Định dạng cho phép</div>
+                                <div class="text-muted small">@desc</div>
+                            </div>
+                            <div class="d-flex flex-column align-items-end flex-grow-1" style="max-width: 500px;">
+
+                                <div id="ext-tags-container-@i" class="w-100 mb-3 p-2 bg-light border rounded" style="min-height: 40px;">
+                                </div>
+
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="ext-input-@i" placeholder="Nhập đuôi file (ví dụ: mp4)" />
+                                    <button type="button" class="btn btn-outline-primary" onclick="addExtension(@i)">
+                                        <span class="material-symbols-outlined fs-6 align-middle">add</span> Thêm
+                                    </button>
+                                </div>
+                                <div class="form-text text-end">Nhập đuôi và nhấn Enter hoặc nút Thêm.</div>
+
+                                <input type="hidden" id="setting-val-@i" name="[@i].SettingValue" value="@val" />
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                         <div class="d-flex justify-content-between align-items-center @(i < Model.Count - 1 ? "border-bottom mb-4 pb-4" : "")">
+                             <div style="max-width: 70%;">
+                                 <div class="fw-bold mb-1">@Model[i].SettingKey</div>
+                                 <div class="text-muted small">@desc</div>
+                             </div>
+                            <div class="input-group w-auto">
+                                <input type="text" id="setting-val-@i" name="[@i].SettingValue" class="form-control text-end fw-bold" value="@val" style="width: 240px;">
+                            </div>
+                         </div>
+                    }
                 }
-            }
+             }
         </div>
 
         <div class="d-flex align-items-center gap-2 mb-3">
@@ -213,18 +258,30 @@
                     <div class="text-muted small">Chỉ có Quản trị viên mới có thể truy cập khi bật.</div>
                 </div>
                 <div class="form-check form-switch fs-4">
-                    <input class="form-check-input" type="checkbox" role="switch" id="maintenanceMode">
-                </div>
-            </div>
-            <div class="border-top pt-4">
-                <label class="form-label form-label-bold">Thông báo bảo trì</label>
-                <textarea class="form-control" rows="3" placeholder="Thông báo cho người dùng..."></textarea>
-            </div>
-        </div>
-    </form>
-</div>
+                    @{
+                        // find index of MaintenanceMode setting
+                        var maintenanceModeIndex = -1;
+                        var maintenanceMsgIndex = -1;
+                        for (int k = 0; k < Model.Count; k++)
+                        {
+                            if (string.Equals(Model[k].SettingKey, "MaintenanceMode", StringComparison.OrdinalIgnoreCase)) { maintenanceModeIndex = k; }
+                            if (string.Equals(Model[k].SettingKey, "MaintenanceMessage", StringComparison.OrdinalIgnoreCase)) { maintenanceMsgIndex = k; }
+                        }
+                    }
 
-<script>
+                    <input class="form-check-input" type="checkbox" role="switch" id="maintenanceMode" data-idx="@maintenanceModeIndex">
+                    <input type="hidden" id="maintenanceModeHidden" name="MaintenanceMode" value="false" />
+                 </div>
+             </div>
+             <div class="border-top pt-4">
+                 <label class="form-label form-label-bold">Thông báo bảo trì</label>
+                <textarea class="form-control" id="maintenanceMessage" name="MaintenanceMessage" rows="3" placeholder="Thông báo cho người dùng..." data-idx="@maintenanceMsgIndex"></textarea>
+             </div>
+         </div>
+     </form>
+ </div>
+ 
+ <script>
     // --- Global Helper Functions for Extensions ---
 
     // Lưu trữ danh sách extensions tạm thời cho từng setting index
@@ -243,7 +300,8 @@
         extData[idx].forEach(function(ext) {
             var tag = document.createElement('span');
             tag.className = 'ext-tag';
-            tag.innerHTML = `${ext} <span class="remove-tag" onclick="removeExtension(${idx}, '${ext}')">&times;</span>`;
+            // add title to remove control in Vietnamese
+            tag.innerHTML = `${ext} <span class="remove-tag" title="Xóa định dạng ${ext}" onclick="removeExtension(${idx}, '${ext}')">&times;</span>`;
             container.appendChild(tag);
         });
 
@@ -343,5 +401,80 @@
                 });
             }
         });
+
+        // Confirm before saving, message in Vietnamese
+        var form = document.getElementById('settingsForm');
+        var saveBtn = document.getElementById('saveSettingsBtn');
+        if (form) {
+            form.addEventListener('submit', function(e){
+                // ensure support hidden sync happens before confirm
+                var visible = document.querySelector('input[name="supportEmail"]');
+                var hidden = document.querySelector('input[id^="support-hidden-"]');
+                if (visible && hidden) hidden.value = visible.value || '';
+
+                var confirmed = confirm('Bạn có chắc chắn muốn lưu các thay đổi cấu hình hệ thống?');
+                if (!confirmed) { e.preventDefault(); }
+            });
+        }
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function(ev){
+                // no-op here because form submit handler will confirm
+            });
+        }
     });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        // Sync maintenance controls with hidden inputs if present
+        var modeIdx = document.getElementById('maintenanceMode')?.getAttribute('data-idx');
+        var msgIdx = document.getElementById('maintenanceMessage')?.getAttribute('data-idx');
+
+        var maintenanceHidden = document.getElementById('maintenanceModeHidden');
+        if(modeIdx && parseInt(modeIdx) >= 0){
+            var hidden = document.getElementById('setting-val-' + modeIdx);
+            var chk = document.getElementById('maintenanceMode');
+            if(hidden && chk){
+                var isOn = (hidden.value || '').toLowerCase() === 'true';
+                chk.checked = isOn;
+                if(maintenanceHidden) maintenanceHidden.value = isOn ? 'true' : 'false';
+                chk.addEventListener('change', function(){ hidden.value = chk.checked ? 'true' : 'false'; if(maintenanceHidden) maintenanceHidden.value = chk.checked ? 'true' : 'false'; });
+            } else if (chk) {
+                // no existing setting row, still sync hidden field
+                chk.addEventListener('change', function(){ if(maintenanceHidden) maintenanceHidden.value = chk.checked ? 'true' : 'false'; });
+            }
+        } else {
+            // no index found, still wire checkbox to hidden input
+            var chk = document.getElementById('maintenanceMode');
+            if(chk){ chk.addEventListener('change', function(){ if(maintenanceHidden) maintenanceHidden.value = chk.checked ? 'true' : 'false'; }); }
+        }
+
+        if(msgIdx && parseInt(msgIdx) >= 0){
+            var hiddenMsg = document.getElementById('setting-val-' + msgIdx);
+            var ta = document.getElementById('maintenanceMessage');
+            if(hiddenMsg && ta){
+                ta.value = hiddenMsg.value || '';
+                ta.addEventListener('input', function(){ hiddenMsg.value = ta.value; if(document.getElementById('maintenanceModeHidden')) document.getElementById('maintenanceModeHidden').value = document.getElementById('maintenanceMode').checked ? 'true' : 'false'; });
+            }
+        }
+
+        // Also, when saving form, ensure maintenance hidden inputs exist (they are created in the loop)
+    });
+</script>
+
+<script>
+    // Sync supportEmail visible input into hidden setting value (when editing existing SupportEmail setting)
+    (function(){
+        var form = document.getElementById('settingsForm');
+        if (!form) return;
+        form.addEventListener('submit', function(){
+            var visible = document.querySelector('input[name="supportEmail"]');
+            // find any hidden support input created earlier
+            var hidden = document.querySelector('input[id^="support-hidden-"]');
+            if (visible && hidden) {
+                hidden.value = visible.value || '';
+            }
+        });
+    })();
 </script>

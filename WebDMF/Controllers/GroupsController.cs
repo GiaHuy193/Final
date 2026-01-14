@@ -146,6 +146,13 @@ namespace WebDocumentManagement_FileSharing.Controllers
                 .ToListAsync();
             ViewBag.MemberInfos = memberInfos;
 
+            // 1.5 Load invites (pending/declined/accepted) for this group
+            var invites = await _context.Set<WebDocumentManagement_FileSharing.Models.GroupInvite>()
+                .Where(i => i.GroupId == id)
+                .OrderByDescending(i => i.CreatedAt)
+                .ToListAsync();
+            ViewBag.GroupInvites = invites;
+
             // 2. Check quyền chủ sở hữu
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.IsOwner = string.Equals(g.OwnerId, userId, StringComparison.OrdinalIgnoreCase);
@@ -174,6 +181,25 @@ namespace WebDocumentManagement_FileSharing.Controllers
             ViewBag.GroupShares = shareList;
 
             return View(g);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelInvite(int inviteId)
+        {
+            var invite = await _context.Set<WebDocumentManagement_FileSharing.Models.GroupInvite>().FindAsync(inviteId);
+            if (invite == null) return NotFound();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var group = await _context.Groups.FindAsync(invite.GroupId);
+            if (group == null) return NotFound();
+            if (group.OwnerId != userId) return Forbid();
+
+            _context.Set<WebDocumentManagement_FileSharing.Models.GroupInvite>().Remove(invite);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Đã hủy lời mời.";
+            return RedirectToAction("Details", new { id = invite.GroupId });
         }
 
         // ==========================================
@@ -253,44 +279,146 @@ namespace WebDocumentManagement_FileSharing.Controllers
             if (group.OwnerId != userId) return Forbid(); // Chỉ chủ nhóm mới được thêm
 
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                TempData["Error"] = "Không tìm thấy người dùng với email này.";
-                return RedirectToAction("Details", new { id = groupId });
-            }
 
-            if (group.Members.Any(m => m.UserId == user.Id))
+            // If user already a member, show error
+            if (user != null && group.Members.Any(m => m.UserId == user.Id))
             {
                 TempData["Error"] = "Người này đã là thành viên nhóm.";
                 return RedirectToAction("Details", new { id = groupId });
             }
 
-            // 1. Thêm Member
-            _context.GroupMembers.Add(new GroupMember { GroupId = groupId, UserId = user.Id, JoinedAt = DateTime.UtcNow });
-
-            // 2. Cấp quyền (Copy logic từ hàm Join)
-            var shares = await _context.Set<GroupShare>().Where(gs => gs.GroupId == groupId).ToListAsync();
-            foreach (var gs in shares)
+            // create invite instead of adding member directly
+            var token = GenerateToken();
+            var invite = new GroupInvite
             {
-                if (gs.DocumentId.HasValue)
+                GroupId = groupId,
+                InviterId = userId,
+                InviteeUserId = user?.Id,
+                InviteeEmail = email.Trim(),
+                Token = token,
+                Status = InviteStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Set<GroupInvite>().Add(invite);
+            await _context.SaveChangesAsync();
+
+            // send email (best effort)
+            try
+            {
+                var config = HttpContext.RequestServices.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration)) as Microsoft.Extensions.Configuration.IConfiguration;
+                if (config != null)
                 {
-                    if (!await _context.Permissions.AnyAsync(p => p.DocumentId == gs.DocumentId.Value && p.UserId == user.Id))
-                    {
-                        _context.Permissions.Add(new Permission { DocumentId = gs.DocumentId.Value, UserId = user.Id, AccessType = gs.AccessType, SharedDate = DateTime.UtcNow });
-                    }
-                }
-                if (gs.FolderId.HasValue)
-                {
-                    if (!await _context.Permissions.AnyAsync(p => p.FolderId == gs.FolderId.Value && p.UserId == user.Id))
-                    {
-                        _context.Permissions.Add(new Permission { FolderId = gs.FolderId.Value, UserId = user.Id, AccessType = gs.AccessType, SharedDate = DateTime.UtcNow });
-                    }
+                    var svc = new WebDocumentManagement_FileSharing.Service.EmailService(config);
+                    var acceptUrl = Url.Action("RespondInvite", "Groups", new { token = token, response = "accept" }, Request.Scheme);
+                    var declineUrl = Url.Action("RespondInvite", "Groups", new { token = token, response = "decline" }, Request.Scheme);
+
+                    var html = $@"<p>Bạn được mời tham gia nhóm: <strong>{group.Name}</strong></p>
+                                  <p>Người mời: {User.Identity?.Name}</p>
+                                  <p><a href='{acceptUrl}'>Chấp nhận</a> | <a href='{declineUrl}'>Từ chối</a></p>";
+
+                    await svc.SendEmailAsync(email, $"Lời mời tham gia nhóm {group.Name}", html);
                 }
             }
+            catch
+            {
+                // ignore
+            }
 
-            await _context.SaveChangesAsync();
-            TempData["Message"] = "Đã thêm thành viên và cấp quyền truy cập.";
+            TempData["Message"] = "Lời mời đã được gửi. Trạng thái: Đang chờ phản hồi.";
             return RedirectToAction("Details", new { id = groupId });
+        }
+
+        // API: get pending invites for current logged-in user's email (used by notification bell)
+        [HttpGet]
+        public async Task<IActionResult> PendingInvites()
+        {
+            if (!(User?.Identity?.IsAuthenticated == true)) return Json(new object[0]);
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Json(new object[0]);
+            var email = user.Email?.Trim();
+            if (string.IsNullOrEmpty(email)) return Json(new object[0]);
+
+            var invites = await _context.Set<GroupInvite>()
+                .Where(i => i.InviteeEmail == email && i.Status == InviteStatus.Pending)
+                .Include(i => i.Group)
+                .OrderByDescending(i => i.CreatedAt)
+                .Select(i => new { i.Id, i.GroupId, GroupName = i.Group != null ? i.Group.Name : "(Nhóm)" , i.CreatedAt, i.Token })
+                .ToListAsync();
+
+            return Json(invites);
+        }
+
+        // Allow user to respond to invite via token link or notification
+        [AllowAnonymous]
+        public async Task<IActionResult> RespondInvite(string token, string response)
+        {
+            if (string.IsNullOrEmpty(token)) return NotFound();
+            var invite = await _context.Set<GroupInvite>().FirstOrDefaultAsync(i => i.Token == token);
+            if (invite == null) return NotFound();
+
+            // require login for accept/decline to bind to user
+            if (!(User?.Identity?.IsAuthenticated == true))
+            {
+                var returnUrl = Url.Action("RespondInvite", "Groups", new { token = token, response = response });
+                return RedirectToPage("/Account/Login", new { area = "Identity", ReturnUrl = returnUrl });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Forbid();
+
+            // ensure invite email matches logged in user's email
+            if (!string.Equals(user.Email?.Trim(), invite.InviteeEmail?.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Email tài khoản không khớp với lời mời.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (string.Equals(response, "accept", StringComparison.OrdinalIgnoreCase))
+            {
+                if (invite.Status != InviteStatus.Pending)
+                {
+                    TempData["Error"] = "Lời mời không còn hợp lệ.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                // add member if not already
+                var already = await _context.GroupMembers.AnyAsync(m => m.GroupId == invite.GroupId && m.UserId == user.Id);
+                if (!already)
+                {
+                    _context.GroupMembers.Add(new GroupMember { GroupId = invite.GroupId, UserId = user.Id, JoinedAt = DateTime.UtcNow });
+
+                    // backfill permissions from group shares
+                    var shares = await _context.Set<GroupShare>().Where(gs => gs.GroupId == invite.GroupId).ToListAsync();
+                    foreach (var gs in shares)
+                    {
+                        if (gs.DocumentId.HasValue)
+                        {
+                            if (!await _context.Permissions.AnyAsync(p => p.DocumentId == gs.DocumentId.Value && p.UserId == user.Id))
+                                _context.Permissions.Add(new Permission { DocumentId = gs.DocumentId.Value, UserId = user.Id, AccessType = gs.AccessType, SharedDate = DateTime.UtcNow });
+                        }
+                        if (gs.FolderId.HasValue)
+                        {
+                            if (!await _context.Permissions.AnyAsync(p => p.FolderId == gs.FolderId.Value && p.UserId == user.Id))
+                                _context.Permissions.Add(new Permission { FolderId = gs.FolderId.Value, UserId = user.Id, AccessType = gs.AccessType, SharedDate = DateTime.UtcNow });
+                        }
+                    }
+                }
+
+                invite.Status = InviteStatus.Accepted;
+                await _context.SaveChangesAsync();
+
+                TempData["Message"] = "Bạn đã chấp nhận lời mời và trở thành thành viên nhóm.";
+                return RedirectToAction("Details", new { id = invite.GroupId });
+            }
+            else
+            {
+                // decline
+                invite.Status = InviteStatus.Declined;
+                await _context.SaveChangesAsync();
+                TempData["Message"] = "Bạn đã từ chối lời mời.";
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         // ==========================================
@@ -305,10 +433,19 @@ namespace WebDocumentManagement_FileSharing.Controllers
 
             // Kiểm tra quyền (chỉ chủ nhóm hoặc người có quyền mới được share - ở đây demo check chủ nhóm)
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (group.OwnerId != userId) return Forbid();
-
+            // Allow if group owner OR the user is the owner of the document and is a member of the group
             var doc = await _context.Documents.FindAsync(documentId);
             if (doc == null) { TempData["Error"] = "Tài liệu không tồn tại."; return RedirectToAction("Details", new { id = groupId }); }
+
+            if (group.OwnerId != userId)
+            {
+                // require that the user is a group member and also the owner of the document
+                var isMemberOfGroup = await _context.GroupMembers.AnyAsync(m => m.GroupId == groupId && m.UserId == userId);
+                if (!isMemberOfGroup || !string.Equals(doc.OwnerId, userId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return Forbid();
+                }
+            }
 
             if (!Enum.TryParse(accessType, out AccessLevel level)) level = AccessLevel.Read;
 
@@ -347,10 +484,19 @@ namespace WebDocumentManagement_FileSharing.Controllers
             if (group == null) return NotFound();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (group.OwnerId != userId) return Forbid();
 
             var folder = await _context.Folders.FindAsync(folderId);
             if (folder == null) { TempData["Error"] = "Thư mục không tồn tại."; return RedirectToAction("Details", new { id = groupId }); }
+
+            // Allow if group owner OR the user is group member and owner of the folder
+            if (group.OwnerId != userId)
+            {
+                var isMemberOfGroup = await _context.GroupMembers.AnyAsync(m => m.GroupId == groupId && m.UserId == userId);
+                if (!isMemberOfGroup || !string.Equals(folder.OwnerId, userId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return Forbid();
+                }
+            }
 
             if (!Enum.TryParse(accessType, out AccessLevel level)) level = AccessLevel.Read;
 

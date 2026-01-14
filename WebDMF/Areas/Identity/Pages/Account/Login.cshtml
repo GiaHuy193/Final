@@ -186,6 +186,13 @@
 
                     <h2 id="welcome-header" class="mb-2">Chào mừng trở lại!</h2>
                     <p id="sub-header" class="small">Vui lòng đăng nhập để tiếp tục.</p>
+
+                    @if (ViewData["MaintenanceActive"] as bool? == true)
+                    {
+                        <div class="alert alert-warning mt-3">
+                            <strong>Thông báo:</strong> @Html.Raw(ViewData["MaintenanceMessage"] as string ?? "Hệ thống đang trong thời gian bảo trì.")
+                        </div>
+                    }
                 </div>
 
                 <form id="account" method="post">

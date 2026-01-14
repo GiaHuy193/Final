@@ -608,6 +608,22 @@
                 <i class="bi bi-moon-fill" style="font-size: 1.25rem; color: var(--text-secondary);"></i>
             </button>
 
+            @* Notification bell (pending group invites) - only for authenticated users *@
+            @if (isAuthenticated)
+            {
+                <div class="dropdown me-2">
+                    <button id="notifyToggle" class="btn btn-link position-relative" data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo">
+                        <i class="bi bi-bell" style="font-size:1.25rem; color:var(--text-secondary)"></i>
+                        <span id="notifyBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notifyToggle" style="min-width:320px;">
+                        <li class="px-2 py-1 fw-bold">Thông báo</li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li id="notifyList"><div class="text-center small text-secondary">Đang tải...</div></li>
+                    </ul>
+                </div>
+            }
+
             @* Partial _LoginPartial *@
             <partial name="_LoginPartial" />
         </div>
@@ -789,6 +805,54 @@
                 applyTheme(newTheme);
                 localStorage.setItem('theme', newTheme);
             });
+
+            // Notification bell behaviour
+            try {
+                const notifyToggle = document.getElementById('notifyToggle');
+                const notifyBadge = document.getElementById('notifyBadge');
+                const notifyList = document.getElementById('notifyList');
+
+                async function loadInvites() {
+                    if (!notifyList) return;
+                    notifyList.innerHTML = '<div class="text-center small text-secondary p-2">Đang tải...</div>';
+                    try {
+                        const res = await fetch('@Url.Action("PendingInvites", "Groups")', { credentials: 'same-origin' });
+                        if (!res.ok) throw new Error('Network');
+                        const items = await res.json();
+                        notifyList.innerHTML = '';
+                        if (!items || items.length === 0) {
+                            notifyBadge.classList.add('d-none');
+                            notifyList.innerHTML = '<div class="text-center small text-secondary p-2">Không có thông báo</div>';
+                            return;
+                        }
+                        notifyBadge.classList.remove('d-none');
+                        notifyBadge.textContent = items.length;
+
+                        items.forEach(i => {
+                            const div = document.createElement('div');
+                            div.className = 'd-flex align-items-start gap-2 p-2 border-bottom';
+                            div.innerHTML = `
+                                <div class="flex-grow-1 small">
+                                    <div class="fw-semibold">Lời mời tham gia: ${i.groupName}</div>
+                                    <div class="text-muted">${new Date(i.createdAt).toLocaleString()}</div>
+                                    <div class="mt-2">
+                                        <a class="btn btn-sm btn-primary me-2" href="${'@Url.Action("RespondInvite","Groups")'}?token=${i.token}&response=accept">Chấp nhận</a>
+                                        <a class="btn btn-sm btn-outline-secondary" href="${'@Url.Action("RespondInvite","Groups")'}?token=${i.token}&response=decline">Từ chối</a>
+                                    </div>
+                                </div>`;
+                            notifyList.appendChild(div);
+                        });
+                    } catch (e) {
+                        notifyList.innerHTML = '<div class="text-center small text-danger p-2">Không thể tải thông báo</div>';
+                        if (notifyBadge) notifyBadge.classList.add('d-none');
+                    }
+                }
+
+                if (notifyToggle) {
+                    notifyToggle.addEventListener('click', function () { loadInvites(); });
+                }
+            } catch (e) { /* ignore in older browsers */ }
+
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

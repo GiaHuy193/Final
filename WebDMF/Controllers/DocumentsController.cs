@@ -114,6 +114,10 @@ namespace WebDocumentManagement_FileSharing.Controllers
                     return Forbid();
                 }
 
+                // Provide folder name for breadcrumb/header in view
+                var currentFolder = await _context.Folders.FindAsync(actualFolderId.Value);
+                ViewBag.CurrentFolderName = currentFolder != null ? currentFolder.Name : null;
+
                 // Folder is accessible (owned by user or shared via ancestor); list all children regardless of owner
                 viewModel.Folders = await _context.Folders
                     .Where(f => f.ParentId == actualFolderId && !f.IsDeleted)
@@ -613,7 +617,11 @@ namespace WebDocumentManagement_FileSharing.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var access = await GetEffectiveAccessForUserOnDocumentAsync(id, userId);
-            if (document.OwnerId != userId)
+
+            // Allow Admin role to download any file
+            var isAdmin = User.IsInRole("Admin");
+
+            if (document.OwnerId != userId && !isAdmin)
             {
                 // require Download or Edit
                 if (access == null || (access != AccessLevel.Download && access != AccessLevel.Edit)) return Forbid();
@@ -627,6 +635,36 @@ namespace WebDocumentManagement_FileSharing.Controllers
                 contentType = "application/octet-stream";
 
             return PhysicalFile(physicalPath, contentType, document.FileName);
+        }
+
+        // Download a specific archived version of a document
+        [HttpGet]
+        public async Task<IActionResult> DownloadVersion(int versionId)
+        {
+            var version = await _context.DocumentVersions.FindAsync(versionId);
+            if (version == null) return NotFound();
+
+            var document = await _context.Documents.FindAsync(version.DocumentId);
+            if (document == null || document.IsDeleted) return NotFound();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var access = await GetEffectiveAccessForUserOnDocumentAsync(document.Id, userId);
+            var isAdmin = User.IsInRole("Admin");
+
+            if (document.OwnerId != userId && !isAdmin)
+            {
+                if (access == null || (access != AccessLevel.Download && access != AccessLevel.Edit))
+                    return Forbid();
+            }
+
+            var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", version.FilePath.TrimStart('/'));
+            if (!System.IO.File.Exists(physicalPath)) return NotFound();
+
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(version.FileName, out var contentType))
+                contentType = "application/octet-stream";
+
+            return PhysicalFile(physicalPath, contentType, version.FileName);
         }
 
         [AllowAnonymous]
@@ -1310,6 +1348,50 @@ namespace WebDocumentManagement_FileSharing.Controllers
                           .Select(x => x.Trim().ToLower()) // Xóa khoảng trắng, chuyển về chữ thường
                           .Where(x => !string.IsNullOrEmpty(x))
                           .ToList();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteVersion(int versionId)
+        {
+            var version = await _context.DocumentVersions.FindAsync(versionId);
+            if (version == null) return NotFound();
+
+            var document = await _context.Documents.FindAsync(version.DocumentId);
+            if (document == null) return NotFound();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+
+            // only owner, Admin or users with Edit access can delete versions
+            if (document.OwnerId != userId && !isAdmin)
+            {
+                var access = await GetEffectiveAccessForUserOnDocumentAsync(document.Id, userId);
+                if (access != AccessLevel.Edit) return Forbid();
+            }
+
+            // remove physical file if exists
+            try
+            {
+                if (!string.IsNullOrEmpty(version.FilePath))
+                {
+                    var physical = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", version.FilePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    if (System.IO.File.Exists(physical)) System.IO.File.Delete(physical);
+                }
+
+                _context.DocumentVersions.Remove(version);
+                await _context.SaveChangesAsync();
+
+                await AuditHelper.LogAsync(HttpContext, "DELETE_VERSION", "DocumentVersion", document.Id, version.FileName, $"Deleted version v{version.VersionNumber} of document {document.FileName}");
+
+                TempData["Message"] = "Đã xóa phiên bản cũ thành công.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi khi xóa phiên bản: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(Details), new { id = document.Id });
         }
     }
 }

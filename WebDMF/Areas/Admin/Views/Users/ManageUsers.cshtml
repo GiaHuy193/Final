@@ -109,6 +109,26 @@
         border-color: #86efac;
         background-color: #f0fdf4;
     }
+    /* Làm cho nút btn-light có màu nền nhạt theo màu chữ khi hover */
+    .btn-light.text-primary:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+        border-color: transparent;
+    }
+
+    .btn-light.text-success:hover {
+        background-color: rgba(25, 135, 84, 0.1);
+        border-color: transparent;
+    }
+
+    .btn-light.text-danger:hover {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-color: transparent;
+    }
+
+    .btn-light.text-warning:hover {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: transparent;
+    }
 </style>
 
 <div class="container-fluid py-5 px-lg-5">
@@ -117,6 +137,13 @@
         <div>
             <h3 class="fw-bold mb-1 text-slate-800">Quản lý Người dùng</h3>
             <p class="text-muted small mb-0">Danh sách thành viên (Standard & Premium)</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <!-- New: Button to open Create User modal with inline form -->
+            <button type="button" class="btn btn-primary" id="openCreateUserModal">
+                <i class="bi bi-person-plus-fill me-1"></i> Tạo người dùng mới
+            </button>
+            <a asp-action="ManageUsers" class="btn btn-light text-primary">Làm mới</a>
         </div>
     </div>
 
@@ -139,10 +166,16 @@
                     {
                         var bytes = storageMap.ContainsKey(user.Id) ? storageMap[user.Id] : 0L;
                         var formatted = StorageHelper.FormatSize(bytes);
-                        // Chỉ lấy Standard hoặc Premium
-                        var rawTier = tierMap.ContainsKey(user.Id) ? tierMap[user.Id] : "Standard"; 
-                        // Đảm bảo chỉ hiển thị Premium hoặc Standard (nếu lỡ có data cũ là Pro thì coi như Standard hoặc xử lý riêng)
-                        var displayTier = (rawTier == "Premium") ? "Premium" : "Standard";
+                        // Determine premium status: prefer explicit user flags (IsPremium or PremiumUntil) then fallback to role map
+                        bool isPremiumFlag = false;
+                        try
+                        {
+                            isPremiumFlag = user.IsPremium || (user.PremiumUntil != null && user.PremiumUntil > DateTime.UtcNow);
+                        }
+                        catch { isPremiumFlag = false; }
+
+                        var rawTier = tierMap.ContainsKey(user.Id) ? tierMap[user.Id] : "Standard";
+                        var displayTier = isPremiumFlag || string.Equals(rawTier, "Premium", StringComparison.OrdinalIgnoreCase) ? "Premium" : "Standard";
 
                         var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow;
 
@@ -171,6 +204,11 @@
                                     }
                                     @displayTier
                                 </span>
+                                @* Show premium expiration if present *@
+                                @if (user.PremiumUntil != null && user.PremiumUntil > DateTime.UtcNow)
+                                {
+                                    <div class="small text-muted">đến @user.PremiumUntil.Value.ToString("dd/MM/yyyy")</div>
+                                }
                             </td>
 
                             <td>
@@ -196,26 +234,72 @@
                             </td>
 
                             <td class="text-end pe-4">
-                                @if (!isLocked)
-                                {
-                                    <form method="post" asp-action="LockUser" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn khóa tài khoản này? Người dùng sẽ không thể đăng nhập.');">
+                                <div class="d-flex align-items-center justify-content-end gap-2">
+
+                                    @* 1. Nút Chi tiết *@
+                                    <button type="button" class="btn btn-sm btn-light text-primary user-details-btn"
+                                            title="Xem chi tiết" data-bs-toggle="tooltip"
+                                            data-username="@user.UserName"
+                                            data-email="@user.Email"
+                                            data-gender="@(string.IsNullOrEmpty(user.Gender) ? "Không rõ" : user.Gender)"
+                                            data-dob="@(user.DateOfBirth?.ToString("dd/MM/yyyy") ?? "N/A")"
+                                            data-tier="@displayTier"
+                                            data-premiumuntil="@(user.PremiumUntil?.ToString("dd/MM/yyyy") ?? "")">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                    </button>
+
+                                    @* 2. Nút Thăng hạng/Hạ hạng *@
+                                    @if (!string.Equals(displayTier, "Premium", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <form method="post" asp-action="SetUserTier" class="d-inline-block" onsubmit="return confirm('Nâng gói người dùng này lên Premium?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <input type="hidden" name="tier" value="Premium" />
+                                            <button type="submit" class="btn btn-sm btn-light text-success" title="Nâng lên Premium" data-bs-toggle="tooltip">
+                                                <i class="bi bi-arrow-up-circle-fill"></i>
+                                            </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-action="SetUserTier" class="d-inline-block" onsubmit="return confirm('Đặt lại gói người dùng về Standard?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <input type="hidden" name="tier" value="Standard" />
+                                            <button type="submit" class="btn btn-sm btn-light text-secondary" title="Hạ về Standard" data-bs-toggle="tooltip">
+                                                <i class="bi bi-arrow-down-circle-fill"></i>
+                                            </form>
+                                    }
+
+                                    @* 3. Nút Khóa/Mở khóa *@
+                                    @if (!isLocked)
+                                    {
+                                        <form method="post" asp-action="LockUser" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn khóa tài khoản này?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-sm btn-light text-warning" title="Khóa tài khoản" data-bs-toggle="tooltip">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-action="UnlockUser" class="d-inline-block" onsubmit="return confirm('Mở khóa tài khoản này?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-sm btn-light text-success" title="Mở khóa" data-bs-toggle="tooltip">
+                                                <i class="bi bi-unlock-fill"></i>
+                                            </form>
+                                    }
+
+                                    @* 4. Nút Xóa (Tách biệt một chút) *@
+                                    <div class="vr mx-1"></div> @* Đường kẻ dọc ngăn cách *@
+
+                                    <form method="post" asp-action="DeleteUser" class="d-inline-block" onsubmit="return confirm('Xóa tài khoản này sẽ xóa User khỏi hệ thống. Tiếp tục?');">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="userId" value="@user.Id" />
-                                        <button class="btn-action danger" type="submit" title="Khóa tài khoản">
-                                            <i class="bi bi-lock"></i>
-                                        </button>
-                                    </form>
-                                }
-                                else
-                                {
-                                    <form method="post" asp-action="UnlockUser" class="d-inline-block" onsubmit="return confirm('Mở khóa tài khoản này?');">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="userId" value="@user.Id" />
-                                        <button class="btn-action success" type="submit" title="Mở khóa">
-                                            <i class="bi bi-unlock"></i>
-                                        </button>
-                                    </form>
-                                }
+                                        <button type="submit" class="btn btn-sm btn-light text-danger" title="Xóa vĩnh viễn" data-bs-toggle="tooltip">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </form>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -224,3 +308,129 @@
         </div>
     </div>
 </div>
+
+@* Modal for user details *@
+<div class="modal fade" id="userDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Chi tiết người dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Tên người dùng</dt>
+                    <dd class="col-sm-8" id="ud-username">-</dd>
+
+                    <dt class="col-sm-4 text-muted">Email</dt>
+                    <dd class="col-sm-8" id="ud-email">-</dd>
+
+                    <dt class="col-sm-4 text-muted">Giới tính</dt>
+                    <dd class="col-sm-8" id="ud-gender">-</dd>
+
+                    <dt class="col-sm-4 text-muted">Ngày sinh</dt>
+                    <dd class="col-sm-8" id="ud-dob">-</dd>
+
+                    <dt class="col-sm-4 text-muted">Gói</dt>
+                    <dd class="col-sm-8" id="ud-tier">-</dd>
+
+                    <dt class="col-sm-4 text-muted">Ngày hết hạn</dt>
+                    <dd class="col-sm-8" id="ud-premiumuntil">-</dd>
+                </dl>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Modal with inline create-user form (admin creates user without email confirmation) *@
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tạo người dùng mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form asp-area="Admin" asp-controller="Dashboard" asp-action="CreateUser" method="post">
+        @Html.AntiForgeryToken()
+        <div class="modal-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tên hiển thị (tùy chọn)</label>
+                    <input type="text" name="userName" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Mật khẩu</label>
+                    <input type="password" name="password" class="form-control" required minlength="6" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Gói mặc định</label>
+                    <select name="role" class="form-select">
+                        <option value="Standard">Standard</option>
+                        <option value="Pro">Pro</option>
+                        <option value="Premium">Premium</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">Tạo người dùng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var modalEl = document.getElementById('userDetailsModal');
+            if (!modalEl) return;
+
+            var bsModal = new bootstrap.Modal(modalEl);
+
+            document.querySelectorAll('.user-details-btn').forEach(function(btn) {
+                btn.addEventListener('click', function () {
+                    var username = btn.getAttribute('data-username') || '-';
+                    var email = btn.getAttribute('data-email') || '-';
+                    var gender = btn.getAttribute('data-gender') || 'Không rõ';
+                    var dob = btn.getAttribute('data-dob') || 'N/A';
+                    var tier = btn.getAttribute('data-tier') || 'Standard';
+                    var premiumUntil = btn.getAttribute('data-premiumuntil') || '';
+
+                    var elUsername = document.getElementById('ud-username');
+                    var elEmail = document.getElementById('ud-email');
+                    var elGender = document.getElementById('ud-gender');
+                    var elDob = document.getElementById('ud-dob');
+                    var elTier = document.getElementById('ud-tier');
+                    var elPremium = document.getElementById('ud-premiumuntil');
+
+                    if (elUsername) elUsername.textContent = username;
+                    if (elEmail) elEmail.textContent = email;
+                    if (elGender) elGender.textContent = gender;
+                    if (elDob) elDob.textContent = dob;
+                    if (elTier) elTier.textContent = tier;
+                    if (elPremium) elPremium.textContent = premiumUntil ? premiumUntil : '-';
+
+                    bsModal.show();
+                });
+            });
+
+            // Create user modal
+            var createBtn = document.getElementById('openCreateUserModal');
+            if (createBtn) {
+                createBtn.addEventListener('click', function() {
+                    var cm = new bootstrap.Modal(document.getElementById('createUserModal'));
+                    cm.show();
+                });
+            }
+        });
+    </script>
+}

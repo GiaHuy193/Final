@@ -446,6 +446,45 @@ namespace WebDocumentManagement_FileSharing.Migrations
                     b.ToTable("Groups");
                 });
 
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.GroupInvite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InviteeEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InviteeUserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InviterId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("groupInvites");
+                });
+
             modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.GroupMember", b =>
                 {
                     b.Property<int>("Id")
@@ -757,6 +796,17 @@ namespace WebDocumentManagement_FileSharing.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("ParentFolder");
+                });
+
+            modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.GroupInvite", b =>
+                {
+                    b.HasOne("WebDocumentManagement_FileSharing.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("WebDocumentManagement_FileSharing.Models.GroupMember", b =>

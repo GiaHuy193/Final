@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using WebDocumentManagement_FileSharing.Data;
 using WebDocumentManagement_FileSharing.Models; // QUAN TRỌNG: Để dùng ApplicationUser
 
 namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account
@@ -20,13 +22,15 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly ApplicationDbContext _context;
 
         // 2. Cập nhật Constructor
-        public LoginModel(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ILogger<LoginModel> logger, ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
+            _context = context;
         }
 
         [BindProperty]
@@ -67,6 +71,23 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
+            // Show maintenance message if enabled (for display purposes)
+            try
+            {
+                var mode = await _context.SystemSettings.FirstOrDefaultAsync(s => s.SettingKey == "MaintenanceMode");
+                var msg = await _context.SystemSettings.FirstOrDefaultAsync(s => s.SettingKey == "MaintenanceMessage");
+                if (mode != null && (mode.SettingValue ?? "").ToLower() == "true")
+                {
+                    ViewData["MaintenanceActive"] = true;
+                    ViewData["MaintenanceMessage"] = msg?.SettingValue ?? "Hệ thống đang bảo trì.";
+                }
+                else
+                {
+                    ViewData["MaintenanceActive"] = false;
+                }
+            }
+            catch { ViewData["MaintenanceActive"] = false; }
+
             // Hiển thị thông báo nếu cần xác thực email sau khi đăng ký
             if (Request.Query.ContainsKey("requireConfirmation") && Request.Query["requireConfirmation"] == "true")
             {
@@ -92,6 +113,25 @@ namespace WebDocumentManagement_FileSharing.Areas.Identity.Pages.Account
                     TempData["Error"] = "Bạn chưa tạo tài khoản";
                     return RedirectToPage("/Account/Register", new { area = "Identity" });
                 }
+
+                // Check maintenance mode: if active, block non-admin users from logging in
+                try
+                {
+                    var mode = await _context.SystemSettings.FirstOrDefaultAsync(s => s.SettingKey == "MaintenanceMode");
+                    var msg = await _context.SystemSettings.FirstOrDefaultAsync(s => s.SettingKey == "MaintenanceMessage");
+                    var isMaintenance = mode != null && (mode.SettingValue ?? "").ToLower() == "true";
+                    if (isMaintenance)
+                    {
+                        // allow admins through
+                        if (!await _userManager.IsInRoleAsync(user, "Admin"))
+                        {
+                            var message = msg?.SettingValue ?? "Hệ thống đang trong thời gian bảo trì. Vui lòng quay lại sau.";
+                            ModelState.AddModelError(string.Empty, message);
+                            return Page();
+                        }
+                    }
+                }
+                catch { /* ignore errors reading settings */ }
 
                 // Kiểm tra xem email đã được xác thực chưa
                 if (!await _userManager.IsEmailConfirmedAsync(user))

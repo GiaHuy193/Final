@@ -1,7 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using WebDocumentManagement_FileSharing.Models
 @model IEnumerable<ApplicationUser>
-@inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewData["Title"] = "Tổng quan hệ thống";
@@ -10,7 +9,7 @@
     int totalUsersAll = 0;
     try { totalUsersAll = (ViewBag.TotalUsers != null) ? Convert.ToInt32(ViewBag.TotalUsers) : 0; } catch { totalUsersAll = 0; }
     int adminCount = 0;
-    try { adminCount = UserManager.GetUsersInRoleAsync("Admin").GetAwaiter().GetResult()?.Count ?? 0; } catch { adminCount = 0; }
+    try { adminCount = (ViewBag.AdminCount != null) ? Convert.ToInt32(ViewBag.AdminCount) : 0; } catch { adminCount = 0; }
     int totalUsersExcludingAdmins = Math.Max(0, totalUsersAll - adminCount);
 
     // --- 1. LOGIC TÍNH TOÁN DUNG LƯỢNG (700GB LIMIT) ---
@@ -189,6 +188,12 @@
         font-size: 0.85rem;
     }
 
+    .user-avatar.small-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+
     .status-badge {
         padding: 4px 10px;
         border-radius: 20px;
@@ -312,7 +317,7 @@
                         <p class="text-secondary small fw-bold text-uppercase mb-1">Dung lượng</p>
                         <h3 class="fw-bold mb-0 text-dark">
                             @ViewBag.TotalStorage
-                            <span class="fs-6 text-muted fw-normal">/ 700GB</span>
+                            <span class="fs-6 text-muted fw-normal">/ 2TB</span>
                         </h3>
                     </div>
                     <div class="icon-box icon-storage shadow-sm" style="width: 40px; height: 40px; font-size: 1.2rem;">
@@ -332,6 +337,214 @@
             </div>
         </div>
     </div>
+    @{ 
+        // Cast ViewBag lists to concrete types to allow LINQ methods and indexing
+        var fileTypeLabels = (ViewBag.FileTypeLabels as List<string>) ?? new List<string>();
+        var fileTypeValues = (ViewBag.FileTypeValues as List<int>) ?? new List<int>();
+        var fileTypeTotal = (ViewBag.FileTypeTotal != null) ? Convert.ToInt32(ViewBag.FileTypeTotal) : (fileTypeValues.Sum());
+        var topDownloads = (ViewBag.TopFiles as List<KeyValuePair<string, int>>) ?? new List<KeyValuePair<string, int>>();
+        var topAccessed = (ViewBag.TopAccessedFiles as List<KeyValuePair<string, int>>) ?? new List<KeyValuePair<string, int>>();
+        var topActiveUsers = (ViewBag.TopActiveUsers as List<KeyValuePair<string, int>>) ?? new List<KeyValuePair<string, int>>();
+        var topActiveUserActivities = (ViewBag.TopActiveUserActivities as Dictionary<string, List<string>>) ?? new Dictionary<string, List<string>>();
+        var topActiveUserNames = (ViewBag.TopActiveUserNames as Dictionary<string, string>) ?? new Dictionary<string, string>();
+        var premiumCount = (ViewBag.PremiumCount != null) ? Convert.ToInt32(ViewBag.PremiumCount) : 0;
+        var proCount = (ViewBag.ProCount != null) ? Convert.ToInt32(ViewBag.ProCount) : 0;
+        var standardCount = (ViewBag.StandardCount != null) ? Convert.ToInt32(ViewBag.StandardCount) : 0;
+    }
+
+    <div class="row g-4 mb-5">
+        <div class="col-xl-4 col-md-6">
+            <div class="stat-card">
+                <h6 class="fw-bold text-dark mb-4">Phân loại tệp tin</h6>
+                <canvas id="fileTypeChart" style="max-height: 200px;"></canvas>
+                <div class="mt-3 small text-muted text-center">
+                    Hệ thống chủ yếu lưu trữ: <strong>@(fileTypeLabels.Count > 0 ? fileTypeLabels[0].ToUpper() : "N/A") (@(fileTypeValues.Count > 0 ? Math.Round(((double)fileTypeValues[0] / (double)Math.Max(1, fileTypeTotal)) * 100) : 0)%)</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="stat-card shadow-sm border-0 rounded-4 p-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-pie-chart-fill me-2 text-primary"></i>Cơ cấu gói cước
+                    </h6>
+                    <span class="badge bg-light text-muted fw-normal">Trả phí</span>
+                </div>
+
+                @{
+                    // Đảm bảo không chia cho 0
+                    var std = standardCount;
+                    var prem = premiumCount;
+                    var totalPaid = std + prem;
+                    var totalPlans = Math.Max(1, totalPaid);
+
+                    // Tính toán phần trăm chính xác
+                    var stdPct = (double)std / totalPlans * 100;
+                    var premPct = (double)prem / totalPlans * 100;
+
+                    // Định dạng chuỗi hiển thị
+                    var stdPctDisplay = stdPct.ToString("0.#");
+                    var premPctDisplay = premPct.ToString("0.#");
+                }
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-end mb-2">
+                        <div>
+                            <div class="small fw-bold text-dark">Standard (15GB)</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">@std người dùng</div>
+                        </div>
+                        <span class="fw-bold text-primary">@stdPctDisplay%</span>
+                    </div>
+                    <div class="progress" style="height: 10px; border-radius: 5px; background-color: #f1f5f9;">
+                        <div class="progress-bar bg-primary shadow-sm"
+                             role="progressbar"
+                             style="width: @stdPctDisplay%"
+                             aria-valuenow="@stdPct" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-end mb-2">
+                        <div>
+                            <div class="small fw-bold text-warning">Premium (100GB)</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">@prem người dùng</div>
+                        </div>
+                        <span class="fw-bold text-warning">@premPctDisplay%</span>
+                    </div>
+                    <div class="progress" style="height: 10px; border-radius: 5px; background-color: #f1f5f9;">
+                        <div class="progress-bar bg-warning shadow-sm"
+                             role="progressbar"
+                             style="width: @premPctDisplay%"
+                             aria-valuenow="@premPct" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+
+                @if (totalPaid == 0)
+                {
+                    <div class="text-center py-3 text-muted small italic">
+                        Chưa có dữ liệu người dùng trả phí
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-12">
+            <div class="stat-card">
+                <h6 class="fw-bold text-dark mb-3">Top File được tải nhiều nhất</h6>
+                <ul class="list-unstyled mb-0">
+                    @{
+                        if (!topDownloads.Any())
+                        {
+                            <li class="text-muted small">Không có dữ liệu</li>
+                        }
+                        else
+                        {
+                            foreach (var kv in topDownloads)
+                            {
+                                <li class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-truncate" style="max-width: 250px;"><i class="bi bi-download me-2"></i>@kv.Key</span>
+                                    <span class="badge bg-light text-dark">@kv.Value lượt</span>
+                                </li>
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-xl-6 col-md-12">
+            <div class="stat-card">
+                <h6 class="fw-bold text-dark mb-3">Top File được truy cập nhiều nhất</h6>
+                <ul class="list-unstyled mb-0">
+                    @{
+                        if (!topAccessed.Any())
+                        {
+                            <li class="text-muted small">Không có dữ liệu</li>
+                        }
+                        else
+                        {
+                            foreach (var kv in topAccessed)
+                            {
+                                <li class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-truncate" style="max-width: 320px;"><i class="bi bi-eye me-2"></i>@kv.Key</span>
+                                    <span class="badge bg-light text-dark">@kv.Value lượt</span>
+                                </li>
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-md-12">
+            <div class="stat-card">
+                <h6 class="fw-bold text-dark mb-3">Người dùng hoạt động nhiều nhất</h6>
+                <ul class="list-unstyled mb-0">
+                    @{
+                        if (!topActiveUsers.Any())
+                        {
+                            <li class="text-muted small">Không có dữ liệu</li>
+                        }
+                        else
+                        {
+                            foreach (var kv in topActiveUsers)
+                            {
+                                <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <div class="d-flex align-items-center gap-2 text-truncate" style="max-width: 320px;">
+                                        <div class="user-avatar small-avatar">@GetInitials(kv.Key)</div>
+                                        <div class="d-flex flex-column w-100">
+                                            <span class="text-truncate fw-semibold">@kv.Key</span>
+                                            @{
+                                                // show up to 3 recent activity lines for this actor if available
+                                                List<string> acts;
+                                                if (topActiveUserActivities.TryGetValue(kv.Key, out acts) && acts != null && acts.Any())
+                                                {
+                                                    <div class="small text-muted mt-1">
+                                                        @foreach (var a in acts)
+                                                        {
+                                                            <div class="text-truncate">@a</div>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-light text-dark">@kv.Value hoạt động</span>
+                                </li>
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function(){
+            try {
+                var labels = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(fileTypeLabels));
+                var values = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(fileTypeValues));
+
+                var ctx = document.getElementById('fileTypeChart');
+                if (ctx && labels.length && values.length) {
+                    new Chart(ctx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{ data: values, backgroundColor: ['#60a5fa','#34d399','#f59e0b','#f87171','#a78bfa','#94a3b8'] }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+            } catch (e) { console.warn(e); }
+        })();
+    </script>
 
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
         <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">

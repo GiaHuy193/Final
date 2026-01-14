@@ -1,4 +1,5 @@
 ﻿@using System.IO
+@using System.Security.Claims
 @model WebDocumentManagement_FileSharing.Models.Document
 
 @{
@@ -211,7 +212,7 @@
                                     <p class="small text-muted mb-2">Đang sử dụng</p>
                                 </div>
                                 <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-sm btn-success text-white rounded-pill px-3 shadow-sm">
-                                    <i class="bi bi-download"></i>
+                                    <i class="bi bi-download"></i> Tải về
                                 </a>
                             </div>
                         </div>
@@ -233,9 +234,24 @@
                                                 </div>
                                             }
                                         </div>
-                                        <a asp-action="DownloadVersion" asp-route-versionId="@v.Id" class="btn btn-sm btn-light border rounded-pill px-3" title="Tải về bản này">
-                                            <i class="bi bi-download"></i> Tải về
-                                        </a>
+                                        <div class="d-flex" style="gap:8px;">
+                                            <a asp-action="DownloadVersion" asp-route-versionId="@v.Id" class="btn btn-sm btn-light border rounded-pill px-3" title="Tải về bản này">
+                                                <i class="bi bi-download"></i> Tải về
+                                            </a>
+
+                                            @* Show delete button only for owner or Admin *@
+                                            @{ var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier); var isAdmin = User.IsInRole("Admin"); }
+                                            @if (isAdmin || string.Equals(currentUserId, Model.OwnerId, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                <form asp-action="DeleteVersion" method="post" onsubmit="return confirm('Xóa phiên bản này? Hành động không thể hoàn tác.');" class="d-inline-block">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="versionId" value="@v.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Xóa phiên bản">
+                                                        <i class="bi bi-trash"></i> Xóa
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             }

@@ -24,7 +24,6 @@
             "linear-gradient(135deg, #c471f5 0%, #fa71cd 100%)", // Tím Hồng
             "linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)", // Hồng Phấn
         };
-        // Dùng toán tử % để lặp lại màu nếu số lượng folder nhiều hơn bảng màu
         return gradients[Math.Abs(id) % gradients.Length];
     }
 }
@@ -34,16 +33,11 @@
 <style>
     :root {
         --primary-color: #3b82f6;
-        --primary-hover-color: #2563eb; 
-    }
-</style>
-
-<style>
-    :root {
+        --primary-hover-color: #2563eb;
         --card-hover-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
-    /* --- 1. UTILITIES --- */
+    /* --- UTILITIES --- */
     .cursor-pointer {
         cursor: pointer;
     }
@@ -52,18 +46,18 @@
         display: none !important;
     }
 
-    /* --- 2. FOLDER CARD (COVER STYLE) --- */
+    /* --- FOLDER CARD --- */
     .folder-card {
         background-color: #ffffff;
         border: 1px solid rgba(0,0,0,0.08);
         border-radius: 16px;
-        overflow: hidden; /* Bo tròn góc cho cả cover */
+        overflow: hidden;
         position: relative;
         transition: transform 0.2s, box-shadow 0.2s;
         height: 100%;
         display: flex;
         flex-direction: column;
-        padding: 0; /* Bỏ padding để cover tràn viền */
+        padding: 0;
     }
 
         .folder-card:hover {
@@ -72,12 +66,10 @@
             border-color: rgba(0,0,0,0.1);
         }
 
-    /* COVER GRADIENT (Phần trên) */
     .folder-cover {
-        height: 90px; /* Chiều cao khối màu */
+        height: 90px;
         width: 100%;
         position: relative;
-        /* Hiệu ứng bóng kính */
     }
 
         .folder-cover::after {
@@ -91,7 +83,6 @@
             pointer-events: none;
         }
 
-    /* BODY INFO (Phần dưới) */
     .folder-body {
         padding: 12px 16px;
         background-color: #fff;
@@ -117,12 +108,12 @@
         color: #94a3b8;
     }
 
-    /* NÚT 3 CHẤM (QUAN TRỌNG) */
+    /* FOLDER OPTION BUTTON */
     .folder-option-btn {
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.4); /* Nền bán trong suốt */
+        background: rgba(255, 255, 255, 0.4);
         backdrop-filter: blur(4px);
         border: 1px solid rgba(255,255,255,0.3);
         color: #333;
@@ -140,7 +131,7 @@
             transform: scale(1.05);
         }
 
-    /* --- 3. FILE CARD (GRID) --- */
+    /* --- FILE CARD --- */
     .file-card {
         border: 1px solid rgba(0,0,0,0.08);
         border-radius: 16px;
@@ -199,7 +190,6 @@
         line-height: 1.4;
     }
 
-    /* Nút 3 chấm cho File */
     .file-option-btn {
         position: absolute;
         top: 8px;
@@ -224,7 +214,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-    /* --- 4. LIST TABLE --- */
+    /* --- TABLE LIST --- */
     .custom-table {
         border-collapse: separate;
         border-spacing: 0;
@@ -262,7 +252,6 @@
             border-bottom: none;
         }
 
-    /* Nút 3 chấm trong bảng */
     .table-action-btn {
         width: 32px;
         height: 32px;
@@ -281,7 +270,7 @@
             color: var(--bs-primary);
         }
 
-    /* --- 5. VIEW TOGGLE --- */
+    /* --- TOGGLES --- */
     .view-toggle-group .btn {
         border: 1px solid #e2e8f0;
         color: #64748b;
@@ -297,6 +286,7 @@
     .section-toggle i {
         transition: transform 0.18s ease;
     }
+
     .section-toggle[aria-expanded="false"] i {
         transform: rotate(-90deg);
     }
@@ -309,6 +299,7 @@
             <h2 class="fw-bold mb-1 text-dark">Trang chủ</h2>
         </div>
     </div>
+
     @if (TempData["Message"] != null)
     {
         <div class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4 fade show" role="alert">
@@ -326,12 +317,13 @@
         </div>
     }
 
-    <div class="d-flex justify-content-between align-items-end mb-3">
-        <h6 class="fw-bold text-uppercase text-secondary small mb-0">Thư mục</h6>
+    <div class="mb-5">
+        <h5 class="fw-bold text-uppercase text-secondary small mb-3 d-flex align-items-center justify-content-between">
+            <span class="d-flex align-items-center gap-2">Thư mục </span>
             <button class="btn btn-sm btn-light section-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#foldersContent" aria-expanded="true" aria-controls="foldersContent" title="Thu gọn/Hiện">
                 <i class="bi bi-chevron-down"></i>
             </button>
-          </div>
+        </h5>
 
         <div id="foldersContent" class="collapse show">
             <div class="row g-3">
@@ -382,8 +374,8 @@
         </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-end mb-3">
-        <h5 class="fw-bold mb-0 d-flex align-items-center text-dark">Tệp tin gần đây</h5>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-uppercase text-secondary small mb-0 d-flex align-items-center gap-2"> Tệp tin gần đây </h5>
 
         <div class="d-flex align-items-center">
             <div class="btn-group view-toggle-group me-2" role="group">
@@ -401,6 +393,7 @@
     </div>
 
     <div id="recentContent" class="collapse show">
+
         <div id="filesGrid" class="row g-3 mb-4" style="display:none">
             @if (Model?.Documents != null && Model.Documents.Any())
             {
@@ -436,9 +429,11 @@
                                         {
                                             var iconClass = "bi-file-earmark-text";
                                             var iconColor = "text-secondary";
-                                            if (d.FileName.EndsWith(".pdf")) { iconClass = "bi-file-earmark-pdf"; iconColor = "text-danger"; }
-                                            else if (d.FileName.EndsWith(".docx") || d.FileName.EndsWith(".doc")) { iconClass = "bi-file-earmark-word"; iconColor = "text-primary"; }
-                                            else if (d.FileName.EndsWith(".xlsx") || d.FileName.EndsWith(".xls")) { iconClass = "bi-file-earmark-excel"; iconColor = "text-success"; }
+                                            var lower = (d.FileName ?? "").ToLowerInvariant();
+
+                                            if (lower.EndsWith(".pdf")) { iconClass = "bi-file-earmark-pdf"; iconColor = "text-danger"; }
+                                            else if (lower.EndsWith(".docx") || lower.EndsWith(".doc")) { iconClass = "bi-file-earmark-word"; iconColor = "text-primary"; }
+                                            else if (lower.EndsWith(".xlsx") || lower.EndsWith(".xls")) { iconClass = "bi-file-earmark-excel"; iconColor = "text-success"; }
 
                                             <i class="bi @iconClass @iconColor" style="font-size: 3rem;"></i>
                                         }
@@ -449,98 +444,99 @@
                             <div class="file-card-body">
                                 <a asp-controller="Documents" asp-action="Open" asp-route-id="@d.Id" target="_blank" class="file-name" title="@d.FileName">
                                     @d.FileName
-                            </a>
-                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                <span class="text-muted small" style="font-size: 0.75rem">@d.UploadedDate.ToString("dd/MM")</span>
-                                <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill fw-normal" style="font-size: 0.65rem">
-                                    @(Math.Round(d.FileSize / 1024.0, 1)) KB
-                                </span>
+                                </a>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="text-muted small" style="font-size: 0.75rem">@d.UploadedDate.ToString("dd/MM")</span>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill fw-normal" style="font-size: 0.65rem">
+                                        @(Math.Round(d.FileSize / 1024.0, 1)) KB
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <div class="text-center py-5 text-muted">Không có tệp tin nào gần đây</div>
                 </div>
             }
-        }
-        else
-        {
-            <div class="col-12">
-                <div class="text-center py-5 text-muted">Không có tệp tin nào gần đây</div>
-            </div>
-        }
-    </div>
+        </div>
 
-    <div id="filesArea" class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table custom-table mb-0">
-                <thead>
-                    <tr>
-                        <th style="padding-left: 1.5rem">Tên tệp</th>
-                        <th>Ngày tải lên</th>
-                        <th>Kích thước</th>
-                        <th class="text-end" style="padding-right: 1.5rem">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model?.Documents != null && Model.Documents.Any())
-                    {
-                        foreach (var d in Model.Documents)
+        <div id="filesArea" class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table custom-table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 1.5rem">Tên tệp</th>
+                            <th>Ngày tải lên</th>
+                            <th>Kích thước</th>
+                            <th class="text-end" style="padding-right: 1.5rem">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model?.Documents != null && Model.Documents.Any())
+                        {
+                            foreach (var d in Model.Documents)
+                            {
+                                <tr>
+                                    <td style="padding-left: 1.5rem">
+                                        <div class="d-flex align-items-center">
+                                            @{
+                                                var iconClass = "bi-file-earmark-text";
+                                                var iconColor = "text-secondary";
+                                                var isImage = false;
+                                                var lower = (d.FileName ?? "").ToLowerInvariant();
+                                                if (lower.EndsWith(".pdf")) { iconClass = "bi-file-earmark-pdf"; iconColor = "text-danger"; }
+                                                else if (lower.EndsWith(".docx") || lower.EndsWith(".doc")) { iconClass = "bi-file-earmark-word"; iconColor = "text-primary"; }
+                                                else if (lower.EndsWith(".xlsx") || lower.EndsWith(".xlsx")) { iconClass = "bi-file-earmark-excel"; iconColor = "text-success"; }
+                                                else if (lower.EndsWith(".jpg") || lower.EndsWith(".jpeg") || lower.EndsWith(".png") || lower.EndsWith(".gif") || lower.EndsWith(".webp")) { iconClass = "bi-file-earmark-image"; isImage = true; }
+                                            }
+                                            @if (isImage)
+                                            {
+                                                <i class="bi @iconClass text-dark fs-4 me-3" aria-hidden="true"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi @iconClass @iconColor fs-4 me-3"></i>
+                                            }
+                                            <div>
+                                                <a href="@Url.Action("Open", "Documents", new { id = d.Id })" target="_blank" class="fw-medium text-decoration-none text-dark">@d.FileName</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">@d.UploadedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="text-secondary">@(Math.Round(d.FileSize / 1024.0, 1)) KB</td>
+                                    <td class="text-end" style="padding-right: 1.5rem">
+                                        <div class="dropdown">
+                                            <button class="table-action-btn ms-auto" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                                <li><a class="dropdown-item" asp-controller="Documents" asp-action="Download" asp-route-id="@d.Id"><i class="bi bi-download me-2"></i>Tải xuống</a></li>
+                                                <li><a class="dropdown-item rename-doc-trigger" href="#" data-id="@d.Id" data-name="@d.FileName" data-bs-toggle="modal" data-bs-target="#renameModal"><i class="bi bi-pencil me-2"></i>Đổi tên</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item document-star-toggle" href="#" data-id="@d.Id"><i class="bi bi-star me-2"></i>Gắn sao</a></li>
+                                                <li><a class="dropdown-item share-trigger" href="#" data-id="@d.Id" data-title="@d.FileName" data-type="document"><i class="bi bi-share me-2"></i>Chia sẻ</a></li>
+                                                <li><a class="dropdown-item" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id"><i class="bi bi-info-circle me-2"></i>Chi tiết</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger document-delete-btn" href="#" data-id="@d.Id" data-name="@d.FileName"><i class="bi bi-trash me-2"></i>Xóa</a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td style="padding-left: 1.5rem">
-                                    <div class="d-flex align-items-center">
-                                        @{
-                                            var iconClass = "bi-file-earmark-text";
-                                            var iconColor = "text-secondary";
-                                            var isImage = false;
-                                            var lower = (d.FileName ?? "").ToLowerInvariant();
-                                            if (lower.EndsWith(".pdf")) { iconClass = "bi-file-earmark-pdf"; iconColor = "text-danger"; }
-                                            else if (lower.EndsWith(".docx") || lower.EndsWith(".doc")) { iconClass = "bi-file-earmark-word"; iconColor = "text-primary"; }
-                                            else if (lower.EndsWith(".xlsx") || lower.EndsWith(".xlsx")) { iconClass = "bi-file-earmark-excel"; iconColor = "text-success"; }
-                                            else if (lower.EndsWith(".jpg") || lower.EndsWith(".jpeg") || lower.EndsWith(".png") || lower.EndsWith(".gif") || lower.EndsWith(".webp")) { iconClass = "bi-file-earmark-image"; isImage = true; }
-                                        }
-                                        @if (isImage)
-                                        {
-                                            <i class="bi @iconClass text-dark fs-4 me-3" aria-hidden="true"></i>
-                                        }
-                                        else
-                                        {
-                                            <i class="bi @iconClass @iconColor fs-4 me-3"></i>
-                                        }
-                                        <div>
-                                            <a href="@Url.Action("Open", "Documents", new { id = d.Id })" target="_blank" class="fw-medium text-decoration-none text-dark">@d.FileName</a>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="text-muted">@d.UploadedDate.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="text-secondary">@(Math.Round(d.FileSize / 1024.0, 1)) KB</td>
-                                <td class="text-end" style="padding-right: 1.5rem">
-                                    <div class="dropdown">
-                                        <button class="table-action-btn ms-auto" data-bs-toggle="dropdown">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                            <li><a class="dropdown-item" asp-controller="Documents" asp-action="Download" asp-route-id="@d.Id"><i class="bi bi-download me-2"></i>Tải xuống</a></li>
-                                            <li><a class="dropdown-item rename-doc-trigger" href="#" data-id="@d.Id" data-name="@d.FileName" data-bs-toggle="modal" data-bs-target="#renameModal"><i class="bi bi-pencil me-2"></i>Đổi tên</a></li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item document-star-toggle" href="#" data-id="@d.Id"><i class="bi bi-star me-2"></i>Gắn sao</a></li>
-                                            <li><a class="dropdown-item share-trigger" href="#" data-id="@d.Id" data-title="@d.FileName" data-type="document"><i class="bi bi-share me-2"></i>Chia sẻ</a></li>
-                                            <li><a class="dropdown-item" asp-controller="Documents" asp-action="Details" asp-route-id="@d.Id"><i class="bi bi-info-circle me-2"></i>Chi tiết</a></li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item text-danger document-delete-btn" href="#" data-id="@d.Id" data-name="@d.FileName"><i class="bi bi-trash me-2"></i>Xóa</a></li>
-                                        </ul>
-                                    </div>
-                                </td>
+                                <td colspan="4" class="text-center py-5 text-muted">Không có tệp tin nào</td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">Không có tệp tin nào</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -556,7 +552,8 @@
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" name="id" id="rename-id" />
-                    <input type="hidden" id="rename-type" /> <div class="mb-3">
+                    <input type="hidden" id="rename-type" />
+                    <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">Tên mới</label>
                         <input type="text" name="newName" id="rename-newName" class="form-control form-control-lg bg-light border-0" required />
                     </div>
@@ -571,6 +568,14 @@
 </div>
 
 <partial name="_ShareModal" />
+
+<footer class="mt-auto py-4">
+    <div class="text-center">
+        <p class="text-secondary mb-0" style="font-size: 0.75rem; opacity: 0.6; letter-spacing: 0.5px;">
+            &copy; 2026 DocNest &bull; Hệ thống quản lý tài liệu thông minh 
+        </p>
+    </div>
+</footer>
 
 @section Scripts {
     <script>

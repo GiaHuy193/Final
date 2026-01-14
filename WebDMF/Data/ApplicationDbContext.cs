@@ -19,6 +19,7 @@ namespace WebDocumentManagement_FileSharing.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMember> GroupMembers { get; set; }
         public DbSet<GroupShare> GroupShares { get; set; }
+        public DbSet<GroupInvite> groupInvites { get; set; }
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

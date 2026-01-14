@@ -10,12 +10,25 @@
 
     // Load owner's documents and folders
     var ownerId = Model.OwnerId;
-    var ownedDocs = Db.Documents.Where(d => d.OwnerId == ownerId && !d.IsDeleted).OrderByDescending(d => d.UploadedDate).ToList();
-    var ownedFolders = Db.Folders.Where(f => f.OwnerId == ownerId && !f.IsDeleted).OrderBy(f => f.Name).ToList();
+    var ownedDocsOwner = Db.Documents.Where(d => d.OwnerId == ownerId && !d.IsDeleted).OrderByDescending(d => d.UploadedDate).ToList();
+    var ownedFoldersOwner = Db.Folders.Where(f => f.OwnerId == ownerId && !f.IsDeleted).OrderBy(f => f.Name).ToList();
 
     // Current user and membership check
     var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
     var isMember = !string.IsNullOrEmpty(currentUserId) && Model.Members.Any(m => m.UserId == currentUserId);
+
+    // Load current user's own documents/folders so members can share their own resources
+    var ownedDocsUser = new List<Document>();
+    var ownedFoldersUser = new List<Folder>();
+    if (!string.IsNullOrEmpty(currentUserId))
+    {
+        ownedDocsUser = Db.Documents.Where(d => d.OwnerId == currentUserId && !d.IsDeleted).OrderByDescending(d => d.UploadedDate).ToList();
+        ownedFoldersUser = Db.Folders.Where(f => f.OwnerId == currentUserId && !f.IsDeleted).OrderBy(f => f.Name).ToList();
+    }
+
+    // Decide lists to show in share UI: owner sees owner's items; members see their own items
+    var availableDocs = (isOwner) ? ownedDocsOwner : ownedDocsUser;
+    var availableFolders = (isOwner) ? ownedFoldersOwner : ownedFoldersUser;
 }
 
 <style>
@@ -329,7 +342,7 @@
 
         <div class="col-lg-8 order-2 order-lg-1">
 
-            @if (isOwner)
+            @if (isOwner || isMember)
             {
                 <div class="mb-4">
                     <h5 class="fw-bold text-dark mb-3"><i class="bi bi-share-fill text-primary me-2"></i>Chia sẻ tài liệu</h5>
@@ -343,9 +356,9 @@
 
                                     <div class="d-flex flex-column gap-2">
                                         <select name="documentId" class="form-select form-control-simple bg-white">
-                                            @if (ownedDocs.Any())
+                                            @if (availableDocs != null && availableDocs.Any())
                                             {
-                                                foreach (var d in ownedDocs)
+                                                foreach (var d in availableDocs)
                                                 {
                                                     <option value="@d.Id">📄 @d.FileName</option>
                                                 }
@@ -378,9 +391,9 @@
 
                                     <div class="d-flex flex-column gap-2">
                                         <select name="folderId" class="form-select form-control-simple bg-white">
-                                            @if (ownedFolders.Any())
+                                            @if (availableFolders != null && availableFolders.Any())
                                             {
-                                                foreach (var f in ownedFolders)
+                                                foreach (var f in availableFolders)
                                                 {
                                                     <option value="@f.Id">📁 @f.Name</option>
                                                 }
@@ -551,11 +564,12 @@
                 }
 
                 <div class="overflow-auto" style="max-height: 600px;">
-                    @if (memberInfos.Any())
-                    {
-                        var orderedMembers = memberInfos.OrderByDescending(info => ((info.Id ?? "") == (Model.OwnerId ?? "")));
-                        foreach (var info in orderedMembers)
-                        {
+                    @{ var invites = ViewBag.GroupInvites as List<WebDocumentManagement_FileSharing.Models.GroupInvite> ?? new List<WebDocumentManagement_FileSharing.Models.GroupInvite>(); }
+                    @if (memberInfos.Any() || invites.Any())
+                     {
+                         var orderedMembers = memberInfos.OrderByDescending(info => ((info.Id ?? "") == (Model.OwnerId ?? "")));
+                         foreach (var info in orderedMembers)
+                         {
                             var name = (string)(info.Email ?? info.UserName);
                             var initial = !string.IsNullOrEmpty(name) ? name.Substring(0, 1).ToUpper() : "?";
 
@@ -599,9 +613,55 @@
                                 }
                             </div>
                         }
+
+                        // Pending invites
+                        foreach (var inv in invites.Where(i => i.Status == WebDocumentManagement_FileSharing.Models.InviteStatus.Pending))
+                        {
+                             <div class="d-flex align-items-center justify-content-between p-3 border-bottom member-row bg-light">
+                                <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                    <div class="member-avatar-small">?</div>
+                                    <div class="d-flex flex-column" style="min-width: 0;">
+                                        <span class="fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@inv.InviteeEmail</span>
+                                        <span class="small text-warning">Đang chờ xác nhận</span>
+                                    </div>
+                                </div>
+
+                                @if (isOwner)
+                                {
+                                    <form method="post" asp-action="CancelInvite" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="inviteId" value="@inv.Id" />
+                                        <button class="btn btn-sm btn-outline-danger" title="Hủy lời mời">Hủy</button>
+                                    </form>
+                                }
+                            </div>
+                        }
+
+                        // Declined invites
+                        foreach (var inv in invites.Where(i => i.Status == WebDocumentManagement_FileSharing.Models.InviteStatus.Declined))
+                        {
+                            <div class="d-flex align-items-center justify-content-between p-3 border-bottom member-row bg-white">
+                                <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                    <div class="member-avatar-small">-</div>
+                                    <div class="d-flex flex-column" style="min-width: 0;">
+                                        <span class="fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@inv.InviteeEmail</span>
+                                        <span class="small text-muted">Đã từ chối</span>
+                                    </div>
+                                </div>
+
+                                @if (isOwner)
+                                {
+                                    <form method="post" asp-action="CancelInvite" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="inviteId" value="@inv.Id" />
+                                        <button class="btn btn-sm btn-outline-secondary" title="Xóa lịch sử">Xóa</button>
+                                    </form>
+                                }
+                            </div>
+                        }
                     }
-                    else
-                    {
+                     else
+                     {
                         @foreach (var m in Model.Members)
                         {
                             <div class="p-3 border-bottom d-flex align-items-center gap-3">
@@ -609,8 +669,8 @@
                                 <span class="small text-truncate">@m.UserId</span>
                             </div>
                         }
-                    }
-                </div>
+                     }
+                 </div>
             </div>
         </div>
 

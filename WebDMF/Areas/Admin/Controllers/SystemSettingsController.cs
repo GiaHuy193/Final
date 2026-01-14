@@ -40,11 +40,12 @@ namespace WebDocumentManagement_FileSharing.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // determine actor info once for all updates
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            var currentUserName = User.Identity?.Name ?? "Admin";
+
             try
             {
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-                var currentUserName = User.Identity?.Name ?? "Admin";
-
                 foreach (var item in settings)
                 {
                     var dbSetting = await _context.SystemSettings.FindAsync(item.Id);
@@ -70,6 +71,66 @@ namespace WebDocumentManagement_FileSharing.Areas.Admin.Controllers
                         };
 
                         _context.AuditLogs.Add(audit);
+                    }
+                }
+
+                // Additionally handle maintenance fields that may not be part of the posted list
+                try
+                {
+                    var formMode = Request.Form["MaintenanceMode"].FirstOrDefault();
+                    var formMsg = Request.Form["MaintenanceMessage"].FirstOrDefault();
+                    if (formMode != null)
+                    {
+                        var setting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.SettingKey == "MaintenanceMode");
+                        if (setting == null)
+                        {
+                            setting = new SystemSetting { SettingKey = "MaintenanceMode", SettingValue = formMode, Description = "Flag bật/tắt chế độ bảo trì" };
+                            _context.SystemSettings.Add(setting);
+                        }
+                        else if (setting.SettingValue != formMode)
+                        {
+                            var old = setting.SettingValue;
+                            setting.SettingValue = formMode;
+                            _context.AuditLogs.Add(new AuditLog { Timestamp = DateTime.UtcNow, ActorId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) ?? "", Actor = User.Identity?.Name ?? "Admin", Action = "CONFIG_UPDATE", TargetType = "SystemSetting", TargetId = setting.Id, TargetName = setting.SettingKey, Details = $"Thay đổi {setting.SettingKey} từ '{old}' thành '{formMode}'" });
+                        }
+                    }
+
+                    if (formMsg != null)
+                    {
+                        var settingMsg = await _context.SystemSettings.FirstOrDefaultAsync(s => s.SettingKey == "MaintenanceMessage");
+                        if (settingMsg == null)
+                        {
+                            settingMsg = new SystemSetting { SettingKey = "MaintenanceMessage", SettingValue = formMsg, Description = "Nội dung thông báo khi bảo trì" };
+                            _context.SystemSettings.Add(settingMsg);
+                        }
+                        else if (settingMsg.SettingValue != formMsg)
+                        {
+                            var old = settingMsg.SettingValue;
+                            settingMsg.SettingValue = formMsg;
+                            _context.AuditLogs.Add(new AuditLog { Timestamp = DateTime.UtcNow, ActorId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) ?? "", Actor = User.Identity?.Name ?? "Admin", Action = "CONFIG_UPDATE", TargetType = "SystemSetting", TargetId = settingMsg.Id, TargetName = settingMsg.SettingKey, Details = $"Thay đổi {settingMsg.SettingKey} từ '{old}' thành '{formMsg}'" });
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+                catch { /* ignore maintenance upsert errors */ }
+
+                // Additionally handle support email field (posted as simple form field) inside same try so actor info is available
+                var formSupport = Request.Form["supportEmail"].FirstOrDefault();
+                if (formSupport != null)
+                {
+                    var setting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.SettingKey == "SupportEmail");
+                    if (setting == null)
+                    {
+                        setting = new SystemSetting { SettingKey = "SupportEmail", SettingValue = formSupport, Description = "Support contact email" };
+                        _context.SystemSettings.Add(setting);
+                        _context.AuditLogs.Add(new AuditLog { Timestamp = DateTime.UtcNow, ActorId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) ?? "", Actor = User.Identity?.Name ?? "Admin", Action = "CONFIG_UPDATE", TargetType = "SystemSetting", TargetId = setting.Id, TargetName = setting.SettingKey, Details = $"Added SupportEmail = '{formSupport}'" });
+                    }
+                    else if (setting.SettingValue != formSupport)
+                    {
+                        var old = setting.SettingValue;
+                        setting.SettingValue = formSupport;
+                        _context.AuditLogs.Add(new AuditLog { Timestamp = DateTime.UtcNow, ActorId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) ?? "", Actor = User.Identity?.Name ?? "Admin", Action = "CONFIG_UPDATE", TargetType = "SystemSetting", TargetId = setting.Id, TargetName = setting.SettingKey, Details = $"Thay đổi {setting.SettingKey} từ '{old}' thành '{formSupport}'" });
                     }
                 }
 
